@@ -13,6 +13,7 @@ import {
   Sparkles,
   Layers,
   Keyboard,
+  AlertTriangle,
 } from "lucide-react";
 import { modules, Module } from "@/lib/curriculum";
 import { useStudyStore } from "@/lib/store";
@@ -95,6 +96,15 @@ export function StudyApp() {
               <Bookmark className="w-3 h-3 text-gray-400" />
               <span className="text-[11px] font-medium text-gray-400 hover:text-gray-300">
                 Marcadores
+              </span>
+            </Link>
+            <Link
+              href="/soluciones"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/3 border border-white/8 hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
+            >
+              <AlertTriangle className="w-3 h-3 text-gray-400" />
+              <span className="text-[11px] font-medium text-gray-400 hover:text-gray-300">
+                Soluciones
               </span>
             </Link>
           </div>
