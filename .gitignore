@@ -52,3 +52,17 @@ prompt
 server.log
 # Skills directory
 /skills/
+# Internal system files
+.zscripts/
+skills/
+db/
+examples/
+download/
+mini-services/
+.env
+*.db
+Caddyfile
+server.log
+dev.log
+dev.out.log
+prompt
