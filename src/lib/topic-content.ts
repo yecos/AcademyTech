@@ -1652,4 +1652,943 @@ Es importante notar que los efectos climáticos aumentan la carga de renderizado
   ],
 });
 
+// ============================================================
+// MÓDULO 6: Cámara y Composición
+// ============================================================
+
+register({
+  moduleId: "modulo-6",
+  topicIndex: 0,
+  title: "Configuración de la cámara virtual",
+  objective: "Dominar los parámetros de la cámara virtual de D5 Render, incluyendo distancia focal, exposición, y formato, para lograr encuadres profesionales.",
+  explanation: `La cámara virtual de D5 Render simula una cámara fotográfica real, con parámetros que controlan exactamente qué se ve y cómo se ve en el render final. Entender estos parámetros es esencial porque, al igual que en la fotografía real, la cámara puede transformar completamente la percepción de un espacio.
+
+La distancia focal (medida en milímetros) es el parámetro más importante de la cámara. Controla el ángulo de visión y la perspectiva de la imagen. Una distancia focal corta (14-24mm) produce un ángulo de visión amplio y exagera la perspectiva, haciendo que los objetos cercanos parezcan más grandes y los lejanos más pequeños. Es ideal para interiores pequeños donde necesitas mostrar mucho espacio. Una distancia focal media (35-50mm) produce una perspectiva similar a la visión humana. Una distancia focal larga (85-200mm) comprime la perspectiva, haciendo que los objetos parezcan más cercanos entre sí, ideal para fachadas y detalles arquitectónicos.
+
+La exposición controla el brillo general de la imagen. En D5 Render, la exposición se ajusta automáticamente según la iluminación de la escena, pero puedes modificarla manualmente. Una exposición alta ilumina más la imagen (útil para interiores oscuros), mientras que una exposición baja la oscurece (útil para escenas nocturnas o atardeceres).
+
+El balance de blancos compensa el color de la iluminación para que los blancos se vean realmente blancos. D5 Render permite ajustar la temperatura de color del balance de blancos en Kelvin. Si la escena está iluminada con luz cálida (2700K), subir el balance de blancos compensará el tono amarillo. Si la escena tiene luz fría (6500K), bajar el balance de blancos añadirá calidez.
+
+El formato de la cámara define la relación de aspecto (aspect ratio) de la imagen. Los formatos más comunes son 16:9 (panorámico, ideal para pantallas), 4:3 (clásico), 1:1 (cuadrado, para Instagram), y 21:9 (cinematográfico). La elección del formato debe hacerse antes de encuadrar porque afecta significativamente la composición.
+
+Para mover la cámara, usa los controles de navegación del viewport: clic derecho + WASD para primera persona, o los controles de órbita. D5 Render también permite ajustar la posición y rotación de la cámara numéricamente en el panel de Propiedades para un control preciso.`,
+  keyPoints: [
+    "Distancia focal corta (14-24mm): ángulo amplio, perspectiva exagerada, ideal interiores",
+    "Distancia focal media (35-50mm): perspectiva natural, similar a visión humana",
+    "Distancia focal larga (85-200mm): perspectiva comprimida, ideal fachadas y detalles",
+    "Exposición: controla brillo general, automática o manual",
+    "Balance de blancos: compensa temperatura de color de la iluminación",
+    "Formato: 16:9 panorámico, 4:3 clásico, 1:1 Instagram, 21:9 cine",
+  ],
+  steps: [
+    {
+      title: "Experimentar con distancias focales",
+      description: "En una escena de exterior, ajusta la distancia focal desde 14mm hasta 200mm. Observa cómo la perspectiva cambia dramáticamente: en 14mm el edificio parece enorme y distante, en 200mm se comprime y los elementos parecen más cercanos.",
+      tip: "Para interiores arquitectónicos, 24-35mm es el rango más útil. Para fachadas, 50-85mm.",
+    },
+    {
+      title: "Ajustar la exposición",
+      description: "En una escena de interior, ajusta la exposición manualmente. Observa cómo el brillo cambia. Busca el valor donde los detalles son visibles tanto en las zonas claras como en las oscuras sin que ninguna se queme.",
+    },
+    {
+      title: "Configurar el balance de blancos",
+      description: "En una escena con iluminación cálida, ajusta el balance de blancos hasta que las superficies blancas se vean realmente blancas. Luego desajústalo deliberadamente para crear un mood cálido o frío.",
+    },
+    {
+      title: "Elegir un formato de imagen",
+      description: "Configura la cámara en formato 16:9 y encuadra una vista. Luego cambia a 4:3 y reencuadra. Observa cómo la relación de aspecto cambia la composición y el espacio visible.",
+    },
+  ],
+  practice: "Fotografía el mismo edificio con 3 distancias focales diferentes (24mm, 50mm, 100mm) manteniendo el edificio centrado. Compara las diferencias de perspectiva y elige cuál funciona mejor para tu proyecto.",
+  extraResources: [
+    { label: "Cámara en D5 Render", url: "https://www.d5render.com/help/camera" },
+  ],
+});
+
+register({
+  moduleId: "modulo-6",
+  topicIndex: 1,
+  title: "Profundidad de campo (DOF)",
+  objective: "Aprender a usar la profundidad de campo para crear imágenes con enfoque selectivo, dirigiendo la atención del espectador y añadiendo realismo fotográfico.",
+  explanation: `La profundidad de campo (Depth of Field o DOF) es el efecto que produce que solo una parte de la imagen esté nítida mientras que el resto se ve borroso, igual que en una fotografía real con el diafragma abierto. Este efecto no solo añade realismo sino que es una herramienta compositiva poderosa para dirigir la atención del espectador hacia los elementos importantes de la imagen.
+
+En fotografía real, la profundidad de campo depende de tres factores: la apertura del diafragma (f-stop), la distancia focal y la distancia al sujeto. D5 Render simula estos mismos parámetros para producir un efecto físicamente preciso. Una apertura grande (f/1.4, f/2.8) produce una profundidad de campo muy superficial con mucho desenfoque. Una aperture pequeña (f/11, f/16) produce una imagen casi completamente nítida.
+
+El parámetro principal en D5 Render es el diafragma (aperture). Cuanto menor sea el número f, mayor será la apertura y más pronunciado será el efecto de desenfoque. Para retratos arquitectónicos donde quieres que un elemento destaque sobre un fondo difuso, usa aperturas de f/2.8 a f/4. Para vistas generales donde todo debe estar nítido, usa f/8 a f/16.
+
+La distancia de enfoque (focus distance) define a qué distancia de la cámara los objetos estarán perfectamente nítidos. Los objetos más cerca o más lejos de esta distancia se irán desenfocando progresivamente. Puedes hacer clic en un objeto de la escena para que la cámara enfoque automáticamente en ese punto.
+
+La distancia focal también afecta la profundidad de campo: las lentes largas (teleobjetivos) producen menos profundidad de campo que las lentes cortas (gran angular) a la misma apertura. Esto significa que con una distancia focal de 85mm y f/2.8 tendrás mucho más desenfoque que con 24mm y f/2.8.
+
+Usar la profundidad de campo de manera efectiva requiere pensar en qué elemento de la escena es el protagonista. En un render de interior, puede ser el mueble principal o la vista desde la ventana. En un exterior, puede ser la entrada del edificio. El desenfoque del resto de la imagen no solo dirige la atención sino que también oculta detalles que no son perfectos en zonas secundarias.
+
+Es importante no exagerar el efecto. Un desenfoque demasiado pronunciado puede hacer que la imagen parezca una maqueta miniatura (efecto tilt-shift). Para renders arquitectónicos, un desenfoque sutil suele ser más apropiado que uno extremo.`,
+  keyPoints: [
+    "DOF produce enfoque selectivo: solo una zona nítida, resto desenfocado",
+    "Apertura grande (f/1.4-f/4): mucho desenfoque, ideal para destacar elementos",
+    "Apertura pequeña (f/8-f/16): todo nítido, ideal para vistas generales",
+    "Distancia de enfoque: define a qué distancia los objetos son nítidos",
+    "Distancias focales largas amplifican el efecto de DOF",
+    "Evitar exagerar: un desenfoque sutil es más profesional que uno extremo",
+  ],
+  steps: [
+    {
+      title: "Activar la profundidad de campo",
+      description: "Selecciona la cámara en D5 Render y busca la opción de Depth of Field. Actívala y ajusta la apertura a f/2.8. Observa cómo el desenfoque aparece en las zonas fuera de foco.",
+    },
+    {
+      title: "Ajustar la distancia de enfoque",
+      description: "Haz clic en un objeto de la escena para enfocar en él. Observa cómo ese objeto se vuelve nítido mientras que los elementos delante y detrás se desenfocan. Prueba enfocando diferentes objetos.",
+      tip: "Puedes usar el punto de enfoque como herramienta compositiva: lo que está enfocado es lo que el espectador mirará primero.",
+    },
+    {
+      title: "Experimentar con diferentes aperturas",
+      description: "Ajusta la apertura desde f/1.4 hasta f/16. Observa cómo la zona nítida se amplía con aperturas más cerradas. Encuentra el equilibrio entre el desenfoque artístico y la nitidez necesaria.",
+    },
+    {
+      title: "Combinar DOF con distancia focal larga",
+      description: "Configura una distancia focal de 85mm y apertura f/2.8. Observa cómo el teleobjetivo amplifica el efecto de desenfoque, creando un retrato arquitectónico con el edificio nítido sobre un fondo suavemente difuminado.",
+    },
+  ],
+  practice: "Crea 3 renders del mismo espacio con diferentes configuraciones de DOF: todo nítido (f/16), desenfoque moderado (f/5.6), y desenfoque pronunciado (f/2.0). Compara y explica cuál funciona mejor para cada tipo de presentación.",
+  extraResources: [
+    { label: "Profundidad de campo en D5 Render", url: "https://www.d5render.com/help/dof" },
+  ],
+});
+
+register({
+  moduleId: "modulo-6",
+  topicIndex: 2,
+  title: "Composición fotográfica: regla de tercios",
+  objective: "Aprender los principios de composición fotográfica y aplicarlos en D5 Render para crear renders visualmente atractivos y profesionales.",
+  explanation: `La composición es el arte de organizar los elementos visuales dentro del encuadre para crear imágenes equilibradas, atractivas y que comuniquen eficazmente la intención del autor. En el renderizado arquitectónico, una buena composición puede hacer que un proyecto ordinario parezca extraordinario, mientras que una mala composición puede desperdiciar un proyecto excelente.
+
+La regla de tercios es la regla compositiva más fundamental. Divide la imagen en 9 secciones iguales usando dos líneas horizontales y dos verticales. Los cuatro puntos donde se cruzan las líneas se llaman puntos de fuerza o puntos de interés, y son las posiciones donde el ojo humano tiende a mirar naturalmente. Colocar los elementos principales en estos puntos crea una composición más dinámica e interesante que centrarlos.
+
+D5 Render permite mostrar una cuadrícula de tercios en el viewport como guía de composición. Actívala y usa las intersecciones como referencia para posicionar los elementos clave: la entrada del edificio, un árbol destacado, o una obra de arte en el interior.
+
+Las líneas guía son otra herramienta compositiva importante. Las líneas diagonales crean tensión y dinamismo, las líneas horizontales transmiten calma y estabilidad, y las líneas verticales sugieren fuerza y poder. En arquitectura, las líneas del edificio, los caminos, y los bordes de los elementos pueden usarse como líneas guía que dirigen la mirada del espectador.
+
+El encuadre (framing) consiste en usar elementos de la escena para enmarcar el sujeto principal. Una puerta que enmarca una vista, las ramas de un árbol que enmarcan un edificio, o un arco que enmarca un patio son ejemplos de encuadre natural que añade profundidad y contexto a la imagen.
+
+El espacio negativo es el área vacía de la composición. Aunque parece contradictorio, el espacio negativo es tan importante como el positivo: da respiración al sujeto, evita que la imagen se vea abrumada, y puede crear un sentido de escala. Un edificio rodeado de cielo vacío se percibe como más monumental que uno rodeado de otros edificios.
+
+La simetría y el equilibrio son conceptos relacionados pero diferentes. La simetría perfecta (dividir la imagen en dos mitades idénticas) puede ser poderosa pero también monótona. El equilibrio asimétrico es más sutil: un elemento grande a un lado se equilibra con un elemento pequeño pero llamativo al otro lado. La arquitectura a menudo se beneficia de composiciones equilibradas pero no perfectamente simétricas.`,
+  keyPoints: [
+    "Regla de tercios: dividir en 9 zonas, colocar sujetos en puntos de intersección",
+    "Líneas guía: diagonales=dinamismo, horizontales=calma, verticales=fuerza",
+    "Encuadre: usar elementos de la escena para enmarcar el sujeto",
+    "Espacio negativo: área vacía que da respiración y escala al sujeto",
+    "Equilibrio asimétrico: más interesante que la simetría perfecta",
+    "D5 Render muestra cuadrícula de tercios como guía de composición",
+  ],
+  steps: [
+    {
+      title: "Activar la cuadrícula de tercios",
+      description: "En D5 Render, activa la visualización de la cuadrícula de tercios en el viewport. Esta cuadrícula te ayudará a posicionar los elementos clave en los puntos de intersección.",
+    },
+    {
+      title: "Aplicar la regla de tercios",
+      description: "Encuadra una vista del edificio colocando el elemento principal (la entrada, una torre destacada) en uno de los puntos de intersección de la cuadrícula. Evita centrar el sujeto.",
+      tip: "Si el edificio se mueve hacia la izquierda, el cielo o el paisaje a la derecha ganará protagonismo y creará un balance interesante.",
+    },
+    {
+      title: "Usar líneas guía",
+      description: "Busca líneas en la escena (caminos, bordes de muros, líneas del techo) que dirijan la mirada hacia el sujeto principal. Ajusta la cámara para que estas líneas conduzcan naturalmente hacia el punto focal.",
+    },
+    {
+      title: "Crear encuadre natural",
+      description: "Busca elementos que puedan enmarcar el sujeto: un árbol a cada lado, un arco, o la oscuridad de un interior que enmarca una vista exterior. El encuadre añade profundidad y contexto.",
+    },
+    {
+      title: "Evaluar el espacio negativo",
+      description: "Revisa tu composición y verifica si hay suficiente espacio negativo alrededor del sujeto. Si la imagen se ve abarrotada, aleja la cámara o usa una distancia focal más larga para simplificar.",
+    },
+  ],
+  practice: "Toma 5 renders del mismo edificio usando diferentes composiciones: regla de tercios, simetría, encuadre natural, líneas diagonales y espacio negativo. Analiza cuál funciona mejor y por qué.",
+  extraResources: [
+    { label: "Composición en visualización arquitectónica", url: "https://www.d5render.com/blog/composition" },
+  ],
+});
+
+register({
+  moduleId: "modulo-6",
+  topicIndex: 3,
+  title: "Exposición y balance de blancos",
+  objective: "Dominar los ajustes de exposición y balance de blancos en D5 Render para controlar el brillo y la temperatura de color de los renders de forma precisa.",
+  explanation: `La exposición y el balance de blancos son los dos ajustes más importantes de la cámara después del encuadre. Controlan respectivamente el brillo general de la imagen y la fidelidad de los colores bajo diferentes condiciones de iluminación. Dominar estos ajustes te permitirá obtener renders bien iluminados y con colores naturales en cualquier situación.
+
+La exposición determina cuánta luz llega al sensor de la cámara (virtual en este caso). Una exposición correcta muestra detalles tanto en las zonas claras (highlights) como en las oscuras (shadows). Una sobreexposición quema los highlights (las zonas claras se vuelven blancas sin detalle), mientras que una subexposición pierde los detalles en las sombras.
+
+En D5 Render, la exposición se controla mediante un valor de EV (Exposure Value) o un deslizador de exposición. Valores más altos iluminan la imagen, valores más bajos la oscurecen. D5 Render ajusta la exposición automáticamente según la iluminación de la escena, pero a veces necesitas corregirla manualmente, especialmente en situaciones de alto contraste como interiores con vistas al exterior.
+
+El balance de blancos (White Balance) compensa la temperatura de color de la iluminación para que los colores neutros (blancos, grises) se reproduzcan correctamente. La temperatura de color se mide en Kelvin: valores bajos (2500-3500K) son cálidos (amarillos/rojos), valores medios (5000-5500K) son neutros (luz de día), y valores altos (6500-10000K) son fríos (azulados).
+
+El problema más común es el desajuste entre la iluminación interior y exterior. Un interior iluminado con luz cálida (2700K) que tiene ventanas con luz del día (5500K) creará un contraste de temperatura: el interior se verá amarillo y el exterior se verá azul. Ajustar el balance de blancos a un valor intermedio puede equilibrar ambas temperaturas.
+
+D5 Render también ofrece ajustes de tono (tint) que controlan el eje verde-magenta del balance de color. Esto es útil cuando la iluminación tiene componentes de color no naturales, como luces fluorescentes que tienden al verde.
+
+Para verificar la exposición correcta, D5 Render puede mostrar un histograma que indica la distribución de luminosidad en la imagen. Un histograma equilibrado con la mayoría de los datos en el centro indica una exposición correcta. Un histograma desplazado a la derecha indica sobreexposición, y desplazado a la izquierda indica subexposición.`,
+  keyPoints: [
+    "Exposición: controla brillo general, verificable con histograma",
+    "Sobreexposición: quema highlights (zonas claras sin detalle)",
+    "Subexposición: pierde detalles en sombras",
+    "Balance de blancos: compensa temperatura de color (medido en Kelvin)",
+    "Interior cálido (2700K) vs exterior neutro (5500K): ajustar a valor intermedio",
+    "Histograma: herramienta para verificar exposición correcta",
+  ],
+  steps: [
+    {
+      title: "Ajustar la exposición manualmente",
+      description: "En una escena de interior, desactiva la exposición automática y ajusta manualmente. Empieza desde un valor bajo y ve subiendo hasta que los detalles sean visibles en toda la imagen sin quemar las zonas claras.",
+    },
+    {
+      title: "Usar el histograma",
+      description: "Activa la visualización del histograma en D5 Render. Observa la distribución de luminosidad. Si el histograma está muy a la derecha, la imagen está sobreexpuesta. Si está muy a la izquierda, está subexpuesta.",
+      tip: "Un histograma con picos en ambos extremos indica una escena con mucho contraste que puede requerir ajustes de iluminación, no solo de exposición.",
+    },
+    {
+      title: "Ajustar el balance de blancos",
+      description: "En una escena con iluminación mixta (natural + artificial), ajusta el balance de blancos a diferentes valores. Observa cómo los colores cambian: más cálidos con valores bajos, más fríos con valores altos.",
+    },
+    {
+      title: "Corregir iluminación mixta",
+      description: "En una escena de interior con vistas al exterior, ajusta el balance de blancos para equilibrar las temperaturas de la luz interior y exterior. Un valor de alrededor de 4000-4500K suele funcionar como compromiso.",
+    },
+  ],
+  practice: "Renderiza la misma escena con 3 configuraciones de exposición (subexpuesta, correcta, sobreexpuesta) y 2 configuraciones de balance de blancos (cálido, neutro). Analiza los 6 resultados.",
+  extraResources: [
+    { label: "Exposición y balance de blancos", url: "https://www.d5render.com/help/exposure" },
+  ],
+});
+
+register({
+  moduleId: "modulo-6",
+  topicIndex: 4,
+  title: "Vistas guardadas y presets de cámara",
+  objective: "Aprender a guardar y gestionar múltiples vistas de cámara en D5 Render para trabajar eficientemente con diferentes encuadres en un mismo proyecto.",
+  explanation: `En un proyecto de visualización arquitectónica, normalmente necesitas producir múltiples renders desde diferentes ángulos: fachada principal, fachada posterior, vista aérea, interiores, detalles, etc. D5 Render permite guardar múltiples configuraciones de cámara para alternar rápidamente entre ellas sin tener que reencuadrar cada vez.
+
+Las vistas guardadas almacenan no solo la posición y orientación de la cámara sino también todos sus parámetros: distancia focal, apertura (DOF), exposición, balance de blancos, y formato. Esto significa que puedes tener una vista con gran angular para el exterior y otra con teleobjetivo para un detalle, cada una con sus parámetros óptimos, y cambiar entre ellas con un clic.
+
+Para guardar una vista, configura la cámara como desees (posición, ángulo, parámetros) y luego ve al panel de Vistas o usa el botón de guardar vista. Dale un nombre descriptivo como 'Fachada principal - 35mm' o 'Sala de estar - 24mm'. Cuantas más vistas guardes, más organizado será tu flujo de trabajo.
+
+La organización de las vistas es importante en proyectos grandes. Nómbralas con un sistema consistente que incluya el espacio y la distancia focal: 'EXT_FachadaNorte_50mm', 'INT_SalaEstar_24mm', 'AER_VistaGeneral_14mm'. Este sistema te permitirá encontrar rápidamente la vista que necesitas.
+
+D5 Render también permite crear presets de cámara que solo guardan los parámetros sin la posición. Esto es útil si quieres aplicar la misma configuración de exposición, DOF y balance de blancos a diferentes encuadres. Por ejemplo, un preset de 'Interior cálido' con exposición alta, balance de blancos cálido y f/4 de apertura.
+
+Las vistas guardadas son esenciales para el flujo de trabajo de renderizado por lotes (batch rendering). En lugar de renderizar una vista a la vez manualmente, puedes configurar todas las vistas necesarias y luego renderizarlas automáticamente una tras otra. Esto es especialmente útil para entregas con múltiples imágenes donde necesitas producir 10-20 renders consistentemente.`,
+  keyPoints: [
+    "Las vistas guardadas almacenan posición + todos los parámetros de cámara",
+    "Nombrar vistas con sistema consistente: espacio + distancia focal",
+    "Los presets guardan solo parámetros sin posición",
+    "Esenciales para renderizado por lotes (batch rendering)",
+    "Permiten alternar rápidamente entre diferentes encuadres",
+    "Organizar vistas por categoría: exteriores, interiores, detalles, aéreas",
+  ],
+  steps: [
+    {
+      title: "Configurar y guardar una vista",
+      description: "Encuadra una vista de la fachada principal del edificio. Ajusta la distancia focal, exposición y balance de blancos. Guarda la vista con un nombre descriptivo como 'EXT_FachadaPrincipal_50mm'.",
+    },
+    {
+      title: "Crear múltiples vistas",
+      description: "Repite el proceso para al menos 4 vistas diferentes: fachada, interior principal, detalle, y vista aérea. Ajusta los parámetros de cámara óptimos para cada una. Nómbralas consistentemente.",
+    },
+    {
+      title: "Alternar entre vistas",
+      description: "Prueba cambiar entre las vistas guardadas haciendo clic en cada una. Observa cómo la cámara salta instantáneamente a la posición y configuración guardadas. Esto es mucho más rápido que reencuadrar manualmente cada vez.",
+    },
+    {
+      title: "Crear un preset de parámetros",
+      description: "Configura los parámetros ideales para renders de interior (exposición alta, DOF suave, balance cálido) y guárdalos como preset. Aplica este preset a diferentes encuadres de interior.",
+      tip: "Los presets te ahorran tiempo cuando necesitas consistencia entre múltiples renders del mismo tipo.",
+    },
+  ],
+  practice: "Configura al menos 8 vistas guardadas para un proyecto completo (4 exteriores + 4 interiores). Nómbralas con un sistema consistente y renderiza todas desde el panel de vistas.",
+  extraResources: [
+    { label: "Vistas guardadas en D5 Render", url: "https://www.d5render.com/help/saved-views" },
+  ],
+});
+
+register({
+  moduleId: "modulo-6",
+  topicIndex: 5,
+  title: "Perspectiva vs. ortográfica",
+  objective: "Entender la diferencia entre vistas en perspectiva y ortográficas, y saber cuándo usar cada una según el propósito del render.",
+  explanation: `D5 Render permite cambiar entre dos modos de proyección de la cámara: perspectiva y ortográfica. Cada una produce resultados visualmente diferentes y es apropiada para diferentes propósitos en la visualización arquitectónica.
+
+La proyección en perspectiva es la que usamos normalmente. Simula cómo el ojo humano (y las cámaras fotográficas) perciben el mundo: los objetos cercanos se ven más grandes que los lejanos, las líneas paralelas convergen en un punto de fuga, y hay una sensación de profundidad y tridimensionalidad. Es la proyección más natural y la que se usa para la mayoría de los renders arquitectónicos porque crea imágenes con las que el espectador puede identificarse.
+
+La proyección ortográfica elimina completamente la perspectiva: los objetos mantienen el mismo tamaño independientemente de su distancia a la cámara, y las líneas paralelas permanecen paralelas sin converger. Es como mirar el edificio desde el infinito con un teleobjetivo infinitamente potente. El resultado se parece a un dibujo técnico o un plano arquitectónico.
+
+Las vistas ortográficas son especialmente útiles para mostrar fachadas, plantas y secciones con precisión dimensional. Cuando un arquitecto necesita verificar las proporciones de una fachada o la relación entre elementos, una vista ortográfica frontal proporciona información precisa sin la distorsión de la perspectiva. También son comunes en presentaciones técnicas y documentación de proyectos.
+
+D5 Render permite alternar entre los dos modos en cualquier momento. En el panel de la cámara, busca la opción de proyección y cambia entre Perspectiva y Ortográfica. En modo ortográfico, la distancia focal ya no afecta el ángulo de visión (porque no hay perspectiva), pero sí afecta el nivel de zoom.
+
+Para crear una fachada ortográfica, sitúa la cámara directamente frente a la fachada del edificio, sin ángulo. Cambia a proyección ortográfica y ajusta el zoom hasta encuadrar toda la fachada. El resultado será una imagen sin distorsión donde todas las líneas horizontales y verticales son perfectamente paralelas.
+
+Una técnica avanzada es combinar vistas ortográficas con estilos de presentación. D5 Render puede aplicar efectos de contorno (outline) y sombras que, sobre una vista ortográfica, producen resultados similares a renders técnicos o ilustraciones arquitectónicas.`,
+  keyPoints: [
+    "Perspectiva: simula visión humana, líneas convergen, hay profundidad",
+    "Ortográfica: sin perspectiva, líneas paralelas, aspecto técnico",
+    "Ortográfica ideal para: fachadas, plantas, secciones, verificación de proporciones",
+    "Perspectiva ideal para: renders fotorrealistas, presentación a clientes",
+    "En ortográfica, la distancia focal controla el zoom, no la perspectiva",
+    "Combinar ortográfica con contornos produce renders técnicos",
+  ],
+  steps: [
+    {
+      title: "Comparar perspectiva y ortográfica",
+      description: "Encuadra una fachada del edificio en perspectiva. Luego cambia a proyección ortográfica. Observa cómo las líneas que convergían en perspectiva ahora son perfectamente paralelas en ortográfica.",
+    },
+    {
+      title: "Crear una fachada ortográfica",
+      description: "Sitúa la cámara directamente frente a la fachada, sin ángulo horizontal ni vertical. Cambia a ortográfica y ajusta el zoom. Verifica que todas las líneas del edificio son paralelas.",
+      tip: "Para una fachada perfectamente frontal, ajusta la posición de la cámara numéricamente para que coincida exactamente con el eje del edificio.",
+    },
+    {
+      title: "Crear una vista de planta ortográfica",
+      description: "Sitúa la cámara directamente arriba del edificio, mirando hacia abajo. Cambia a ortográfica. El resultado será similar a una planta arquitectónica. Ajusta el zoom para encuadrar el área deseada.",
+    },
+    {
+      title: "Elegir el modo apropiado para cada render",
+      description: "Para un proyecto completo, decide qué renders necesitan perspectiva (presentación, marketing) y cuáles necesitan ortográfica (documentación, verificación). Planifica tus vistas en consecuencia.",
+    },
+  ],
+  practice: "Crea 4 renders del mismo proyecto: 2 en perspectiva (exterior e interior) y 2 en ortográfica (fachada y planta). Compara la utilidad de cada tipo para diferentes propósitos.",
+  extraResources: [
+    { label: "Proyecciones de cámara en D5 Render", url: "https://www.d5render.com/help/camera-projection" },
+  ],
+});
+
+// ============================================================
+// MÓDULO 7: Renderizado
+// ============================================================
+
+register({
+  moduleId: "modulo-7",
+  topicIndex: 0,
+  title: "Configuración de resolución y calidad de render",
+  objective: "Dominar las opciones de configuración de renderizado en D5 Render, incluyendo resolución, calidad, pases de ray tracing y formatos de salida.",
+  explanation: `El renderizado final es el proceso donde D5 Render calcula la imagen de alta calidad a partir de tu escena. A diferencia de la vista previa en tiempo real del viewport (que prioriza la velocidad), el render final invierte más tiempo en calcular cada píxel con precisión, produciendo una imagen sin ruido con iluminación, materiales y efectos de máxima calidad.
+
+La resolución es el primer parámetro a configurar. Define el tamaño de la imagen en píxeles. Para presentaciones en pantalla, 1920x1080 (Full HD) suele ser suficiente. Para impresión de alta calidad, necesitarás resoluciones mayores como 3840x2160 (4K) o incluso superiores, dependiendo del tamaño de impresión y la distancia de visualización. D5 Render permite resoluciones personalizadas o presets comunes.
+
+La calidad del render se controla mediante el número de pases de ray tracing. Cada pase calcula una muestra adicional de la iluminación, reduciendo el ruido y mejorando la precisión de las sombras, reflexiones y caústicas. Más pases = mejor calidad pero más tiempo de render. Para previews rápidos, 100-200 pases pueden ser suficientes. Para renders finales, 500-2000 pases son recomendados. Para renders de máxima calidad (competencias, impresión grande), 3000+ pases.
+
+D5 Render también ofrece un Denoiser inteligente que elimina el ruido residual sin perder detalles. Con el Denoiser activado, puedes usar menos pases y obtener resultados similares en menos tiempo. Esto es especialmente útil en escenas con iluminación indirecta compleja donde el ruido es más persistente.
+
+El formato de salida determina cómo se guarda la imagen. PNG es el formato más común: soporta transparencia y no tiene compresión con pérdida. JPEG es más ligero pero pierde calidad. EXR y HDR son formatos de alto rango dinámico que conservan toda la información de luminosidad, ideales para post-producción. TIFF es un formato profesional sin pérdida usado en impresión.
+
+Para renders de noche o interiores oscuros, necesitarás más pases porque la iluminación indirecta es más compleja y genera más ruido. Para renders de día con sol directo, menos pases suelen ser suficientes porque la iluminación principal es más simple de calcular.
+
+El tiempo de render depende principalmente de la complejidad de la escena (número de objetos, luces, materiales translúcidos), la resolución, y el número de pases. En una GPU RTX 3060, un render de 1920x1080 con 500 pases puede tomar entre 2-10 minutos dependiendo de la escena.`,
+  keyPoints: [
+    "Resolución: 1920x1080 (pantalla), 3840x2160 (4K/impresión), personalizada",
+    "Pases de ray tracing: más pases = menos ruido + más tiempo",
+    "100-200 pases: preview / 500-2000: final / 3000+: máxima calidad",
+    "Denoiser: elimina ruido, permite menos pases con buena calidad",
+    "Formatos: PNG (general), EXR (post-producción), JPEG (preview)",
+    "Escenas nocturnas y de interior requieren más pases que exteriores diurnos",
+  ],
+  steps: [
+    {
+      title: "Configurar la resolución",
+      description: "Abre el panel de renderizado en D5 Render. Selecciona la resolución deseada o ingresa valores personalizados. Para una presentación en pantalla, 1920x1080 es adecuado. Para impresión A3, usa al menos 3500x2500.",
+      tip: "Si no estás seguro, renderiza a mayor resolución de la que crees necesitar. Siempre puedes reducir después, pero no puedes aumentar sin perder calidad.",
+    },
+    {
+      title: "Ajustar la calidad (pases)",
+      description: "Configura el número de pases. Para una prueba rápida, usa 100-200. Para el render final, usa 500-1000. Observa la diferencia de calidad y tiempo entre ambas configuraciones.",
+    },
+    {
+      title: "Probar el Denoiser",
+      description: "Renderiza la misma escena con 300 pases sin Denoiser y luego con Denoiser. Compara los resultados: el Denoiser debería eliminar el ruido sin borrar detalles finos.",
+    },
+    {
+      title: "Elegir el formato de salida",
+      description: "Para renders finales que no necesitan post-producción, usa PNG. Si planeas ajustar la imagen en Photoshop o After Effects, usa EXR para conservar toda la información HDR.",
+    },
+    {
+      title: "Iniciar el render",
+      description: "Haz clic en el botón de Render y observa el progreso. D5 Render mostrará la imagen mientras se renderiza, permitiéndote ver cómo se reduce el ruido con cada pase.",
+    },
+  ],
+  practice: "Renderiza la misma vista con 3 configuraciones diferentes: baja calidad (200 pases), media (800 pases), y alta (2000 pases). Compara calidad y tiempo. Determina cuál es el equilibrio óptimo para tu equipo.",
+  extraResources: [
+    { label: "Configuración de renderizado", url: "https://www.d5render.com/help/render-settings" },
+  ],
+});
+
+register({
+  moduleId: "modulo-7",
+  topicIndex: 1,
+  title: "Render de imagen fija (fotografía)",
+  objective: "Aprender el flujo de trabajo completo para producir renders de imagen fija de alta calidad, desde la preparación de la escena hasta la exportación final.",
+  explanation: `El render de imagen fija es el tipo de output más común en visualización arquitectónica. Una imagen fija bien compuesta, iluminada y renderizada puede comunicar todo el potencial de un proyecto arquitectónico de manera que ningún otro medio puede igualar. Este tema cubre el flujo de trabajo completo para producir imágenes fijas profesionales.
+
+La preparación es la etapa más importante. Antes de iniciar cualquier render, verifica que la escena esté completa: todos los materiales asignados, la iluminación configurada, la vegetación colocada, y los detalles finales añadidos. Un error común es empezar a renderizar antes de que la escena esté lista, desperdiciando tiempo en renders que tendrán que repetirse.
+
+Define qué imágenes necesitas antes de empezar. Un set típico para un proyecto residencial incluye: fachada principal (exterior diurno), fachada secundaria o jardín trasero, vista aérea, sala de estar (interior), cocina/comedor, y dormitorio principal. Para proyectos comerciales, añade vistas de la entrada, espacios de trabajo y áreas comunes.
+
+Para cada imagen, configura la cámara cuidadosamente siguiendo los principios de composición. Guarda cada vista con un nombre descriptivo. Ajusta la exposición y el balance de blancos específicamente para cada vista, ya que las condiciones de iluminación pueden variar significativamente entre diferentes ángulos y momentos del día.
+
+El renderizado por lotes (batch render) es una función que te permite configurar múltiples vistas y renderizarlas automáticamente una tras otra. Esto es especialmente útil cuando necesitas producir un set completo de imágenes de un proyecto, ya que puedes configurar todo y dejar que D5 Render trabaje sin supervisión.
+
+Después del render, revisa cada imagen en pantalla completa. Busca problemas como: ruido visible, materiales que no se ven correctos, sombras extrañas, objetos flotantes o intersectados, y elementos que se salen del encuadre. Si encuentras problemas, corrígelos en la escena y vuelve a renderizar solo las vistas afectadas.
+
+Finalmente, organiza los renders en una carpeta con una nomenclatura clara. Los nombres de archivo deben incluir el proyecto, la vista y la versión (ej: 'CasaLopez_FachadaPrincipal_v02.png'). Esto facilita encontrar y compartir las imágenes correctas con el equipo y los clientes.`,
+  keyPoints: [
+    "Preparar la escena completamente antes de renderizar",
+    "Definir el set de imágenes necesario antes de empezar",
+    "Configurar cámara, exposición y balance de blancos para cada vista",
+    "Usar renderizado por lotes para múltiples vistas",
+    "Revisar cada imagen en pantalla completa antes de aprobar",
+    "Organizar archivos con nomenclatura clara y versiones",
+  ],
+  steps: [
+    {
+      title: "Verificar la escena",
+      description: "Recorre la escena en el viewport verificando que todo está correcto: materiales asignados, iluminación funcionando, vegetación colocada, sin objetos flotantes o intersectados. Haz cualquier corrección necesaria.",
+    },
+    {
+      title: "Configurar las vistas",
+      description: "Encuadra cada vista necesaria y guárdala con nombre descriptivo. Ajusta la distancia focal, exposición, balance de blancos y DOF para cada una. Verifica la composición con la cuadrícula de tercios.",
+    },
+    {
+      title: "Configurar el renderizado",
+      description: "Establece la resolución, calidad (pases), formato de salida y carpeta de destino. Activa el Denoiser para renders finales. Verifica que hay suficiente espacio en disco para todos los renders.",
+    },
+    {
+      title: "Renderizar y revisar",
+      description: "Inicia el renderizado. Revisa cada imagen resultante en pantalla completa. Busca ruido, artefactos o errores. Si encuentras problemas, corrígelos y re-renderiza solo las vistas afectadas.",
+      tip: "Siempre revisa los renders en un monitor calibrado si es posible. Los colores pueden verse diferentes en diferentes pantallas.",
+    },
+  ],
+  practice: "Produce un set completo de 6 renders para un proyecto (2 exteriores + 4 interiores). Usa renderizado por lotes y organiza los archivos con nomenclatura profesional.",
+  extraResources: [
+    { label: "Flujo de trabajo de renderizado", url: "https://www.d5render.com/help/render-workflow" },
+  ],
+});
+
+register({
+  moduleId: "modulo-7",
+  topicIndex: 2,
+  title: "Render de video y animación",
+  objective: "Aprender a configurar y producir renders de video animado en D5 Render, incluyendo recorridos de cámara y animaciones de objetos.",
+  explanation: `Los renders de video permiten mostrar el proyecto arquitectónico de una manera dinámica e inmersiva que las imágenes fijas no pueden igualar. Un recorrido de cámara puede transportar al espectador a través del espacio, mostrando la secuencia de experiencias que un visitante real tendría al recorrer el edificio. D5 Render facilita la creación de videos animados directamente desde la escena.
+
+El tipo más común de video arquitectónico es el recorrido de cámara (camera walk-through), donde la cámara se mueve a través del espacio como si el espectador caminara por el edificio. D5 Render permite crear estos recorridos definiendo keyframes de posición de cámara a lo largo de una línea de tiempo, y el programa interpola automáticamente el movimiento entre los keyframes.
+
+Para configurar un video, necesitas definir la resolución (generalmente 1920x1080 para web o 3840x2160 para presentaciones en pantalla grande), los frames por segundo (FPS: 24 para cinematográfico, 30 para web, 60 para suavidad extra), y la duración total del video. Un recorrido arquitectónico típico dura entre 30 segundos y 3 minutos.
+
+La calidad del video requiere más pases por frame que una imagen fija porque cada frame se muestra solo una fracción de segundo, lo que hace que el ruido sea más visible. Se recomienda usar al menos 500 pases por frame con Denoiser activado para videos. Esto significa que un video de 30 segundos a 30 FPS (900 frames) puede tardar varias horas en renderizar.
+
+D5 Render permite previsualizar la animación en tiempo real antes de renderizar, lo que es esencial para verificar que el movimiento de la cámara es suave y no hay cortes bruscos. También puedes renderizar una versión de baja calidad (preview) del video completo para revisar la edición antes de lanzar el render final de alta calidad.
+
+Para hacer el recorrido más interesante, varía la velocidad de la cámara: más lento en los espacios importantes, más rápido en las transiciones. También cambia la dirección de la mirada para que la cámara no siempre mire hacia adelante, sino que mire hacia los lados para mostrar detalles interesantes.
+
+Los videos de D5 Render se exportan en formato MP4 con códec H.264 o H.265. El formato MP4 es universalmente compatible y ofrece buena calidad con tamaño de archivo razonable. Para post-producción en After Effects, puedes exportar como secuencia de imágenes PNG o EXR que ofrecen mayor flexibilidad de edición.`,
+  keyPoints: [
+    "Recorrido de cámara: la cámara se mueve por el espacio simulando un visitante",
+    "Resolución: 1920x1080 (web) o 3840x2160 (presentaciones)",
+    "FPS: 24 (cine), 30 (web), 60 (ultra suave)",
+    "Más pases por frame que imagen fija (mínimo 500 con Denoiser)",
+    "Previsualizar animación antes de renderizar final",
+    "Formatos: MP4 (H.264) para entrega, secuencia PNG/EXR para post-producción",
+  ],
+  steps: [
+    {
+      title: "Planificar el recorrido",
+      description: "Dibuja en papel o mentalmente la ruta que seguirá la cámara. Define los puntos de inicio, los momentos clave y el final. Un buen recorrido empieza desde lejos (acercamiento), entra al edificio, recorre los espacios principales y termina con una vista memorable.",
+    },
+    {
+      title: "Crear keyframes de cámara",
+      description: "En la línea de tiempo de D5 Render, coloca keyframes de posición y dirección de cámara en los puntos clave del recorrido. Mueve la cámara a cada posición y guarda el keyframe. D5 Render interpolará el movimiento entre ellos.",
+      tip: "Usa pocos keyframes al principio y ve refinando. Demasiados keyframes pueden crear movimientos erráticos.",
+    },
+    {
+      title: "Ajustar la suavidad del movimiento",
+      description: "Reproduce la animación en el viewport para verificar el movimiento. Ajusta las curvas de interpolación para que las aceleraciones y desaceleraciones sean suaves. Evita los cambios bruscos de dirección o velocidad.",
+    },
+    {
+      title: "Configurar y renderizar el video",
+      description: "Establece la resolución, FPS, calidad y formato de salida. Renderiza primero una versión de baja calidad para verificar, y luego lanza el render final de alta calidad.",
+    },
+  ],
+  practice: "Crea un recorrido de cámara de 30 segundos a través de un proyecto. Renderiza una versión preview de baja calidad primero, revisa el movimiento, y luego renderiza la versión final.",
+  extraResources: [
+    { label: "Render de video en D5 Render", url: "https://www.d5render.com/help/video-render" },
+  ],
+});
+
+register({
+  moduleId: "modulo-7",
+  topicIndex: 3,
+  title: "Render panorámico 360°",
+  objective: "Aprender a crear renders panorámicos 360° en D5 Render que permitan visualizaciones interactivas inmersivas.",
+  explanation: `Los renders panorámicos 360° son una forma poderosa de presentar proyectos arquitectónicos de manera interactiva. A diferencia de una imagen fija tradicional que muestra solo un ángulo, un panorama 360° permite al espectador mirar en todas las direcciones como si estuviera dentro del espacio. Esto crea una experiencia inmersiva que es especialmente valiosa para presentaciones a clientes que no pueden visitar el sitio.
+
+D5 Render genera panoramas en formato equirectangular, que es una imagen plana que contiene la información completa de 360 grados horizontales y 180 grados verticales. Esta imagen se puede visualizar con visores de realidad virtual (VR), reproductores web de 360°, o incluso subir a plataformas como Matterport o Kuula para compartir con clientes.
+
+Para crear un render panorámico en D5 Render, selecciona la opción de render panorámico en el panel de renderizado. La resolución recomendada para panoramas es alta: al menos 4096x2048 para web y 8192x4096 para VR. La resolución alta es necesaria porque la imagen se despliega en todas las direcciones, por lo que cada dirección individual tiene solo una fracción de los píxeles totales.
+
+La posición de la cámara es crítica en los panoramas porque el espectador puede mirar en cualquier dirección. Coloca la cámara a la altura de los ojos (aproximadamente 1.60m) en el punto más representativo del espacio. Evita posiciones donde un muro esté demasiado cerca de la cámara, ya que creará una zona sin interés visual.
+
+La iluminación debe ser equilibrada en todas las direcciones para un panorama efectivo. Evita tener una dirección mucho más brillante que las demás, ya que el espectador sentirá que las zonas oscuras carecen de detalle. Para interiores, esto puede requerir luces artificiales adicionales en las zonas que no reciben luz natural.
+
+Los panoramas se pueden enlazar entre sí para crear recorridos virtuales. Por ejemplo, un panorama en la sala de estar puede tener puntos de acceso (hotspots) que al hacer clic llevan al panorama de la cocina, y desde ahí a la terraza. D5 Render no crea estos recorridos directamente, pero puedes usar plataformas como Kuula o Pano2VR para enlazar los panoramas y añadir interactividad.
+
+Para compartir panoramas, puedes subir las imágenes equirectangulares a plataformas como Kuula, Roundme o Momento360. Estas plataformas generan automáticamente la vista interactiva 360° que se puede compartir mediante un enlace o incrustar en un sitio web.`,
+  keyPoints: [
+    "Panoramas 360°: experiencia inmersiva donde el espectador mira en todas direcciones",
+    "Formato equirectangular: imagen plana con info de 360° horizontal + 180° vertical",
+    "Resolución alta: mínimo 4096x2048 (web), 8192x4096 (VR)",
+    "Posicionar cámara a 1.60m de altura en el punto más representativo",
+    "Iluminación equilibrada en todas las direcciones",
+    "Enlazar panoramas en Kuula/Roundme para recorridos virtuales interactivos",
+  ],
+  steps: [
+    {
+      title: "Configurar el render panorámico",
+      description: "En el panel de renderizado, selecciona la opción Panoramic. Configura la resolución a al menos 4096x2048. Coloca la cámara a la altura de los ojos en el centro del espacio que quieres mostrar.",
+    },
+    {
+      title: "Verificar la iluminación",
+      description: "Gira la cámara 360 grados en el viewport para verificar que la iluminación es equilibrada en todas las direcciones. Añade luces artificiales si hay zonas demasiado oscuras.",
+    },
+    {
+      title: "Renderizar el panorama",
+      description: "Inicia el renderizado. Los panoramas necesitan más pases que las imágenes fijas porque las zonas distantes pueden tener ruido. Usa al menos 800 pases con Denoiser.",
+    },
+    {
+      title: "Visualizar el resultado",
+      description: "Abre la imagen renderizada en un visor 360° para verificar que se ve correcta en todas las direcciones. Busca problemas como líneas de costura (seam lines) o zonas sin detalle.",
+      tip: "Puedes usar la vista previa de 360° de D5 Render o subir la imagen a Kuula para una vista interactiva rápida.",
+    },
+  ],
+  practice: "Crea 3 panoramas 360° para un proyecto (exterior, sala principal, terraza). Súbelos a una plataforma como Kuula y enlázalos para crear un recorrido virtual.",
+  extraResources: [
+    { label: "Render panorámico en D5 Render", url: "https://www.d5render.com/help/panoramic-render" },
+    { label: "Kuula - Plataforma 360°", url: "https://kuula.co" },
+  ],
+});
+
+register({
+  moduleId: "modulo-7",
+  topicIndex: 4,
+  title: "Formatos de exportación",
+  objective: "Conocer todos los formatos de exportación disponibles en D5 Render y saber cuándo usar cada uno según el destino final del render.",
+  explanation: `Elegir el formato de exportación correcto es tan importante como el renderizado mismo. El formato afecta la calidad de la imagen, el tamaño del archivo, la compatibilidad con otros programas y la flexibilidad para post-producción. D5 Render ofrece varios formatos, cada uno con sus ventajas y desventajas.
+
+PNG (Portable Network Graphics) es el formato más versátil y el que usarás con mayor frecuencia. Soporta 16 bits por canal (millones de colores), transparencia (canal alpha), y no tiene compresión con pérdida. Esto significa que la calidad se preserva perfectamente. El tamaño de archivo es moderado-grande. Es ideal para renders finales, presentaciones y cualquier uso donde la calidad es prioritaria.
+
+JPEG (Joint Photographic Experts Group) es el formato más común en fotografía digital. Usa compresión con pérdida, lo que significa que cada vez que guardas un JPEG, pierdes algo de calidad. Sin embargo, a máxima calidad (100%), la pérdida es prácticamente imperceptible. El tamaño de archivo es mucho menor que PNG. Es adecuado para previews, envío por email y uso web donde el tamaño importa más que la calidad perfecta.
+
+EXR (OpenEXR) es un formato profesional de alto rango dinámico (HDR) desarrollado por ILM. Almacena valores de color que superan el rango 0-1, permitiendo representar luminosidades superiores al blanco puro. Esto es invaluable para post-producción porque puedes ajustar la exposición, el balance de blancos y otros parámetros sin perder información. Si planeas editar tus renders en Photoshop, After Effects o Nuke, EXR es el mejor formato.
+
+HDR (Radiance HDR) es similar a EXR pero con un formato más antiguo. También almacena información de alto rango dinámico y es útil para los mismos propósitos que EXR. La elección entre EXR y HDR suele depender de la compatibilidad con tu software de post-producción.
+
+TIFF (Tagged Image File Format) es un formato profesional sin compresión o con compresión sin pérdida. Soporta 8 y 16 bits por canal, canales alpha, y es ampliamente compatible con software de impresión profesional. Es ideal cuando necesitas la máxima calidad para impresión de gran formato.
+
+Para video, D5 Render exporta en MP4 con códec H.264 (compatible universalmente) o H.265 (mejor compresión, menor compatibilidad). Para post-producción de video, puedes exportar como secuencia de imágenes PNG o EXR que dan máxima flexibilidad de edición.`,
+  keyPoints: [
+    "PNG: sin pérdida, con transparencia, versátil, ideal para uso general",
+    "JPEG: compresión con pérdida, archivos pequeños, solo para previews/web",
+    "EXR: alto rango dinámico, ideal para post-producción profesional",
+    "HDR: similar a EXR, para post-producción y HDRI",
+    "TIFF: sin pérdida, ideal para impresión profesional de gran formato",
+    "Video: MP4 (H.264/H.265) o secuencia PNG/EXR para post-producción",
+  ],
+  steps: [
+    {
+      title: "Exportar en PNG",
+      description: "Renderiza una imagen en formato PNG. Observa el tamaño del archivo y la calidad. Este es tu formato de referencia para comparar con los demás.",
+    },
+    {
+      title: "Comparar PNG vs JPEG",
+      description: "Renderiza la misma vista en JPEG con calidad 100 y calidad 80. Compara con el PNG: zoom al 200% para ver los artefactos de compresión del JPEG. El JPEG a calidad 80 tiene artefactos visibles pero el archivo es mucho más pequeño.",
+    },
+    {
+      title: "Exportar en EXR para post-producción",
+      description: "Renderiza en formato EXR y abre el archivo en un editor de imágenes. Observa cómo puedes ajustar la exposición y el balance de blancos sin perder calidad. La información HDR te da una flexibilidad imposible con PNG o JPEG.",
+      tip: "Los archivos EXR son grandes pero valen la pena si planeas post-producción seria.",
+    },
+    {
+      title: "Elegir el formato según el destino",
+      description: "Para cada tipo de entrega, elige el formato apropiado: presentación en pantalla (PNG), email/cliente (JPEG alta calidad), post-producción (EXR), impresión (TIFF), video (MP4).",
+    },
+  ],
+  practice: "Renderiza la misma vista en PNG, JPEG y EXR. Abre los tres en un editor y compara calidad, tamaño y flexibilidad de edición. Documenta cuándo usarías cada formato.",
+  extraResources: [
+    { label: "Formatos de exportación D5 Render", url: "https://www.d5render.com/help/export-formats" },
+  ],
+});
+
+register({
+  moduleId: "modulo-7",
+  topicIndex: 5,
+  title: "Optimización del tiempo de render",
+  objective: "Aprender estrategias y técnicas para optimizar el tiempo de renderizado sin sacrificar calidad, haciendo el flujo de trabajo más eficiente.",
+  explanation: `El tiempo es uno de los recursos más valiosos en visualización arquitectónica, y optimizar el tiempo de render sin sacrificar calidad es una habilidad que diferencia a los profesionales eficientes de los que pierden horas innecesariamente. Hay muchas estrategias que puedes aplicar para acelerar tus renders.
+
+La optimización de la escena es el primer paso. Las escenas con geometría innecesaria, materiales excesivamente complejos y luces redundantes tardan más en renderizar. Revisa tu escena y elimina objetos que no son visibles desde el ángulo de la cámara (backface culling manual). Simplifica la geometría de objetos lejanos: un árbol a 100 metros no necesita el mismo nivel de detalle que uno a 5 metros.
+
+Los materiales translúcidos (vidrio, agua) son los más costosos de renderizar porque cada rayo de luz que los atraviesa debe ser calculado adicionalmente. Si un vidrio es visible pero no es el foco de la imagen, considera reducir la calidad de refracción o usar un material más simple. Si el vidrio está lejos, reemplázalo por un material opaco con textura de reflexión.
+
+El uso inteligente del Denoiser es la mayor optimización disponible. Con el Denoiser activado, puedes reducir los pases a la mitad o más obteniendo resultados visualmente equivalentes. Un render de 500 pases con Denoiser puede verse tan bueno como uno de 1500 pases sin Denoiser, pero en una fracción del tiempo.
+
+La resolución también puede optimizarse. Si el render final se verá en una pantalla de 1080p, no necesitas renderizar a 4K. Si necesitas imprimir a tamaño A3, calcula la resolución mínima necesaria (A3 a 300 DPI = 3508x4961 píxeles) y no renderices a más.
+
+El renderizado por capas (pass rendering) te permite renderizar elementos por separado (iluminación difusa, reflexiones, sombras) y componerlos en post-producción. Esto es más eficiente porque puedes re-renderizar solo la capa que necesita cambios en lugar de toda la imagen.
+
+Para videos, la optimización es aún más importante. Renderizar cientos de frames a máxima calidad puede tomar días. Usa resoluciones más bajas para previews, reduce los pases por frame, y usa el Denoiser agresivamente. Solo renderiza a máxima calidad los frames clave o el segmento final.
+
+Finalmente, la optimización del hardware también cuenta. Mantén los drivers actualizados, cierra otros programas que consuman VRAM, y considera usar GPU con más VRAM si tu trabajo lo requiere. La VRAM es el recurso más limitado y el que más afecta al rendimiento.`,
+  keyPoints: [
+    "Eliminar geometría innecesaria y simplificar objetos lejanos",
+    "Materiales translúcidos (vidrio, agua) son los más costosos de renderizar",
+    "El Denoiser permite reducir pases a la mitad con resultados equivalentes",
+    "No renderizar a más resolución de la necesaria para el destino final",
+    "Renderizar por capas para cambios eficientes en post-producción",
+    "Para videos: previews de baja calidad primero, alta calidad solo al final",
+  ],
+  steps: [
+    {
+      title: "Auditar la escena",
+      description: "Recorre tu escena y busca objetos innecesarios: geometría oculta, objetos duplicados, luces redundantes. Elimina todo lo que no aporta al render final. Cada objeto eliminado es tiempo de render ahorrado.",
+    },
+    {
+      title: "Simplificar materiales costosos",
+      description: "Identifica los materiales translúcidos (vidrio, agua). Si alguno no es importante para la imagen, reemplázalo con un material más simple. Si es importante, verifica que no tiene parámetros excesivos.",
+    },
+    {
+      title: "Comparar con y sin Denoiser",
+      description: "Renderiza la misma escena con 500 pases sin Denoiser y con 300 pases con Denoiser. Compara la calidad visual y el tiempo. Lo más probable es que el resultado con Denoiser sea indistinguible pero más rápido.",
+      tip: "El Denoiser es tu mejor amigo para optimizar tiempo sin sacrificar calidad visible.",
+    },
+    {
+      title: "Optimizar la resolución",
+      description: "Calcula la resolución mínima necesaria para tu destino final. Si el render se verá en una presentación PowerPoint a 1080p, no necesitas más de 1920x1080. Reduce la resolución y observa cómo baja el tiempo de render.",
+    },
+  ],
+  practice: "Toma una escena compleja y optimízala siguiendo todos los pasos anteriores. Mide el tiempo de render antes y después de la optimización. Documenta el porcentaje de mejora.",
+  extraResources: [
+    { label: "Optimización de renderizado", url: "https://www.d5render.com/help/render-optimization" },
+  ],
+});
+
+// ============================================================
+// MÓDULO 8: Efectos y Post-producción
+// ============================================================
+
+register({
+  moduleId: "modulo-8",
+  topicIndex: 0,
+  title: "Panel de efectos de post-producción",
+  objective: "Conocer el panel de efectos de post-producción integrado de D5 Render y aprender a usarlo para mejorar los renders sin necesidad de software externo.",
+  explanation: `D5 Render incluye un potente panel de efectos de post-producción que te permite ajustar y mejorar tus renders directamente en el programa, sin necesidad de exportar a Photoshop o After Effects. Este panel es una de las grandes ventajas de D5 Render frente a otros motores que requieren post-producción externa para ajustes básicos.
+
+El panel de efectos se accede desde la barra de herramientas o con un atajo de teclado. Muestra una lista de efectos disponibles que puedes activar, desactivar y ajustar individualmente. Los efectos se aplican en tiempo real sobre la vista previa del viewport, lo que te permite ver el resultado instantáneamente mientras ajustas los parámetros.
+
+La organización del panel es jerárquica: los efectos se aplican en orden, desde los más básicos (exposición, contraste) hasta los más complejos (bloom, viñeta). Puedes reordenar los efectos arrastrándolos, aunque el orden por defecto suele ser el más lógico.
+
+Cada efecto tiene un interruptor de activación/desactivación y parámetros ajustables con deslizadores. También hay un botón de reset para volver a los valores por defecto de cada efecto. Es recomendable empezar con todos los efectos desactivados e ir añadiéndolos uno a uno para un control preciso.
+
+Los ajustes de post-producción se guardan con la escena, por lo que tus efectos se mantendrán entre sesiones. También puedes guardar presets de post-producción para aplicar la misma configuración a diferentes escenas o proyectos.
+
+Es importante entender que la post-producción no puede arreglar un render mal hecho. Si la iluminación es incorrecta o los materiales están mal configurados, los efectos de post-producción solo pueden mejorar parcialmente el resultado. La post-producción debe ser el toque final, no una corrección de errores fundamentales.
+
+La regla general para la post-producción es la sutileza. Los mejores efectos de post-producción son los que el espectador no nota conscientemente pero que hacen que la imagen se vea 'mejor' de alguna manera difícil de definir. Evita los efectos exagerados que hacen que el render se vea artificial o sobre-procesado.`,
+  keyPoints: [
+    "Panel integrado con efectos en tiempo real sobre la vista previa",
+    "Efectos se aplican en orden jerárquico",
+    "Cada efecto tiene activación, parámetros y reset individual",
+    "Los ajustes se guardan con la escena",
+    "La post-producción no sustituye un buen render base",
+    "La sutileza es la regla: los mejores efectos son los que no se notan",
+  ],
+  steps: [
+    {
+      title: "Abrir el panel de efectos",
+      description: "Abre el panel de efectos de post-producción en D5 Render. Familiarízate con la lista de efectos disponibles y la interfaz de cada uno. Observa cómo cada efecto tiene un interruptor y deslizadores de parámetros.",
+    },
+    {
+      title: "Aplicar ajustes básicos",
+      description: "Activa los ajustes de exposición y contraste. Ajusta ligeramente el contraste (un aumento de 5-10% suele ser suficiente) para dar más punch a la imagen. Observa cómo la imagen gana viveza sin dejar de verse natural.",
+    },
+    {
+      title: "Probar cada efecto individualmente",
+      description: "Activa un efecto a la vez y ajusta sus parámetros. Observa cómo afecta a la imagen. Luego desactívalo y prueba el siguiente. Esto te dará un entendimiento claro de qué hace cada efecto sin interferencias.",
+    },
+    {
+      title: "Combinar efectos con moderación",
+      description: "Activa 2-3 efectos que complementen tu escena (por ejemplo: ligero bloom + contraste suave + viñeta sutil). Ajusta cada uno para que su contribución sea apenas perceptible individualmente pero el conjunto mejore notablemente la imagen.",
+      tip: "Activa y desactiva todos los efectos para comparar el antes y después. Si la diferencia es demasiado obvia, reduce la intensidad.",
+    },
+  ],
+  practice: "Aplica efectos de post-producción a 3 renders diferentes. Para cada uno, documenta qué efectos usaste y con qué parámetros. Compara el antes y después.",
+  extraResources: [
+    { label: "Post-producción en D5 Render", url: "https://www.d5render.com/help/post-production" },
+  ],
+});
+
+register({
+  moduleId: "modulo-8",
+  topicIndex: 1,
+  title: "Ambient Occlusion (AO)",
+  objective: "Entender qué es el Ambient Occlusion y cómo usarlo en D5 Render para añadir profundidad y realismo a los renders oscureciendo zonas de contacto y esquinas.",
+  explanation: `El Ambient Occlusion (AO) u Oclusión Ambiental es un efecto de sombreado que simula cómo la luz ambiente tiene dificultad para llegar a las esquinas, grietas y zonas de contacto entre objetos. En la realidad, estas zonas siempre son más oscuras porque los objetos cercanos bloquean parte de la luz que llegaría desde el entorno. El AO reproduce este fenómeno, añadiendo profundidad y definición a la imagen.
+
+Sin AO, los renders pueden verse planos porque todos los objetos tienen la misma cantidad de luz ambiental. Con AO, las zonas donde los objetos se encuentran (un muro con el piso, una viga con el techo, una silla sobre el suelo) se oscurecen sutilmente, creando una sensación de contacto y peso que el cerebro interpreta como realismo.
+
+D5 Render calcula AO automáticamente como parte del renderizado con ray tracing, pero también ofrece un efecto de AO en el panel de post-producción que puedes ajustar. El AO del panel de post-producción es un overlay adicional que intensifica el efecto del AO nativo.
+
+Los parámetros principales del AO son: intensidad (qué tan oscuro se hace el efecto), radio (hasta qué distancia del contacto se extiende la oscuridad), y suavizado (qué tan gradual es la transición entre la zona oscurecida y la normal).
+
+El AO es especialmente efectivo en interiores donde hay muchas zonas de contacto: muebles contra paredes, marcos de puertas, zócalos, y esquinas de habitaciones. Un AO sutil en estas zonas puede transformar un interior plano en un espacio con profundidad y definición.
+
+Es importante no exagerar el AO. Un AO demasiado intenso creará líneas oscuras artificiales alrededor de todos los objetos, haciendo que la escena parezca sucia o con sombras excesivas. El AO real es muy sutil: apenas un oscurecimiento ligero en las zonas de contacto, no sombras pronunciadas.`,
+  keyPoints: [
+    "AO oscurece zonas de contacto y esquinas donde la luz ambiente no llega",
+    "Añade profundidad y sensación de peso a los objetos",
+    "D5 Render calcula AO nativo + permite ajuste en post-producción",
+    "Parámetros: intensidad, radio y suavizado",
+    "Especialmente efectivo en interiores con muchos contactos",
+    "La sutileza es clave: AO exagerado parece sombras artificiales",
+  ],
+  steps: [
+    {
+      title: "Activar y ajustar el AO",
+      description: "Abre el panel de post-producción y activa Ambient Occlusion. Ajusta la intensidad a un valor bajo (0.3-0.5) como punto de partida. Observa cómo las esquinas y zonas de contacto se oscurecen sutilmente.",
+    },
+    {
+      title: "Ajustar el radio",
+      description: "Cambia el radio del AO de pequeño a grande. Un radio pequeño afecta solo las zonas muy cercanas al contacto. Un radio grande extiende el efecto más lejos. Para interiores arquitectónicos, un radio medio suele ser el más apropiado.",
+      tip: "El radio debe ser proporcional a la escala de la escena. Interiores pequeños necesitan radio pequeño, exteriores necesitan radio grande.",
+    },
+    {
+      title: "Comparar con y sin AO",
+      description: "Alterna el AO activado/desactivado. Observa la diferencia: sin AO, la imagen se ve más plana; con AO, hay más profundidad y definición. Si la diferencia es demasiado obvia, reduce la intensidad.",
+    },
+    {
+      title: "Aplicar AO en una escena de interior",
+      description: "En una escena de interior, ajusta el AO para que los muebles se asienten naturalmente en el piso, los zócalos se definan contra la pared, y las esquinas del techo se oscurezcan ligeramente.",
+    },
+  ],
+  practice: "Aplica AO a una escena de interior y a una de exterior. Compara cómo el efecto funciona en cada caso y documenta los parámetros óptimos para cada tipo de escena.",
+  extraResources: [
+    { label: "Ambient Occlusion en D5 Render", url: "https://www.d5render.com/help/ao" },
+  ],
+});
+
+register({
+  moduleId: "modulo-8",
+  topicIndex: 2,
+  title: "Bloom y resplandor",
+  objective: "Aprender a usar el efecto Bloom en D5 Render para crear resplandor realista alrededor de fuentes de luz brillantes y reflejos intensos.",
+  explanation: `El Bloom (también llamado glow o resplandor) es un efecto óptico que simula cómo las cámaras fotográficas y el ojo humano perciben las fuentes de luz extremadamente brillantes: se produce un halo suave y difuso alrededor del punto luminoso que se extiende más allá de sus bordes reales. Este efecto es natural y lo vemos constantemente en la vida real cuando miramos luces brillantes.
+
+En el mundo real, el bloom ocurre porque la luz de una fuente muy brillante se dispersa dentro del objetivo de la cámara o el ojo, afectando los píxeles cercanos. En renderizado, el bloom simula este comportamiento, haciendo que las luces brillantes, los reflejos intensos y las superficies muy iluminadas emitan un resplandor suave.
+
+D5 Render incluye un efecto de Bloom en el panel de post-producción. Los parámetros principales son: intensidad (qué tan visible es el resplandor), umbral (qué nivel de brillo necesita un píxel para generar bloom) y radio (qué tan lejos se extiende el resplandor desde la fuente).
+
+El umbral es el parámetro más importante. Si lo configuras bajo, muchas superficies generarán bloom (incluyendo algunas que no deberían), haciendo que toda la imagen parezca brumosa. Si lo configuras alto, solo las luces más brillantes generarán bloom, lo cual es más realista. La clave es encontrar el umbral que haga que solo las fuentes de luz directas y los reflejos más intensos produzcan resplandor.
+
+El bloom es especialmente efectivo en escenas nocturnas donde las luces artificiales crean resplandor visible. Una farola en la noche, una ventana iluminada, o un spot dirigido hacia la cámara lucen mucho más realistas con un bloom sutil. También mejora los renders de día cuando el sol crea reflejos intensos en ventanas o superficies metálicas.
+
+Para escenas de interior, el bloom puede suavizar la apariencia de las lámparas y crear un ambiente más cálido y acogedor. Las pantallas de lámparas con bloom parecen emitir luz de manera más natural.
+
+Es importante no confundir bloom con sobreexposición. El bloom añade resplandor a las fuentes brillantes sin afectar el resto de la imagen. La sobreexposición ilumina toda la imagen. Si tu imagen se ve lavada o deslavada, probablemente tienes el umbral de bloom demasiado bajo o la intensidad demasiado alta.`,
+  keyPoints: [
+    "Bloom simula el resplandor de luces brillantes en cámaras reales",
+    "Parámetros: intensidad, umbral (nivel mínimo de brillo) y radio",
+    "El umbral es clave: bajo = todo resplandece, alto = solo las luces más brillantes",
+    "Especialmente efectivo en escenas nocturnas y reflejos intensos",
+    "No confundir con sobreexposición: bloom solo afecta zonas brillantes",
+    "La sutileza es importante: bloom excesivo hace la imagen brumosa",
+  ],
+  steps: [
+    {
+      title: "Activar el Bloom",
+      description: "En una escena con luces visibles, activa el efecto Bloom en el panel de post-producción. Observa cómo las fuentes de luz generan un resplandor suave a su alrededor.",
+    },
+    {
+      title: "Ajustar el umbral",
+      description: "Sube el umbral hasta que solo las luces más brillantes produzcan bloom. Baja el umbral gradualmente y observa cómo más superficies empiezan a resplandecer. Encuentra el punto donde solo las luces y reflejos más intensos tienen bloom.",
+      tip: "El umbral correcto depende de la escena. Escenas nocturnas necesitan umbral más bajo, escenas diurnas umbral más alto.",
+    },
+    {
+      title: "Ajustar la intensidad y el radio",
+      description: "Con el umbral correcto, ajusta la intensidad del bloom. Un valor de 0.2-0.4 suele ser suficiente para realismo. Ajusta el radio para que el resplandor se extienda naturalmente sin ser demasiado amplio.",
+    },
+    {
+      title: "Probar en diferentes condiciones",
+      description: "Aplica bloom a una escena nocturna y a una diurna. Observa cómo el efecto funciona diferente en cada caso: más pronunciado en la noche, más sutil en el día.",
+    },
+  ],
+  practice: "Crea una escena nocturna con luces artificiales visibles. Aplica bloom con parámetros sutiles y renderiza con y sin el efecto. Compara el realismo de ambas versiones.",
+  extraResources: [
+    { label: "Efecto Bloom en D5 Render", url: "https://www.d5render.com/help/bloom" },
+  ],
+});
+
+register({
+  moduleId: "modulo-8",
+  topicIndex: 3,
+  title: "Viñeta y corrección de color",
+  objective: "Aprender a usar los efectos de viñeta y corrección de color en D5 Render para dar un acabado cinematográfico y consistente a los renders.",
+  explanation: `La viñeta y la corrección de color son dos efectos de post-producción que, aunque sutiles, pueden transformar significativamente el mood y la calidad percibida de un render. Son las herramientas finales que dan el 'toque profesional' a una imagen.
+
+La viñeta es un efecto que oscurece gradualmente los bordes de la imagen mientras mantiene el centro más brillante. Este fenómeno ocurre naturalmente en muchas cámaras fotográficas debido a las características del objetivo. En post-producción, la viñeta se usa para dirigir la atención del espectador hacia el centro de la imagen y crear una sensación de intimidad.
+
+Los parámetros de la viñeta son: intensidad (qué tan oscuros son los bordes) y suavizado (qué tan gradual es la transición entre el centro y los bordes). Una viñeta sutil apenas se nota conscientemente pero subconscientemente dirige la mirada al centro. Una viñeta fuerte crea un efecto dramático y cinematográfico.
+
+La corrección de color abarca varios ajustes: temperatura (cálido/frío), tinte (verde/magenta), saturación (intensidad del color), y contraste. Estos ajustes permiten afinar el mood de la imagen de manera similar a como un fotógrafo edita sus fotos.
+
+La temperatura ajusta el balance entre tonos cálidos (amarillo/naranja) y fríos (azul). Subir la temperatura añade calidez (ideal para atardeceres e interiores acogedores). Bajarla añade frialdad (ideal para escenas nocturnas y ambientes contemporáneos).
+
+La saturación controla la intensidad de los colores. Los renders de D5 Render suelen tener colores ligeramente sobresaturados por defecto. Reducir la saturación un 5-10% puede hacer que los colores se vean más naturales y menos 'computarizados'. Para renders en blanco y negro o desaturados, puedes reducir la saturación significativamente.
+
+El contraste separa los tonos claros de los oscuros, dando más punch a la imagen. Un contraste ligeramente aumentado (5-15%) hace que el render se vea más definido y profesional. Demasiado contraste quema los highlights y pierde detalles en las sombras.
+
+Una técnica profesional es crear 'looks' consistentes aplicando las mismas correcciones de color a todas las imágenes de un proyecto. Esto crea una paleta visual coherente que refuerza la identidad del proyecto. Puedes guardar tus ajustes como presets para aplicarlos a todas las vistas.`,
+  keyPoints: [
+    "Viñeta: oscurece bordes para dirigir atención al centro",
+    "Corrección de color: temperatura, tinte, saturación, contraste",
+    "Viñeta sutil: casi imperceptible pero efectiva",
+    "Reducir saturación 5-10% suele hacer los renders más naturales",
+    "Contraste aumentado 5-15% da más punch sin quemar detalles",
+    "Guardar presets de color para consistencia entre renders del mismo proyecto",
+  ],
+  steps: [
+    {
+      title: "Aplicar una viñeta sutil",
+      description: "En el panel de post-producción, activa la viñeta y ajusta la intensidad a un valor bajo (0.2-0.4). Configura el suavizado para que la transición sea gradual. Observa cómo la atención se dirige al centro de la imagen.",
+    },
+    {
+      title: "Ajustar la temperatura de color",
+      description: "Para una escena de interior cálido, sube la temperatura ligeramente. Para un exterior contemporáneo, bájala un poco. Encuentra la temperatura que mejor comunique el mood deseado.",
+      tip: "Compara tu render con fotos de referencia del tipo de espacio que quieres simular. La temperatura de color debe ser similar.",
+    },
+    {
+      title: "Afinar la saturación",
+      description: "Reduce la saturación un 5-10% y observa si los colores se ven más naturales. Si la escena se ve deslavada, vuelve a subir un poco. El objetivo es colores realistas, no sobresaturados.",
+    },
+    {
+      title: "Ajustar el contraste",
+      description: "Aumenta el contraste un 5-10% para dar más definición a la imagen. Verifica que no se queman los highlights ni se pierden detalles en las sombras. Ajusta hasta encontrar el equilibrio.",
+    },
+  ],
+  practice: "Crea 3 'looks' diferentes para el mismo render: cálido acogedor (interior residencial), neutro profesional (oficina), y frío dramático (exterior nocturno). Documenta los parámetros de cada look.",
+  extraResources: [
+    { label: "Corrección de color en D5 Render", url: "https://www.d5render.com/help/color-correction" },
+  ],
+});
+
+register({
+  moduleId: "modulo-8",
+  topicIndex: 4,
+  title: "Estilos artísticos y efectos especiales",
+  objective: "Explorar los estilos artísticos y efectos especiales disponibles en D5 Render para crear renders no fotorrealistas y presentaciones creativas.",
+  explanation: `Aunque el fotorrealismo es el objetivo principal de la mayoría de los renders arquitectónicos, hay situaciones donde un estilo artístico o un efecto especial puede comunicar mejor la idea del proyecto. D5 Render incluye varias opciones no fotorrealistas que permiten crear renders con estilos únicos.
+
+El modo de contorno (Outline/Outline Render) es uno de los estilos más útiles. Dibuja líneas negras en los bordes de los objetos, creando un efecto similar a una ilustración o un dibujo técnico. Los parámetros controlan el grosor de las líneas y qué bordes se muestran (solo silueta, todos los bordes, o bordes basados en ángulo). Combinado con colores planos o iluminación simplificada, produce resultados que recuerdan a ilustraciones arquitectónicas.
+
+El estilo acuarela simula la apariencia de una pintura en acuarela, con bordes suaves y difuminados, colores que se mezclan, y un aspecto orgánico y artesanal. Este estilo es popular en presentaciones de paisajismo y proyectos residenciales donde se busca una estética más humana y menos técnica.
+
+El estilo conceptual simplifica la escena a formas básicas con colores sólidos y sombras mínimas. Es útil en las primeras etapas del diseño cuando quieres mostrar el concepto sin comprometerte con detalles específicos. También se usa en diagramas y esquemas donde la claridad es más importante que el realismo.
+
+El efecto de tilt-shift simula la fotografía de maquetas, haciendo que la escena parezca un modelo en miniatura. Funciona combinando una viñeta selectiva con profundidad de campo pronunciada, creando una banda nítida en el centro de la imagen mientras que arriba y abajo se desenfocan. Es un efecto divertido para presentaciones pero debe usarse con moderación.
+
+El estilo nocturno cinematográfico combina varios efectos (bloom intenso, viñeta fuerte, colores fríos con acentos cálidos, alto contraste) para crear imágenes que parecen sacadas de una película. Es efectivo para presentaciones dramáticas de proyectos de hostelería y entretenimiento.
+
+D5 Render permite combinar estos estilos con el renderizado fotorrealista, creando imágenes híbridas donde elementos específicos tienen tratamiento artístico mientras otros se mantienen realistas. Por ejemplo, un edificio con estilo de contorno sobre un fondo fotorrealista.`,
+  keyPoints: [
+    "Contorno (Outline): dibuja líneas en bordes, estilo ilustración/técnico",
+    "Acuarela: aspecto orgánico y artesanal, popular en paisajismo",
+    "Conceptual: formas básicas y colores sólidos, para etapas tempranas",
+    "Tilt-shift: simula fotografía de maquetas con DOF pronunciada",
+    "Nocturno cinematográfico: bloom + viñeta + colores fríos + alto contraste",
+    "Se pueden combinar estilos artísticos con elementos fotorrealistas",
+  ],
+  steps: [
+    {
+      title: "Probar el modo contorno",
+      description: "Activa el efecto de contorno en el panel de post-producción. Ajusta el grosor de las líneas y los parámetros de detección de bordes. Renderiza una vista con solo contornos y luego con contornos sobre el render fotorrealista.",
+    },
+    {
+      title: "Explorar el estilo acuarela",
+      description: "Si D5 Render tiene un preset de acuarela, aplícalo y observa los resultados. Si no, intenta simularlo combinando: suavizado de imagen, saturación reducida, y viñeta suave.",
+    },
+    {
+      title: "Crear un estilo conceptual",
+      description: "Crea un render conceptual eliminando texturas (usando colores sólidos), simplificando materiales, y activando contornos sutiles. El resultado debe comunicar la idea del proyecto sin detalles distractores.",
+      tip: "Los renders conceptuales son excelentes para competencias donde quieres que el jurado se enfoque en la idea, no en los materiales.",
+    },
+    {
+      title: "Experimentar con tilt-shift",
+      description: "Aplica un DOF pronunciado con la zona de enfoque en una franja horizontal del centro. Aumenta la saturación y añade viñeta. Observa cómo la escena parece una maqueta en miniatura.",
+    },
+  ],
+  practice: "Crea 3 versiones del mismo proyecto con estilos diferentes: fotorrealista, ilustración con contornos, y conceptual. Compara cuándo sería apropiado usar cada estilo.",
+  extraResources: [
+    { label: "Estilos artísticos en D5 Render", url: "https://www.d5render.com/help/artistic-styles" },
+  ],
+});
+
+register({
+  moduleId: "modulo-8",
+  topicIndex: 5,
+  title: "Exportación para post-producción externa (Photoshop, After Effects)",
+  objective: "Aprender a preparar y exportar renders de D5 Render para post-producción profesional en Photoshop, After Effects u otros software de edición.",
+  explanation: `Aunque D5 Render tiene herramientas de post-producción integradas, para ajustes avanzados y composición profesional necesitarás usar software externo como Adobe Photoshop (para imágenes fijas) o After Effects (para video). Este tema cubre cómo preparar y exportar tus renders para estos programas.
+
+El primer paso es renderizar en el formato correcto. Para post-producción en Photoshop, el formato EXR es ideal porque conserva toda la información HDR, permitiéndote ajustar exposición, balance de blancos y niveles sin perder calidad. Si no tienes EXR disponible, PNG de 16 bits es la segunda mejor opción. Nunca uses JPEG para post-producción porque la compresión con pérdida degrada la imagen con cada edición.
+
+D5 Render permite renderizar por capas (render passes), que son imágenes separadas que contienen información específica de cada aspecto del render. Los passes más útiles son: iluminación difusa (solo la luz directa), iluminación indirecta (solo la luz rebotada), reflexiones, sombras, y occlusión ambiental. Al tener estos elementos por separado, puedes ajustar cada uno independientemente en Photoshop.
+
+El pase de reflexiones te permite intensificar o suavizar las reflexiones sin afectar el resto de la imagen. El pase de sombras te permite aclarar u oscurecer las sombras sin cambiar la iluminación directa. El pase de AO te permite ajustar la oclusión ambiental independientemente. Esta flexibilidad es imposible si solo tienes el render final combinado.
+
+Para exportar el canal alpha (transparencia), activa la opción de Alpha Channel en la configuración de renderizado. El canal alpha te permite separar el edificio del fondo, lo que es útil para reemplazar el cielo o añadir elementos en post-producción.
+
+El flujo de trabajo típico en Photoshop es: abrir el render EXR, ajustar la exposición y balance de blancos usando los ajustes de Camera Raw, componer los passes individuales como capas con modos de fusión (Screen para reflexiones, Multiply para sombras), y aplicar ajustes finales como curvas, niveles y corrección de color.
+
+Para After Effects, el flujo es similar pero orientado a video. Importa la secuencia de imágenes EXR, componla con los passes, y añade efectos y transiciones. After Effects es especialmente útil para añadir elementos que no puedes crear fácilmente en D5 Render: personas, coches en movimiento, partículas, y efectos atmosféricos complejos.
+
+Otra técnica es renderizar una imagen de profundidad (Z-depth pass) que codifica la distancia de cada píxel a la cámara en escala de grises. Con esta información, puedes aplicar efectos basados en profundidad en post-producción: niebla volumétrica, DOF adicional, o color grading por distancia.`,
+  keyPoints: [
+    "EXR es el mejor formato para post-producción (conserva HDR)",
+    "Renderizar por capas/passes: reflexiones, sombras, AO, iluminación",
+    "Canal alpha: separa edificio del fondo para reemplazar cielo",
+    "En Photoshop: EXR + Camera Raw + capas con modos de fusión",
+    "En After Effects: secuencia EXR + composición + efectos",
+    "Z-depth pass: permite efectos basados en profundidad en post",
+  ],
+  steps: [
+    {
+      title: "Renderizar en EXR con passes",
+      description: "Configura el renderizado en formato EXR y activa los passes disponibles (reflexiones, sombras, AO, iluminación, alpha). Renderiza y verifica que se generan todos los archivos de pass.",
+    },
+    {
+      title: "Abrir en Photoshop",
+      description: "Abre el archivo EXR principal en Photoshop. Usa Camera Raw Filter para ajustar la exposición y el balance de blancos. Observa cómo puedes hacer ajustes significativos sin perder calidad gracias a la información HDR.",
+      tip: "Si no tienes EXR, abre el PNG y duplica la capa antes de hacer ajustes. Así siempre puedes volver al original.",
+    },
+    {
+      title: "Componer los passes",
+      description: "Abre los passes de reflexiones y sombras como capas. Pon las reflexiones en modo Screen y las sombras en modo Multiply. Ajusta la opacidad de cada capa para controlar su intensidad.",
+    },
+    {
+      title: "Usar el canal alpha",
+      description: "Usa el canal alpha para crear una selección del edificio. Con el edificio seleccionado, puedes aplicar ajustes solo al edificio sin afectar el cielo, o viceversa. Esto es especialmente útil para reemplazar el cielo.",
+    },
+  ],
+  practice: "Renderiza una escena con EXR y todos los passes disponibles. Compón la imagen en Photoshop usando los passes como capas. Documenta los ajustes que haces y compara el resultado con el render directo de D5 Render.",
+  extraResources: [
+    { label: "Exportación para post-producción", url: "https://www.d5render.com/help/post-export" },
+  ],
+});
+
 console.log(`Topic content loaded: ${contentMap.size} topics`);
