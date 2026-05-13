@@ -14,11 +14,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Academia D5 Render - Plan de Estudio",
+  title: "Academia D5 Render - Plan de Estudio Interactivo",
   description:
-    "Plataforma interactiva para seguir tu progreso en el curso de D5 Render. Aprende renderizado en tiempo real con nuestro plan de estudio estructurado.",
-  icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    "Plataforma interactiva para seguir tu progreso en el curso de D5 Render. 10 módulos, 60 temas y evaluaciones para dominar el renderizado en tiempo real.",
+  keywords: ["D5 Render", "renderizado", "3D", "arquitectura", "curso", "aprender"],
+  openGraph: {
+    title: "Academia D5 Render - Plan de Estudio Interactivo",
+    description:
+      "Sigue tu progreso en el curso completo de D5 Render con evaluaciones interactivas.",
+    type: "website",
   },
 };
 
