@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -59,7 +60,19 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
         value={module.id}
         className="glass-card glass-card-hover rounded-xl border-0 mb-3 overflow-hidden transition-all duration-300"
       >
-        <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-transparent">
+        {/* Module image banner */}
+        <div className="relative w-full h-24 overflow-hidden">
+          <Image
+            src={`/images/modules/modulo-${module.number}.png`}
+            alt={`Módulo ${module.number}: ${module.title}`}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 600px"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-zinc-950/30" />
+        </div>
+
+        <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-transparent -mt-6 relative z-10">
           <div className="flex items-center gap-4 flex-1 text-left">
             {/* Module number */}
             <div

@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -150,6 +151,24 @@ export default function TopicPage() {
           <ChevronRight className="w-3 h-3" />
           <span className="text-emerald-400">Tema {topicIndex + 1}</span>
         </motion.nav>
+
+        {/* Module hero banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="relative w-full h-52 rounded-xl overflow-hidden mb-8"
+        >
+          <Image
+            src={`/images/modules/modulo-${moduleData.number}.png`}
+            alt={`Módulo ${moduleData.number}: ${moduleData.title}`}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 896px"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+        </motion.div>
 
         {/* Header */}
         <motion.div
