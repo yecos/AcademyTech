@@ -11,6 +11,7 @@ export function useAuth() {
   const isAuthenticated = status === "authenticated";
   const user = session?.user ?? null;
   const isTeacher = user?.role === "teacher";
+  const isAdmin = user?.role === "teacher" || user?.role === "admin";
   const isGuest = user?.email?.endsWith("@d5academy.guest") ?? false;
 
   const login = () => {
@@ -34,6 +35,7 @@ export function useAuth() {
     isLoading,
     isAuthenticated,
     isTeacher,
+    isAdmin,
     isGuest,
     login,
     loginWithGoogle,

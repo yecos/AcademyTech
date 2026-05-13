@@ -29,10 +29,39 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      // Auto-assign teacher role if email matches ADMIN_EMAIL
+      if (account?.provider === "google" && user.email) {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail && user.email === adminEmail) {
+          // Check if user exists and update role
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+          if (existingUser && existingUser.role !== "teacher") {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { role: "teacher" },
+            });
+          }
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
+      }
+      // Always refresh role from DB for admin users to catch role changes
+      if (token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role;
+        }
       }
       return token;
     },

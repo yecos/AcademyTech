@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogIn, LogOut, User, ChevronDown } from "lucide-react";
+import { LogIn, LogOut, User, ChevronDown, Shield, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export function UserMenu() {
-  const { user, isAuthenticated, isLoading, login, logout, isGuest } = useAuth();
+  const { user, isAuthenticated, isLoading, login, logout, isGuest, isAdmin } = useAuth();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -87,6 +87,12 @@ export function UserMenu() {
         <span className="text-xs font-medium text-gray-700 dark:text-gray-300 max-w-[80px] truncate hidden sm:inline">
           {getDisplayName()}
         </span>
+        {/* Admin badge in top bar */}
+        {isAdmin && (
+          <span className="text-[8px] px-1 py-0.5 rounded bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/20 font-bold shrink-0">
+            Admin
+          </span>
+        )}
         <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </motion.button>
 
@@ -117,25 +123,48 @@ export function UserMenu() {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {user?.name || "Usuario"}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {user?.name || "Usuario"}
+                    </p>
+                    {isAdmin && (
+                      <Shield className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400 shrink-0" />
+                    )}
+                  </div>
                   <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
                     {user?.email}
                   </p>
                 </div>
               </div>
-              {isGuest && (
-                <div className="mt-2">
+              <div className="flex items-center gap-2 mt-2">
+                {isGuest && (
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium">
                     Invitado
                   </span>
-                </div>
-              )}
+                )}
+                {isAdmin && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 font-medium">
+                    {user?.role === "teacher" ? "Profesor" : "Admin"}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Menu items */}
             <div className="py-1">
+              {/* Admin link - only for teacher/admin */}
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    router.push("/admin");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/5 transition-colors"
+                >
+                  <Settings className="w-4 h-4" />
+                  Panel de Admin
+                </button>
+              )}
               <button
                 onClick={() => {
                   setIsOpen(false);
