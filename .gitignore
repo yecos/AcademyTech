@@ -57,3 +57,5 @@ prompt
 .z-ai-config
 local-*
 package-lock.json
+
+/src/generated/prisma

@@ -27,6 +27,8 @@ import { ModuleCard } from "@/components/module-card";
 import { QuizDialog } from "@/components/quiz-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAchievementChecker } from "@/hooks/use-achievement-checker";
+import { UserMenu } from "@/components/user-menu";
+import { AuthBanner } from "@/components/auth-banner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,6 +63,9 @@ export function StudyApp() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
+      {/* Auth banner for non-logged users */}
+      <AuthBanner />
+
       {/* Background decorative elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -76,8 +81,9 @@ export function StudyApp() {
           transition={{ duration: 0.5 }}
           className="text-center mb-10"
         >
-          {/* Theme toggle - top right */}
-          <div className="flex justify-end mb-2">
+          {/* Theme toggle + User menu - top right */}
+          <div className="flex justify-end items-center gap-2 mb-2">
+            <UserMenu />
             <ThemeToggle />
           </div>
 

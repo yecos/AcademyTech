@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useStudyStore } from "@/lib/store";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 export default function CertificadoPage() {
   const router = useRouter();
@@ -99,7 +100,10 @@ export default function CertificadoPage() {
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <UserMenu />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Header */}

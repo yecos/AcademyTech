@@ -28,6 +28,7 @@ import { modules } from "@/lib/curriculum";
 import { getTopicContent } from "@/lib/topic-content";
 import { useStudyStore } from "@/lib/store";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 function TopicNotes({ moduleId, topicIndex }: { moduleId: string; topicIndex: number }) {
   const saveTopicNote = useStudyStore((s) => s.saveTopicNote);
@@ -149,7 +150,10 @@ export default function TopicPage() {
             <ChevronRight className="w-3 h-3" />
             <span className="text-emerald-500 dark:text-emerald-400">Tema {topicIndex + 1}</span>
           </nav>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <UserMenu />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Module hero banner */}

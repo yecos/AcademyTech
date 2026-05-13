@@ -36,6 +36,7 @@ import {
   type Severity,
 } from "@/lib/search-data";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 type CategoryKey = "todos" | TroubleshootingCategoryKey;
 
@@ -139,7 +140,10 @@ export default function SolucionesPage() {
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <UserMenu />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Header */}

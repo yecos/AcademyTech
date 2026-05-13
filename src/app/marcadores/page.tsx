@@ -14,6 +14,7 @@ import {
 import { modules } from "@/lib/curriculum";
 import { useStudyStore } from "@/lib/store";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 export default function MarcadoresPage() {
   const router = useRouter();
@@ -62,7 +63,10 @@ export default function MarcadoresPage() {
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <UserMenu />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Header */}

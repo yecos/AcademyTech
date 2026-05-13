@@ -20,6 +20,7 @@ import { useStudyStore } from "@/lib/store";
 import { achievements, achievementCategories, getAchievementById } from "@/lib/achievements";
 import { useAchievementChecker } from "@/hooks/use-achievement-checker";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 export default function LogrosPage() {
   const router = useRouter();
@@ -86,7 +87,10 @@ export default function LogrosPage() {
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <UserMenu />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Header */}

@@ -10,6 +10,7 @@ import {
   Command,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 interface Shortcut {
   keys: string[];
@@ -130,7 +131,10 @@ export default function AtajosPage() {
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <UserMenu />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Header */}
