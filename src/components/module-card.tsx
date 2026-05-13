@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -17,8 +18,7 @@ import {
   CheckCircle2,
   ClipboardCheck,
   Trophy,
-  Lock,
-  Unlock,
+  ChevronRight,
 } from "lucide-react";
 import { Module } from "@/lib/curriculum";
 import { useStudyStore } from "@/lib/store";
@@ -30,6 +30,7 @@ interface ModuleCardProps {
 }
 
 export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
+  const router = useRouter();
   const completedTopics = useStudyStore((s) =>
     s.getModuleCompletedCount(module.id)
   );
@@ -115,7 +116,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
 
         <AccordionContent className="px-5 pb-4">
           <div className="space-y-4">
-            {/* Topics list */}
+            {/* Topics list - now clickable */}
             <div className="space-y-1">
               {module.topics.map((topic, topicIndex) => {
                 const key = `${module.id}-${topicIndex}`;
@@ -133,11 +134,14 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                       onCheckedChange={() =>
                         toggleTopic(module.id, topicIndex)
                       }
+                      onClick={(e) => e.stopPropagation()}
                       className="border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                     />
-                    <label
-                      htmlFor={key}
-                      className={`text-sm cursor-pointer transition-colors ${
+                    <button
+                      onClick={() =>
+                        router.push(`/modulo/${module.id}/tema/${topicIndex}`)
+                      }
+                      className={`flex-1 flex items-center gap-1 text-left cursor-pointer transition-colors ${
                         checked
                           ? "text-gray-500 line-through"
                           : "text-gray-300 group-hover:text-white"
@@ -146,8 +150,9 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                       <span className="text-gray-500 mr-1.5 text-xs">
                         {topicIndex + 1}.
                       </span>
-                      {topic}
-                    </label>
+                      <span className="flex-1 text-sm">{topic}</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-emerald-400 transition-colors shrink-0" />
+                    </button>
                   </motion.div>
                 );
               })}
