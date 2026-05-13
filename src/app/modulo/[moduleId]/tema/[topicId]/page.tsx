@@ -27,6 +27,7 @@ import {
 import { modules } from "@/lib/curriculum";
 import { getTopicContent } from "@/lib/topic-content";
 import { useStudyStore } from "@/lib/store";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function TopicNotes({ moduleId, topicIndex }: { moduleId: string; topicIndex: number }) {
   const saveTopicNote = useStudyStore((s) => s.saveTopicNote);
@@ -57,15 +58,15 @@ function TopicNotes({ moduleId, topicIndex }: { moduleId: string; topicIndex: nu
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <PenLine className="w-5 h-5 text-emerald-400" />
-          <h2 className="text-lg font-semibold text-white">Mis Notas</h2>
+          <PenLine className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Mis Notas</h2>
         </div>
         {savedIndicator && (
           <motion.span
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="text-xs text-emerald-400/70"
+            className="text-xs text-emerald-500/70 dark:text-emerald-400/70"
           >
             Guardado
           </motion.span>
@@ -76,7 +77,7 @@ function TopicNotes({ moduleId, topicIndex }: { moduleId: string; topicIndex: nu
         onChange={(e) => setNoteText(e.target.value)}
         placeholder="Escribe tus notas personales sobre este tema aquí..."
         rows={5}
-        className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-gray-300 text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500/30 focus:ring-1 focus:ring-emerald-500/15 resize-y transition-colors"
+        className="w-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 rounded-lg px-4 py-3 text-gray-600 dark:text-gray-300 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:border-emerald-500/30 focus:ring-1 focus:ring-emerald-500/15 resize-y transition-colors"
       />
     </motion.section>
   );
@@ -98,10 +99,10 @@ export default function TopicPage() {
 
   if (!moduleData || topicIndex < 0 || topicIndex >= moduleData.topics.length) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-white">Tema no encontrado</h2>
-          <p className="text-gray-400">El tema que buscas no existe.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tema no encontrado</h2>
+          <p className="text-gray-500 dark:text-gray-400">El tema que buscas no existe.</p>
           <Button onClick={() => router.push("/")} className="bg-emerald-600 hover:bg-emerald-500 text-white">
             <Home className="w-4 h-4 mr-2" />
             Volver al inicio
@@ -123,7 +124,7 @@ export default function TopicPage() {
   const notesKey = `${moduleId}-${topicIndex}`;
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Background decorative */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -131,26 +132,25 @@ export default function TopicPage() {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Breadcrumb */}
-        <motion.nav
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 text-sm text-gray-400 mb-6 flex-wrap"
-        >
-          <button
-            onClick={() => router.push("/")}
-            className="hover:text-emerald-400 transition-colors flex items-center gap-1"
-          >
-            <Home className="w-3.5 h-3.5" />
-            Inicio
-          </button>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-gray-500">Módulo {moduleData.number}</span>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-gray-500">{moduleData.title}</span>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-emerald-400">Tema {topicIndex + 1}</span>
-        </motion.nav>
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-2">
+          <nav className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-400 flex-wrap">
+            <button
+              onClick={() => router.push("/")}
+              className="hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors flex items-center gap-1"
+            >
+              <Home className="w-3.5 h-3.5" />
+              Inicio
+            </button>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-gray-400 dark:text-gray-500">Módulo {moduleData.number}</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-gray-400 dark:text-gray-500">{moduleData.title}</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-emerald-500 dark:text-emerald-400">Tema {topicIndex + 1}</span>
+          </nav>
+          <ThemeToggle />
+        </div>
 
         {/* Module hero banner */}
         <motion.div
@@ -167,7 +167,7 @@ export default function TopicPage() {
             sizes="(max-width: 768px) 100vw, 896px"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/40 to-transparent dark:from-zinc-950 dark:via-zinc-950/40 dark:to-transparent" />
         </motion.div>
 
         {/* Header */}
@@ -180,37 +180,37 @@ export default function TopicPage() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-3 flex-wrap">
-                <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 text-xs">
+                <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs">
                   Módulo {moduleData.number}
                 </Badge>
-                <Badge className="bg-white/5 text-gray-400 border-white/10 text-xs">
+                <Badge className="bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/10 text-xs">
                   Tema {topicIndex + 1} de {totalTopics}
                 </Badge>
                 <Badge className={`text-xs ${
                   topicInfo.difficulty === 'basico'
-                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20'
+                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                     : topicInfo.difficulty === 'intermedio'
-                      ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
-                      : 'bg-red-500/15 text-red-400 border-red-500/20'
+                      ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                      : 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20'
                 }`}>
                   {topicInfo.difficulty === 'basico' ? 'Básico' : topicInfo.difficulty === 'intermedio' ? 'Intermedio' : 'Avanzado'}
                 </Badge>
-                <Badge className="bg-white/5 text-gray-400 border-white/10 text-xs flex items-center gap-1">
+                <Badge className="bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/10 text-xs flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {topicInfo.estimatedTime}
                 </Badge>
                 {isCompleted && (
-                  <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs">
+                  <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/30 text-xs">
                     <CheckCircle2 className="w-3 h-3 mr-1" />
                     Completado
                   </Badge>
                 )}
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 {topicTitle}
               </h1>
               {content && (
-                <div className="flex items-center gap-2 text-sm text-emerald-400/80">
+                <div className="flex items-center gap-2 text-sm text-emerald-600/80 dark:text-emerald-400/80">
                   <Target className="w-4 h-4" />
                   <span>{content.objective}</span>
                 </div>
@@ -222,11 +222,11 @@ export default function TopicPage() {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => toggleBookmark(moduleId, topicIndex)}
-                className="p-2.5 rounded-lg glass-card transition-colors hover:bg-white/6"
+                className="p-2.5 rounded-lg glass-card transition-colors hover:bg-gray-200 dark:hover:bg-white/6"
                 title={bookmarked ? "Quitar marcador" : "Añadir marcador"}
               >
                 {bookmarked ? (
-                  <BookmarkCheck className="w-5 h-5 text-emerald-400" />
+                  <BookmarkCheck className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
                 ) : (
                   <Bookmark className="w-5 h-5 text-gray-400" />
                 )}
@@ -236,11 +236,11 @@ export default function TopicPage() {
                   id="topic-complete"
                   checked={isCompleted}
                   onCheckedChange={() => toggleTopic(moduleId, topicIndex)}
-                  className="border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                  className="border-gray-300 dark:border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                 />
                 <label
                   htmlFor="topic-complete"
-                  className="text-sm text-gray-300 cursor-pointer select-none"
+                  className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer select-none"
                 >
                   Marcar como completado
                 </label>
@@ -260,12 +260,12 @@ export default function TopicPage() {
               className="glass-card rounded-xl p-6"
             >
               <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-lg font-semibold text-white">Explicación</h2>
+                <BookOpen className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Explicación</h2>
               </div>
               <div className="prose prose-invert max-w-none">
                 {content.explanation.split("\n\n").map((paragraph, i) => (
-                  <p key={i} className="text-gray-300 leading-relaxed mb-4 text-sm sm:text-base">
+                  <p key={i} className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-sm sm:text-base">
                     {paragraph}
                   </p>
                 ))}
@@ -280,16 +280,16 @@ export default function TopicPage() {
               className="glass-card rounded-xl p-6"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Lightbulb className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-lg font-semibold text-white">Puntos Clave</h2>
+                <Lightbulb className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Puntos Clave</h2>
               </div>
               <ul className="space-y-3">
                 {content.keyPoints.map((point, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-bold shrink-0 mt-0.5">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0 mt-0.5">
                       {i + 1}
                     </span>
-                    <span className="text-gray-300 text-sm sm:text-base">{point}</span>
+                    <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">{point}</span>
                   </li>
                 ))}
               </ul>
@@ -303,8 +303,8 @@ export default function TopicPage() {
               className="glass-card rounded-xl p-6"
             >
               <div className="flex items-center gap-2 mb-4">
-                <ListChecks className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-lg font-semibold text-white">Tutorial Paso a Paso</h2>
+                <ListChecks className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Tutorial Paso a Paso</h2>
               </div>
               <div className="space-y-6">
                 {content.steps.map((step, i) => (
@@ -313,16 +313,16 @@ export default function TopicPage() {
                       <div className="absolute left-5 top-12 bottom-0 w-px bg-emerald-500/20" />
                     )}
                     <div className="flex items-start gap-4">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-400 font-bold shrink-0 text-sm border border-emerald-500/20">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-sm border border-emerald-500/20">
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-white mb-1">{step.title}</h3>
-                        <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{step.title}</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{step.description}</p>
                         {step.tip && (
                           <div className="mt-2 flex items-start gap-2 bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
-                            <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                            <span className="text-amber-300/80 text-xs">{step.tip}</span>
+                            <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <span className="text-amber-600/80 dark:text-amber-300/80 text-xs">{step.tip}</span>
                           </div>
                         )}
                       </div>
@@ -340,10 +340,10 @@ export default function TopicPage() {
               className="glass-card rounded-xl p-6 border-emerald-500/10"
             >
               <div className="flex items-center gap-2 mb-4">
-                <Eye className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-lg font-semibold text-white">Práctica</h2>
+                <Eye className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Práctica</h2>
               </div>
-              <p className="text-gray-300 text-sm sm:text-base leading-relaxed">{content.practice}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">{content.practice}</p>
             </motion.section>
 
             {/* Personal Notes */}
@@ -358,8 +358,8 @@ export default function TopicPage() {
                 className="glass-card rounded-xl p-6"
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <ExternalLink className="w-5 h-5 text-emerald-400" />
-                  <h2 className="text-lg font-semibold text-white">Recursos Adicionales</h2>
+                  <ExternalLink className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recursos Adicionales</h2>
                 </div>
                 <div className="space-y-2">
                   {content.extraResources.map((res, i) => (
@@ -368,7 +368,7 @@ export default function TopicPage() {
                       href={res.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors group"
+                      className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors group"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span className="group-hover:underline">{res.label}</span>
@@ -385,9 +385,9 @@ export default function TopicPage() {
             className="space-y-8"
           >
             <div className="glass-card rounded-xl p-8 text-center">
-              <BookOpen className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-white mb-2">Contenido en desarrollo</h2>
-              <p className="text-gray-400">
+              <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Contenido en desarrollo</h2>
+              <p className="text-gray-500 dark:text-gray-400">
                 El contenido detallado para este tema aún no está disponible. Mientras tanto,
                 puedes marcar el tema como completado si ya lo has estudiado.
               </p>
@@ -409,7 +409,7 @@ export default function TopicPage() {
             <Button
               variant="outline"
               onClick={() => router.push(prevPath)}
-              className="border-white/10 text-gray-300 hover:bg-white/5 hover:text-white gap-2"
+              className="border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Tema {topicIndex}</span>
@@ -419,7 +419,7 @@ export default function TopicPage() {
             <Button
               variant="outline"
               onClick={() => router.push("/")}
-              className="border-white/10 text-gray-300 hover:bg-white/5 hover:text-white gap-2"
+              className="border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white gap-2"
             >
               <Home className="w-4 h-4" />
               Inicio
@@ -433,10 +433,10 @@ export default function TopicPage() {
                 onClick={() => router.push(`/modulo/${moduleId}/tema/${i}`)}
                 className={`w-2.5 h-2.5 rounded-full transition-all ${
                   i === topicIndex
-                    ? "bg-emerald-400 w-6"
+                    ? "bg-emerald-500 dark:bg-emerald-400 w-6"
                     : useStudyStore.getState().isTopicCompleted(moduleId, i)
                       ? "bg-emerald-500/50"
-                      : "bg-white/10 hover:bg-white/20"
+                      : "bg-gray-300 dark:bg-white/10 hover:bg-gray-400 dark:hover:bg-white/20"
                 }`}
               />
             ))}

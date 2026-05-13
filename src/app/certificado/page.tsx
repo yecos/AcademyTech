@@ -16,6 +16,7 @@ import {
   Shield,
 } from "lucide-react";
 import { useStudyStore } from "@/lib/store";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function CertificadoPage() {
   const router = useRouter();
@@ -78,7 +79,7 @@ export default function CertificadoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Background decorative elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -87,22 +88,19 @@ export default function CertificadoPage() {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Back button */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/")}
-            className="text-gray-400 hover:text-white hover:bg-white/5 mb-6 gap-1.5"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-        </motion.div>
+          <ThemeToggle />
+        </div>
 
         {/* Header */}
         <motion.header
@@ -113,16 +111,16 @@ export default function CertificadoPage() {
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <Award className="w-5 h-5 text-emerald-400" />
+              <Award className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                 Certificado de{" "}
-                <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
                   Finalización
                 </span>
               </h1>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Completa el 100% del curso para obtener tu certificado
               </p>
             </div>
@@ -138,30 +136,30 @@ export default function CertificadoPage() {
           >
             <div className="glass-card rounded-2xl p-8 text-center max-w-lg mx-auto">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
-                <GraduationCap className="w-8 h-8 text-emerald-400" />
+                <GraduationCap className="w-8 h-8 text-emerald-500 dark:text-emerald-400" />
               </div>
 
-              <h2 className="text-xl font-bold text-white mb-2">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 ¡Sigue avanzando!
               </h2>
-              <p className="text-sm text-gray-400 mb-6">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                 Completa todos los temas del curso para desbloquear tu
                 certificado de finalización. Estás muy cerca de lograrlo.
               </p>
 
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     Progreso del curso
                   </span>
-                  <span className="text-lg font-bold text-emerald-400">
+                  <span className="text-lg font-bold text-emerald-500 dark:text-emerald-400">
                     {overallProgress}%
                   </span>
                 </div>
                 <div className="relative">
                   <Progress
                     value={overallProgress}
-                    className="h-3 bg-white/5 rounded-full overflow-hidden"
+                    className="h-3 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
                   />
                   <motion.div
                     className="absolute top-0 left-0 h-3 rounded-full progress-emerald"
@@ -195,7 +193,7 @@ export default function CertificadoPage() {
                 <div className="flex-1 w-full">
                   <label
                     htmlFor="studentName"
-                    className="block text-sm font-medium text-gray-300 mb-2"
+                    className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"
                   >
                     Nombre del estudiante
                   </label>
@@ -205,7 +203,7 @@ export default function CertificadoPage() {
                     value={studentName}
                     onChange={(e) => setStudentName(e.target.value)}
                     placeholder="Ingresa tu nombre completo"
-                    className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
+                    className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
                   />
                 </div>
                 <Button
@@ -218,7 +216,7 @@ export default function CertificadoPage() {
                 </Button>
               </div>
               {!studentName.trim() && (
-                <p className="text-xs text-amber-400/80 mt-2">
+                <p className="text-xs text-amber-500/80 dark:text-amber-400/80 mt-2">
                   Ingresa tu nombre para poder descargar el certificado
                 </p>
               )}

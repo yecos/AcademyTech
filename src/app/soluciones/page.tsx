@@ -35,6 +35,7 @@ import {
   type TroubleshootingCategoryKey,
   type Severity,
 } from "@/lib/search-data";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type CategoryKey = "todos" | TroubleshootingCategoryKey;
 
@@ -48,7 +49,7 @@ const categories: { key: CategoryKey; label: string; icon: React.ReactNode }[] =
 ];
 
 const categoryColorsAll: Record<CategoryKey, string> = {
-  todos: "bg-white/10 text-gray-300 border-white/10",
+  todos: "bg-gray-200/60 text-gray-600 dark:bg-white/10 dark:text-gray-300 border-gray-300 dark:border-white/10",
   ...troubleshootingCategoryColors,
 };
 
@@ -118,7 +119,7 @@ export default function SolucionesPage() {
   }, [filteredIssues]);
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Background decorative elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -127,22 +128,19 @@ export default function SolucionesPage() {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Back button */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/")}
-            className="text-gray-400 hover:text-white hover:bg-white/5 mb-6 gap-1.5"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-        </motion.div>
+          <ThemeToggle />
+        </div>
 
         {/* Header */}
         <motion.header
@@ -153,16 +151,16 @@ export default function SolucionesPage() {
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <AlertTriangle className="w-5 h-5 text-emerald-400" />
+              <AlertTriangle className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                 Soluciones{" "}
-                <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
                   D5 Render
                 </span>
               </h1>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {troubleshootingItems.length} problemas comunes y sus soluciones
               </p>
             </div>
@@ -177,25 +175,25 @@ export default function SolucionesPage() {
           className="mb-6"
         >
           <div className="glass-card rounded-xl p-4 flex flex-wrap items-center gap-4">
-            <span className="text-xs text-gray-500 font-medium">
+            <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
               Severidad:
             </span>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-red-400" />
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
                   {severityCounts.critico} Críticos
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
                   {severityCounts.moderado} Moderados
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
                   {severityCounts.leve} Leves
                 </span>
               </div>
@@ -211,18 +209,18 @@ export default function SolucionesPage() {
           className="mb-6"
         >
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar problema, causa o solución..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
+              className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -244,8 +242,8 @@ export default function SolucionesPage() {
                 onClick={() => setActiveCategory(cat.key)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border ${
                   activeCategory === cat.key
-                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                    : "bg-white/3 text-gray-400 border-white/8 hover:bg-white/6 hover:text-gray-300"
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    : "bg-gray-100 dark:bg-white/3 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
                 {cat.icon}
@@ -271,11 +269,11 @@ export default function SolucionesPage() {
           >
             {filteredIssues.length === 0 ? (
               <div className="glass-card rounded-xl p-8 text-center">
-                <Search className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-white mb-1">
+                <Search className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
                   Sin resultados
                 </h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   No se encontraron problemas que coincidan con tu búsqueda.
                 </p>
               </div>
@@ -291,8 +289,8 @@ export default function SolucionesPage() {
                         >
                           {categoryLabelsAll[category as CategoryKey]}
                         </Badge>
-                        <div className="flex-1 h-px bg-white/5" />
-                        <span className="text-xs text-gray-500">
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
                           {categoryIssues.length}{" "}
                           {categoryIssues.length === 1
                             ? "problema"
@@ -316,7 +314,7 @@ export default function SolucionesPage() {
                               value={`issue-${issue.id}`}
                               className="glass-card rounded-xl border-0 overflow-hidden data-[state=open]:border-emerald-500/15 transition-colors duration-300"
                             >
-                              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-white/3 transition-colors duration-200 [&[data-state=open]]:border-b [&[data-state=open]]:border-white/5">
+                              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-100 dark:hover:bg-white/3 transition-colors duration-200 [&[data-state=open]]:border-b [&[data-state=open]]:border-gray-200 dark:[&[data-state=open]]:border-white/5">
                                 <div className="flex items-center gap-3 text-left flex-1 min-w-0">
                                   <div
                                     className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center ${severityConfig[issue.severity].color}`}
@@ -325,7 +323,7 @@ export default function SolucionesPage() {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                                      <h3 className="text-sm font-semibold text-white truncate">
+                                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                                         {issue.title}
                                       </h3>
                                       <Badge
@@ -334,7 +332,7 @@ export default function SolucionesPage() {
                                         {severityConfig[issue.severity].label}
                                       </Badge>
                                     </div>
-                                    <p className="text-xs text-gray-500 line-clamp-1">
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 line-clamp-1">
                                       {issue.description}
                                     </p>
                                   </div>
@@ -344,7 +342,7 @@ export default function SolucionesPage() {
                                 <div className="space-y-4 pt-2">
                                   {/* Description */}
                                   <div>
-                                    <p className="text-xs text-gray-400 leading-relaxed">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                                       {issue.description}
                                     </p>
                                   </div>
@@ -352,8 +350,8 @@ export default function SolucionesPage() {
                                   {/* Causes */}
                                   <div>
                                     <div className="flex items-center gap-1.5 mb-2">
-                                      <CircleAlert className="w-3.5 h-3.5 text-red-400/70" />
-                                      <h4 className="text-xs font-semibold text-red-400/90 uppercase tracking-wider">
+                                      <CircleAlert className="w-3.5 h-3.5 text-red-500/70 dark:text-red-400/70" />
+                                      <h4 className="text-xs font-semibold text-red-600/90 dark:text-red-400/90 uppercase tracking-wider">
                                         Causas
                                       </h4>
                                     </div>
@@ -361,9 +359,9 @@ export default function SolucionesPage() {
                                       {issue.causes.map((cause, i) => (
                                         <li
                                           key={i}
-                                          className="flex items-start gap-2 text-xs text-gray-400"
+                                          className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400"
                                         >
-                                          <ChevronRight className="w-3 h-3 text-red-400/50 shrink-0 mt-0.5" />
+                                          <ChevronRight className="w-3 h-3 text-red-500/50 dark:text-red-400/50 shrink-0 mt-0.5" />
                                           <span>{cause}</span>
                                         </li>
                                       ))}
@@ -373,8 +371,8 @@ export default function SolucionesPage() {
                                   {/* Solutions */}
                                   <div>
                                     <div className="flex items-center gap-1.5 mb-2">
-                                      <Wrench className="w-3.5 h-3.5 text-emerald-400/70" />
-                                      <h4 className="text-xs font-semibold text-emerald-400/90 uppercase tracking-wider">
+                                      <Wrench className="w-3.5 h-3.5 text-emerald-500/70 dark:text-emerald-400/70" />
+                                      <h4 className="text-xs font-semibold text-emerald-600/90 dark:text-emerald-400/90 uppercase tracking-wider">
                                         Soluciones
                                       </h4>
                                     </div>
@@ -382,9 +380,9 @@ export default function SolucionesPage() {
                                       {issue.solutions.map((solution, i) => (
                                         <li
                                           key={i}
-                                          className="flex items-start gap-2 text-xs text-gray-300"
+                                          className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300"
                                         >
-                                          <span className="shrink-0 w-4 h-4 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-[9px] font-bold mt-0.5">
+                                          <span className="shrink-0 w-4 h-4 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[9px] font-bold mt-0.5">
                                             {i + 1}
                                           </span>
                                           <span>{solution}</span>
@@ -414,16 +412,16 @@ export default function SolucionesPage() {
           className="mt-10 glass-card rounded-xl p-5 border-emerald-500/10"
         >
           <div className="flex items-start gap-3">
-            <Wrench className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+            <Wrench className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-semibold text-white mb-1">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
                 Consejo
               </h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                 Si tu problema no aparece en esta lista, asegúrate de tener la
                 última versión de D5 Render instalada. Muchos errores se
                 corrigen en cada actualización. También puedes consultar la{" "}
-                <span className="text-emerald-400/80">
+                <span className="text-emerald-600 dark:text-emerald-400/80">
                   comunidad oficial de D5 Render
                 </span>{" "}
                 o contactar al soporte técnico con tu archivo de registro
@@ -441,9 +439,9 @@ export default function SolucionesPage() {
           className="mt-10 pb-8 text-center"
         >
           <div className="glass-card rounded-xl p-4">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               Soluciones de la Academia D5 Render —{" "}
-              <span className="text-emerald-400/70">
+              <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {troubleshootingItems.length} problemas documentados
               </span>
             </p>

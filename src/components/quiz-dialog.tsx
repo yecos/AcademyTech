@@ -93,9 +93,9 @@ export function QuizDialog({
   const percentage = Math.round((score / totalQuestions) * 100);
 
   const getScoreColor = () => {
-    if (percentage >= 80) return "text-emerald-400";
-    if (percentage >= 60) return "text-amber-400";
-    return "text-red-400";
+    if (percentage >= 80) return "text-emerald-500 dark:text-emerald-400";
+    if (percentage >= 60) return "text-amber-500 dark:text-amber-400";
+    return "text-red-500 dark:text-red-400";
   };
 
   const getScoreMessage = () => {
@@ -107,13 +107,13 @@ export function QuizDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg bg-zinc-900/95 backdrop-blur-xl border-white/10 text-white">
+      <DialogContent className="max-w-lg bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-gray-200 dark:border-white/10 text-gray-900 dark:text-white">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
-            <Award className="w-5 h-5 text-emerald-400" />
+          <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <Award className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
             Evaluación: {module.title}
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-gray-500 dark:text-gray-400">
             {submitted
               ? "Resultados de tu evaluación"
               : `Pregunta ${currentQuestion + 1} de ${totalQuestions}`}
@@ -137,10 +137,10 @@ export function QuizDialog({
                     key={i}
                     className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
                       i === currentQuestion
-                        ? "bg-emerald-400"
+                        ? "bg-emerald-500 dark:bg-emerald-400"
                         : answers[questions[i].id]
-                          ? "bg-emerald-400/40"
-                          : "bg-white/10"
+                          ? "bg-emerald-500/40 dark:bg-emerald-400/40"
+                          : "bg-gray-200 dark:bg-white/10"
                     }`}
                   />
                 ))}
@@ -169,19 +169,19 @@ export function QuizDialog({
                         htmlFor={`${currentQ.id}-${option.label}`}
                         className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border ${
                           answers[currentQ.id] === option.label
-                            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-                            : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10"
+                            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+                            : "bg-gray-50 dark:bg-white/3 border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-white/10"
                         }`}
                       >
                         <RadioGroupItem
                           value={option.label}
                           id={`${currentQ.id}-${option.label}`}
-                          className="border-white/20 text-emerald-400"
+                          className="border-gray-300 dark:border-white/20 text-emerald-500 dark:text-emerald-400"
                         />
-                        <span className="text-sm font-medium text-gray-300">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                           {option.label})
                         </span>
-                        <span className="text-sm text-gray-300">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
                           {option.text}
                         </span>
                       </Label>
@@ -190,7 +190,7 @@ export function QuizDialog({
                 </RadioGroup>
               </div>
 
-              <Separator className="bg-white/5" />
+              <Separator className="bg-gray-200 dark:bg-white/5" />
 
               {/* Navigation */}
               <div className="flex items-center justify-between">
@@ -201,7 +201,7 @@ export function QuizDialog({
                     setCurrentQuestion((prev) => Math.max(0, prev - 1))
                   }
                   disabled={currentQuestion === 0}
-                  className="text-gray-400 hover:text-white"
+                  className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 >
                   <ChevronLeft className="w-4 h-4 mr-1" />
                   Anterior
@@ -255,18 +255,18 @@ export function QuizDialog({
                   }}
                   className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/15 mb-3"
                 >
-                  <Trophy className="w-10 h-10 text-emerald-400" />
+                  <Trophy className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
                 </motion.div>
                 <div className={`text-4xl font-bold ${getScoreColor()} mb-1`}>
                   {score}/{totalQuestions}
                 </div>
-                <div className="text-sm text-gray-400">{percentage}% correcto</div>
-                <p className="text-sm text-gray-300 mt-2 max-w-xs mx-auto">
+                <div className="text-sm text-gray-500 dark:text-gray-400">{percentage}% correcto</div>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 max-w-xs mx-auto">
                   {getScoreMessage()}
                 </p>
               </div>
 
-              <Separator className="bg-white/5" />
+              <Separator className="bg-gray-200 dark:bg-white/5" />
 
               {/* Question review */}
               <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
@@ -284,12 +284,12 @@ export function QuizDialog({
                     >
                       <div className="flex items-start gap-2">
                         {isCorrect ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 mt-0.5 shrink-0" />
                         ) : (
-                          <XCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+                          <XCircle className="w-4 h-4 text-red-500 dark:text-red-400 mt-0.5 shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-300 mb-1">
+                          <p className="text-xs text-gray-600 dark:text-gray-300 mb-1">
                             {i + 1}. {q.question}
                           </p>
                           <div className="flex flex-wrap gap-1.5">
@@ -297,8 +297,8 @@ export function QuizDialog({
                               variant="outline"
                               className={`text-[10px] px-1.5 ${
                                 isCorrect
-                                  ? "border-emerald-500/30 text-emerald-400"
-                                  : "border-red-500/30 text-red-400"
+                                  ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                                  : "border-red-500/30 text-red-600 dark:text-red-400"
                               }`}
                             >
                               Tu respuesta: {userAnswer}
@@ -306,7 +306,7 @@ export function QuizDialog({
                             {!isCorrect && (
                               <Badge
                                 variant="outline"
-                                className="text-[10px] px-1.5 border-emerald-500/30 text-emerald-400"
+                                className="text-[10px] px-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                               >
                                 Correcta: {q.correctAnswer}
                               </Badge>
@@ -319,7 +319,7 @@ export function QuizDialog({
                 })}
               </div>
 
-              <Separator className="bg-white/5" />
+              <Separator className="bg-gray-200 dark:bg-white/5" />
 
               {/* Actions */}
               <div className="flex gap-2">
@@ -327,7 +327,7 @@ export function QuizDialog({
                   variant="outline"
                   size="sm"
                   onClick={handleRetake}
-                  className="flex-1 border-white/10 text-gray-300 hover:text-white hover:bg-white/5"
+                  className="flex-1 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5"
                 >
                   <RotateCcw className="w-4 h-4 mr-1.5" />
                   Reintentar

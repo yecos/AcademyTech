@@ -36,28 +36,28 @@ export function ProgressOverview() {
       icon: BookOpen,
       label: "Temas Completados",
       value: `${completedTopics}/${totalTopics}`,
-      color: "text-emerald-400",
+      color: "text-emerald-500 dark:text-emerald-400",
       bgColor: "bg-emerald-500/10",
     },
     {
       icon: Trophy,
       label: "Módulos Completados",
       value: `${modulesCompleted}/${modules.length}`,
-      color: "text-amber-400",
+      color: "text-amber-500 dark:text-amber-400",
       bgColor: "bg-amber-500/10",
     },
     {
       icon: Target,
       label: "Evaluaciones Hechas",
       value: `${quizzesCompleted}/${modules.length}`,
-      color: "text-sky-400",
+      color: "text-sky-500 dark:text-sky-400",
       bgColor: "bg-sky-500/10",
     },
     {
       icon: TrendingUp,
       label: "Promedio Evaluaciones",
       value: quizzesCompleted > 0 ? `${avgQuizScore}%` : "—",
-      color: "text-violet-400",
+      color: "text-violet-500 dark:text-violet-400",
       bgColor: "bg-violet-500/10",
     },
   ];
@@ -74,25 +74,25 @@ export function ProgressOverview() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-emerald-500/15">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Progreso General del Curso
               </h2>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Avanza por todos los módulos para completar el curso
               </p>
             </div>
           </div>
-          <div className="text-3xl font-bold text-emerald-400">
+          <div className="text-3xl font-bold text-emerald-500 dark:text-emerald-400">
             {overallProgress}%
           </div>
         </div>
         <div className="relative">
           <Progress
             value={overallProgress}
-            className="h-3 bg-white/5 rounded-full overflow-hidden"
+            className="h-3 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
           />
           <motion.div
             className="absolute top-0 left-0 h-3 rounded-full progress-emerald"
@@ -118,8 +118,8 @@ export function ProgressOverview() {
             >
               <stat.icon className={`w-4 h-4 ${stat.color}`} />
             </div>
-            <div className="text-xl font-bold text-white">{stat.value}</div>
-            <div className="text-xs text-gray-400 mt-0.5">{stat.label}</div>
+            <div className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{stat.label}</div>
           </motion.div>
         ))}
       </div>

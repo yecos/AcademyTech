@@ -69,7 +69,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 600px"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-zinc-950/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/60 to-gray-50/30 dark:from-zinc-950 dark:via-zinc-950/60 dark:to-zinc-950/30" />
         </div>
 
         <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-transparent -mt-6 relative z-10">
@@ -78,8 +78,8 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
             <div
               className={`flex items-center justify-center w-10 h-10 rounded-lg text-sm font-bold shrink-0 ${
                 isComplete
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : "bg-white/5 text-gray-400"
+                  ? "bg-emerald-500/20 text-emerald-500 dark:text-emerald-400"
+                  : "bg-gray-100 dark:bg-white/5 text-gray-400"
               }`}
             >
               {isComplete ? (
@@ -92,11 +92,11 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
             {/* Module info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-sm font-semibold text-white truncate">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                   Módulo {module.number}: {module.title}
                 </h3>
                 {isComplete && (
-                  <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 text-[10px] px-1.5">
+                  <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] px-1.5">
                     Completo
                   </Badge>
                 )}
@@ -104,10 +104,10 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                   <Badge
                     className={`text-[10px] px-1.5 ${
                       quizScore >= 80
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20"
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                         : quizScore >= 60
-                          ? "bg-amber-500/15 text-amber-400 border-amber-500/20"
-                          : "bg-red-500/15 text-red-400 border-red-500/20"
+                          ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                          : "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20"
                     }`}
                   >
                     <Trophy className="w-2.5 h-2.5 mr-0.5" />
@@ -119,10 +119,10 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                 <div className="flex-1 max-w-48">
                   <Progress
                     value={progress}
-                    className="h-1.5 bg-white/5 rounded-full overflow-hidden"
+                    className="h-1.5 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
                   />
                 </div>
-                <span className="text-[11px] text-gray-500 shrink-0">
+                <span className="text-[11px] text-gray-400 dark:text-gray-500 shrink-0">
                   {completedTopics}/{totalTopics} temas
                 </span>
               </div>
@@ -138,9 +138,9 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                 const key = `${module.id}-${topicIndex}`;
                 const checked = isTopicCompleted(module.id, topicIndex);
                 const diffColors = {
-                  basico: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-                  intermedio: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-                  avanzado: 'bg-red-500/15 text-red-400 border-red-500/20',
+                  basico: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                  intermedio: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                  avanzado: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20',
                 };
                 const diffLabels = {
                   basico: 'Básico',
@@ -152,7 +152,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                     key={key}
                     initial={false}
                     whileHover={{ x: 2 }}
-                    className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-white/3 transition-colors group"
+                    className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/3 transition-colors group"
                   >
                     <Checkbox
                       id={key}
@@ -161,7 +161,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                         toggleTopic(module.id, topicIndex)
                       }
                       onClick={(e) => e.stopPropagation()}
-                      className="border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                      className="border-gray-300 dark:border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                     />
                     <button
                       onClick={() =>
@@ -169,25 +169,25 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                       }
                       className={`flex-1 flex items-center gap-1 text-left cursor-pointer transition-colors ${
                         checked
-                          ? "text-gray-500 line-through"
-                          : "text-gray-300 group-hover:text-white"
+                          ? "text-gray-400 dark:text-gray-500 line-through"
+                          : "text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white"
                       }`}
                     >
-                      <span className="text-gray-500 mr-1.5 text-xs">
+                      <span className="text-gray-400 dark:text-gray-500 mr-1.5 text-xs">
                         {topicIndex + 1}.
                       </span>
                       <span className="flex-1 text-sm">{topic.name}</span>
                       <Badge className={`text-[9px] px-1.5 py-0 ${diffColors[topic.difficulty]} shrink-0`}>
                         {diffLabels[topic.difficulty]}
                       </Badge>
-                      <span className="text-[10px] text-gray-500 shrink-0 flex items-center gap-0.5">
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 shrink-0 flex items-center gap-0.5">
                         <Clock className="w-2.5 h-2.5" />
                         {topic.estimatedTime}
                       </span>
                       {isBookmarked(module.id, topicIndex) && (
-                        <Bookmark className="w-3 h-3 text-emerald-400 fill-emerald-400 shrink-0" />
+                        <Bookmark className="w-3 h-3 text-emerald-500 dark:text-emerald-400 fill-emerald-500 dark:fill-emerald-400 shrink-0" />
                       )}
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-emerald-400 transition-colors shrink-0" />
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors shrink-0" />
                     </button>
                   </motion.div>
                 );
@@ -195,8 +195,8 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
             </div>
 
             {/* Evaluar button */}
-            <div className="flex items-center justify-between pt-2 border-t border-white/5">
-              <div className="text-xs text-gray-500">
+            <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-white/5">
+              <div className="text-xs text-gray-400 dark:text-gray-500">
                 {progress < 100
                   ? "Completa todos los temas para dominar el módulo"
                   : "¡Todos los temas completados!"}

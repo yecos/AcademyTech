@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ServiceWorkerRegistration } from "@/components/sw-registration";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +26,22 @@ export const metadata: Metadata = {
       "Sigue tu progreso en el curso completo de D5 Render con evaluaciones interactivas.",
     type: "website",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "D5 Academy",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -32,12 +50,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          {children}
+          <Toaster />
+          <ServiceWorkerRegistration />
+        </ThemeProvider>
       </body>
     </html>
   );

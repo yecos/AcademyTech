@@ -16,6 +16,7 @@ import {
   Lightbulb,
   BarChart3,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface EngineData {
   name: string;
@@ -54,7 +55,7 @@ const engines: EngineData[] = [
     color: "emerald",
     bgColor: "bg-emerald-500/15",
     borderColor: "border-emerald-500/30",
-    textColor: "text-emerald-400",
+    textColor: "text-emerald-600 dark:text-emerald-400",
     tipo: "Standalone",
     tecnologia: "Ray Tracing (GPU RTX)",
     vistaPreviaReal: true,
@@ -94,7 +95,7 @@ const engines: EngineData[] = [
     color: "blue",
     bgColor: "bg-blue-500/15",
     borderColor: "border-blue-500/30",
-    textColor: "text-blue-400",
+    textColor: "text-blue-600 dark:text-blue-400",
     tipo: "Standalone",
     tecnologia: "Rasterización + Ray Tracing parcial",
     vistaPreviaReal: true,
@@ -134,7 +135,7 @@ const engines: EngineData[] = [
     color: "purple",
     bgColor: "bg-purple-500/15",
     borderColor: "border-purple-500/30",
-    textColor: "text-purple-400",
+    textColor: "text-purple-600 dark:text-purple-400",
     tipo: "Plugin",
     tecnologia: "Rasterización + Ray Tracing parcial",
     vistaPreviaReal: true,
@@ -174,7 +175,7 @@ const engines: EngineData[] = [
     color: "orange",
     bgColor: "bg-orange-500/15",
     borderColor: "border-orange-500/30",
-    textColor: "text-orange-400",
+    textColor: "text-orange-600 dark:text-orange-400",
     tipo: "Plugin",
     tecnologia: "Ray Tracing CPU/GPU",
     vistaPreviaReal: false,
@@ -214,7 +215,7 @@ const engines: EngineData[] = [
     color: "cyan",
     bgColor: "bg-cyan-500/15",
     borderColor: "border-cyan-500/30",
-    textColor: "text-cyan-400",
+    textColor: "text-cyan-600 dark:text-cyan-400",
     tipo: "Standalone",
     tecnologia: "Rasterización + Unreal Engine",
     vistaPreviaReal: true,
@@ -268,7 +269,7 @@ const comparisonCriteria = [
 
 function BooleanValue({ value }: { value: boolean }) {
   return value ? (
-    <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" />
+    <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 mx-auto" />
   ) : (
     <XCircle className="w-4 h-4 text-red-400/60 mx-auto" />
   );
@@ -283,7 +284,7 @@ function ScoreBar({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+      <div className="flex-1 h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
         <motion.div
           className={`h-full rounded-full ${color}`}
           initial={{ width: 0 }}
@@ -291,7 +292,7 @@ function ScoreBar({
           transition={{ duration: 0.8, ease: "easeOut" }}
         />
       </div>
-      <span className="text-xs font-mono text-gray-400 w-8 text-right">
+      <span className="text-xs font-mono text-gray-500 dark:text-gray-400 w-8 text-right">
         {value}
       </span>
     </div>
@@ -328,7 +329,7 @@ export default function CompararPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Background decorative elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -337,22 +338,19 @@ export default function CompararPage() {
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 py-8 sm:px-6">
-        {/* Back button */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/")}
-            className="text-gray-400 hover:text-white hover:bg-white/5 mb-6 gap-1.5"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-        </motion.div>
+          <ThemeToggle />
+        </div>
 
         {/* Header */}
         <motion.header
@@ -363,16 +361,16 @@ export default function CompararPage() {
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <GitCompare className="w-5 h-5 text-emerald-400" />
+              <GitCompare className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                 Comparación de{" "}
-                <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
                   Motores de Render
                 </span>
               </h1>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 D5 Render vs Lumion vs Enscape vs V-Ray vs Twinmotion
               </p>
             </div>
@@ -415,8 +413,8 @@ export default function CompararPage() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border whitespace-nowrap ${
                   activeTab === tab.key
-                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                    : "bg-white/3 text-gray-400 border-white/8 hover:bg-white/6 hover:text-gray-300"
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    : "bg-gray-100 dark:bg-white/3 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
                 <tab.icon className="w-3.5 h-3.5" />
@@ -438,8 +436,8 @@ export default function CompararPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[800px]">
                   <thead>
-                    <tr className="border-b border-white/5">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider sticky left-0 bg-zinc-900/95 backdrop-blur z-10">
+                    <tr className="border-b border-gray-200 dark:border-white/5">
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider sticky left-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur z-10">
                         Criterio
                       </th>
                       {engines.map((engine) => (
@@ -456,17 +454,17 @@ export default function CompararPage() {
                     {comparisonCriteria.map((criteria, idx) => (
                       <tr
                         key={criteria.key}
-                        className={`border-b border-white/3 ${
-                          idx % 2 === 0 ? "bg-white/[0.01]" : ""
+                        className={`border-b border-gray-100 dark:border-white/3 ${
+                          idx % 2 === 0 ? "bg-gray-50/50 dark:bg-white/[0.01]" : ""
                         }`}
                       >
-                        <td className="px-4 py-3 text-sm text-gray-300 font-medium sticky left-0 bg-zinc-900/95 backdrop-blur z-10">
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium sticky left-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur z-10">
                           {criteria.label}
                         </td>
                         {engines.map((engine) => (
                           <td
                             key={engine.name}
-                            className="text-center px-4 py-3 text-sm text-gray-400"
+                            className="text-center px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
                           >
                             {criteria.type === "boolean" ? (
                               <BooleanValue
@@ -524,8 +522,8 @@ export default function CompararPage() {
                   {/* Pros */}
                   <div>
                     <div className="flex items-center gap-1.5 mb-3">
-                      <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" />
-                      <h4 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+                      <ThumbsUp className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                      <h4 className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                         Ventajas
                       </h4>
                     </div>
@@ -533,7 +531,7 @@ export default function CompararPage() {
                       {engine.pros.map((pro, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-sm text-gray-300"
+                          className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500/70 mt-0.5 shrink-0" />
                           {pro}
@@ -546,7 +544,7 @@ export default function CompararPage() {
                   <div>
                     <div className="flex items-center gap-1.5 mb-3">
                       <ThumbsDown className="w-3.5 h-3.5 text-red-400" />
-                      <h4 className="text-xs font-semibold text-red-400 uppercase tracking-wider">
+                      <h4 className="text-xs font-semibold text-red-500 dark:text-red-400 uppercase tracking-wider">
                         Desventajas
                       </h4>
                     </div>
@@ -554,7 +552,7 @@ export default function CompararPage() {
                       {engine.contras.map((contra, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-sm text-gray-300"
+                          className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300"
                         >
                           <MinusCircle className="w-3.5 h-3.5 text-red-500/70 mt-0.5 shrink-0" />
                           {contra}
@@ -566,12 +564,12 @@ export default function CompararPage() {
                   {/* Best use case */}
                   <div>
                     <div className="flex items-center gap-1.5 mb-3">
-                      <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-                      <h4 className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
+                      <Lightbulb className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                      <h4 className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
                         Mejor uso
                       </h4>
                     </div>
-                    <p className="text-sm text-gray-400 leading-relaxed">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                       {engine.mejorCaso}
                     </p>
                   </div>
@@ -591,8 +589,8 @@ export default function CompararPage() {
             {/* Overall scores */}
             <div className="glass-card rounded-xl p-6">
               <div className="flex items-center gap-2 mb-6">
-                <BarChart3 className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-lg font-bold text-white">
+                <BarChart3 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   Puntuaciones Comparativas
                 </h3>
               </div>
@@ -600,7 +598,7 @@ export default function CompararPage() {
               <div className="space-y-8">
                 {scoreLabels.map((scoreLabel) => (
                   <div key={scoreLabel.key}>
-                    <h4 className="text-sm font-medium text-gray-300 mb-3">
+                    <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">
                       {scoreLabel.label}
                     </h4>
                     <div className="space-y-2.5">
@@ -628,8 +626,8 @@ export default function CompararPage() {
             {/* Summary card */}
             <div className="glass-card rounded-xl p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Lightbulb className="w-5 h-5 text-amber-400" />
-                <h3 className="text-lg font-bold text-white">
+                <Lightbulb className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   Resumen de Recomendaciones
                 </h3>
               </div>
@@ -653,11 +651,11 @@ export default function CompararPage() {
                         >
                           {engine.name}
                         </span>
-                        <span className="text-lg font-bold text-white">
+                        <span className="text-lg font-bold text-gray-900 dark:text-white">
                           {avgScore}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 leading-relaxed">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                         {engine.mejorCaso}
                       </p>
                     </div>
@@ -676,9 +674,9 @@ export default function CompararPage() {
           className="mt-12 pb-8 text-center"
         >
           <div className="glass-card rounded-xl p-4">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               Comparación de motores de renderizado —{" "}
-              <span className="text-emerald-400/70">
+              <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 Academia D5 Render
               </span>
             </p>

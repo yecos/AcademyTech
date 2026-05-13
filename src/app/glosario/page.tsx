@@ -17,6 +17,7 @@ import {
   glossaryCategoryLabels,
   type GlossaryCategoryKey,
 } from "@/lib/search-data";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type CategoryKey = "todos" | GlossaryCategoryKey;
 
@@ -31,7 +32,7 @@ const categories: { key: CategoryKey; label: string }[] = [
 ];
 
 const categoryColorsAll: Record<CategoryKey, string> = {
-  todos: "bg-white/10 text-gray-300 border-white/10",
+  todos: "bg-gray-200/60 text-gray-600 dark:bg-white/10 dark:text-gray-300 border-gray-300 dark:border-white/10",
   ...glossaryCategoryColors,
 };
 
@@ -68,7 +69,7 @@ export default function GlosarioPage() {
   }, [filteredTerms, activeCategory]);
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Background decorative elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -77,22 +78,19 @@ export default function GlosarioPage() {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Back button */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/")}
-            className="text-gray-400 hover:text-white hover:bg-white/5 mb-6 gap-1.5"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-        </motion.div>
+          <ThemeToggle />
+        </div>
 
         {/* Header */}
         <motion.header
@@ -103,16 +101,16 @@ export default function GlosarioPage() {
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <BookOpen className="w-5 h-5 text-emerald-400" />
+              <BookOpen className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                 Glosario{" "}
-                <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
                   D5 Render
                 </span>
               </h1>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {glossaryTerms.length} términos de renderizado 3D y D5 Render
               </p>
             </div>
@@ -127,18 +125,18 @@ export default function GlosarioPage() {
           className="mb-6"
         >
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar término..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
+              className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -160,8 +158,8 @@ export default function GlosarioPage() {
                 onClick={() => setActiveCategory(cat.key)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border ${
                   activeCategory === cat.key
-                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                    : "bg-white/3 text-gray-400 border-white/8 hover:bg-white/6 hover:text-gray-300"
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    : "bg-gray-100 dark:bg-white/3 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
                 {cat.label}
@@ -186,11 +184,11 @@ export default function GlosarioPage() {
           >
             {filteredTerms.length === 0 ? (
               <div className="glass-card rounded-xl p-8 text-center">
-                <Search className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-white mb-1">
+                <Search className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
                   Sin resultados
                 </h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   No se encontraron términos que coincidan con tu búsqueda.
                 </p>
               </div>
@@ -204,8 +202,8 @@ export default function GlosarioPage() {
                       >
                         {categoryLabelsAll[category as CategoryKey]}
                       </Badge>
-                      <div className="flex-1 h-px bg-white/5" />
-                      <span className="text-xs text-gray-500">
+                      <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
+                      <span className="text-xs text-gray-400 dark:text-gray-500">
                         {terms.length} términos
                       </span>
                     </div>
@@ -222,7 +220,7 @@ export default function GlosarioPage() {
                           className="glass-card glass-card-hover rounded-xl p-4 transition-all duration-300"
                         >
                           <div className="flex items-start justify-between gap-2 mb-2">
-                            <h3 className="text-sm font-semibold text-white">
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                               {item.term}
                             </h3>
                             <Badge
@@ -231,7 +229,7 @@ export default function GlosarioPage() {
                               {categoryLabelsAll[item.category as CategoryKey]}
                             </Badge>
                           </div>
-                          <p className="text-xs text-gray-400 leading-relaxed">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                             {item.definition}
                           </p>
                         </motion.div>
@@ -252,9 +250,9 @@ export default function GlosarioPage() {
           className="mt-12 pb-8 text-center"
         >
           <div className="glass-card rounded-xl p-4">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               Glosario de la Academia D5 Render —{" "}
-              <span className="text-emerald-400/70">
+              <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {glossaryTerms.length} términos definidos
               </span>
             </p>

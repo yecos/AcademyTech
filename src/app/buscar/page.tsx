@@ -29,6 +29,7 @@ import {
   type TroubleshootingCategoryKey,
   type Severity,
 } from "@/lib/search-data";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // ============================================================
 // Types
@@ -69,9 +70,9 @@ interface TroubleshootingResult {
 // ============================================================
 
 const difficultyColors: Record<string, string> = {
-  basico: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-  intermedio: "bg-amber-500/15 text-amber-400 border-amber-500/20",
-  avanzado: "bg-rose-500/15 text-rose-400 border-rose-500/20",
+  basico: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+  intermedio: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20",
+  avanzado: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/20",
 };
 
 const difficultyLabels: Record<string, string> = {
@@ -114,7 +115,7 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
       parts.push(text.slice(lastIndex, idx));
     }
     parts.push(
-      <mark key={idx} className="bg-emerald-500/25 text-emerald-300 rounded px-0.5">
+      <mark key={idx} className="bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 rounded px-0.5">
         {text.slice(idx, idx + query.length)}
       </mark>
     );
@@ -291,7 +292,7 @@ function BuscarContent() {
   const hasQuery = debouncedQuery.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Background decorative elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -300,22 +301,19 @@ function BuscarContent() {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Back button */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/")}
-            className="text-gray-400 hover:text-white hover:bg-white/5 mb-6 gap-1.5"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-        </motion.div>
+          <ThemeToggle />
+        </div>
 
         {/* Header */}
         <motion.header
@@ -326,16 +324,16 @@ function BuscarContent() {
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <Search className="w-5 h-5 text-emerald-400" />
+              <Search className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                 Buscar{" "}
-                <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
                   D5 Render
                 </span>
               </h1>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Busca temas, términos del glosario y soluciones
               </p>
             </div>
@@ -350,14 +348,14 @@ function BuscarContent() {
           className="mb-8"
         >
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               ref={inputRef}
               type="text"
               placeholder="Buscar temas, términos, soluciones..."
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              className="w-full pl-12 pr-12 py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-500 text-base focus:outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+              className="w-full pl-12 pr-12 py-4 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-base focus:outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/20 transition-all"
             />
             {query && (
               <button
@@ -366,7 +364,7 @@ function BuscarContent() {
                   setDebouncedQuery("");
                   inputRef.current?.focus();
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -390,24 +388,24 @@ function BuscarContent() {
                 animate={{ opacity: 1 }}
                 className="glass-card rounded-xl p-10 text-center"
               >
-                <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">
+                <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   Busca en toda la academia
                 </h3>
-                <p className="text-sm text-gray-400 max-w-md mx-auto">
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
                   Escribe para buscar en los 60 temas del curso, {glossaryTerms.length} términos
                   del glosario y {troubleshootingItems.length} soluciones de problemas.
                 </p>
                 <div className="flex items-center justify-center gap-4 mt-6">
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                     <FileText className="w-3.5 h-3.5" />
                     <span>Temas</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                     <BookOpen className="w-3.5 h-3.5" />
                     <span>Glosario</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                     <AlertTriangle className="w-3.5 h-3.5" />
                     <span>Soluciones</span>
                   </div>
@@ -420,11 +418,11 @@ function BuscarContent() {
                 animate={{ opacity: 1 }}
                 className="glass-card rounded-xl p-10 text-center"
               >
-                <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">
+                <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   No se encontraron resultados
                 </h3>
-                <p className="text-sm text-gray-400 max-w-md mx-auto mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-4">
                   No hay coincidencias para &quot;{debouncedQuery}&quot;.
                   Intenta con otros términos o revisa la ortografía.
                 </p>
@@ -437,7 +435,7 @@ function BuscarContent() {
                           setQuery(suggestion);
                           setDebouncedQuery(suggestion);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/8 text-xs text-gray-400 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/20 transition-all"
+                        className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/8 text-xs text-gray-500 dark:text-gray-400 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-500/20 transition-all"
                       >
                         {suggestion}
                       </button>
@@ -450,24 +448,24 @@ function BuscarContent() {
               <div className="space-y-8">
                 {/* Result counts summary */}
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     {totalResults} resultado{totalResults !== 1 ? "s" : ""}
                   </span>
                   <div className="flex items-center gap-2">
                     {results.topics.length > 0 && (
-                      <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 text-xs">
+                      <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs">
                         <FileText className="w-3 h-3 mr-1" />
                         {results.topics.length} tema{results.topics.length !== 1 ? "s" : ""}
                       </Badge>
                     )}
                     {results.glossary.length > 0 && (
-                      <Badge className="bg-violet-500/15 text-violet-400 border-violet-500/20 text-xs">
+                      <Badge className="bg-violet-500/15 text-violet-600 dark:text-violet-400 border-violet-500/20 text-xs">
                         <BookOpen className="w-3 h-3 mr-1" />
                         {results.glossary.length} glosario{results.glossary.length !== 1 ? "s" : ""}
                       </Badge>
                     )}
                     {results.solutions.length > 0 && (
-                      <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/20 text-xs">
+                      <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs">
                         <AlertTriangle className="w-3 h-3 mr-1" />
                         {results.solutions.length} solución{results.solutions.length !== 1 ? "es" : ""}
                       </Badge>
@@ -479,14 +477,14 @@ function BuscarContent() {
                 {results.topics.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-4">
-                      <FileText className="w-4 h-4 text-emerald-400" />
-                      <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
+                      <FileText className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                      <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
                         Temas
                       </h2>
-                      <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 text-xs">
+                      <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs">
                         {results.topics.length}
                       </Badge>
-                      <div className="flex-1 h-px bg-white/5" />
+                      <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
                     </div>
                     <div className="grid gap-3">
                       {results.topics.map((topic, index) => (
@@ -503,12 +501,12 @@ function BuscarContent() {
                           className="glass-card glass-card-hover rounded-xl p-4 cursor-pointer transition-all duration-300"
                         >
                           <div className="flex items-start gap-3">
-                            <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-xs font-bold text-emerald-400">
+                            <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
                               {topic.moduleNumber}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap mb-1">
-                                <h3 className="text-sm font-semibold text-white truncate">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                                   <HighlightedText text={topic.topicName} query={debouncedQuery} />
                                 </h3>
                                 <Badge
@@ -517,7 +515,7 @@ function BuscarContent() {
                                   {difficultyLabels[topic.difficulty]}
                                 </Badge>
                               </div>
-                              <div className="flex items-center gap-3 mb-2 text-xs text-gray-500">
+                              <div className="flex items-center gap-3 mb-2 text-xs text-gray-400 dark:text-gray-500">
                                 <span>Módulo {topic.moduleNumber}: {topic.moduleTitle}</span>
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
@@ -525,7 +523,7 @@ function BuscarContent() {
                                 </span>
                               </div>
                               {topic.snippet && (
-                                <p className="text-xs text-gray-400 line-clamp-2">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                                   <HighlightedText text={topic.snippet} query={debouncedQuery} />
                                 </p>
                               )}
@@ -541,14 +539,14 @@ function BuscarContent() {
                 {results.glossary.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-4">
-                      <BookOpen className="w-4 h-4 text-violet-400" />
-                      <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
+                      <BookOpen className="w-4 h-4 text-violet-500 dark:text-violet-400" />
+                      <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
                         Glosario
                       </h2>
-                      <Badge className="bg-violet-500/15 text-violet-400 border-violet-500/20 text-xs">
+                      <Badge className="bg-violet-500/15 text-violet-600 dark:text-violet-400 border-violet-500/20 text-xs">
                         {results.glossary.length}
                       </Badge>
-                      <div className="flex-1 h-px bg-white/5" />
+                      <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {results.glossary.map((item, index) => (
@@ -561,7 +559,7 @@ function BuscarContent() {
                           className="glass-card glass-card-hover rounded-xl p-4 cursor-pointer transition-all duration-300"
                         >
                           <div className="flex items-start justify-between gap-2 mb-2">
-                            <h3 className="text-sm font-semibold text-white">
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                               <HighlightedText text={item.term} query={debouncedQuery} />
                             </h3>
                             <Badge
@@ -570,7 +568,7 @@ function BuscarContent() {
                               {glossaryCategoryLabels[item.category]}
                             </Badge>
                           </div>
-                          <p className="text-xs text-gray-400 line-clamp-3">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-3">
                             <HighlightedText text={item.snippet} query={debouncedQuery} />
                           </p>
                         </motion.div>
@@ -583,14 +581,14 @@ function BuscarContent() {
                 {results.solutions.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-4">
-                      <AlertTriangle className="w-4 h-4 text-amber-400" />
-                      <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                      <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
                         Soluciones
                       </h2>
-                      <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/20 text-xs">
+                      <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs">
                         {results.solutions.length}
                       </Badge>
-                      <div className="flex-1 h-px bg-white/5" />
+                      <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
                     </div>
                     <div className="grid gap-3">
                       {results.solutions.map((item, index) => (
@@ -610,7 +608,7 @@ function BuscarContent() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap mb-1">
-                                <h3 className="text-sm font-semibold text-white">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                                   <HighlightedText text={item.title} query={debouncedQuery} />
                                 </h3>
                                 <Badge
@@ -624,7 +622,7 @@ function BuscarContent() {
                                   {troubleshootingCategoryLabels[item.category]}
                                 </Badge>
                               </div>
-                              <p className="text-xs text-gray-400 line-clamp-2">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                                 <HighlightedText text={item.snippet} query={debouncedQuery} />
                               </p>
                             </div>
@@ -647,9 +645,9 @@ function BuscarContent() {
           className="mt-12 pb-8 text-center"
         >
           <div className="glass-card rounded-xl p-4">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               Búsqueda de la Academia D5 Render —{" "}
-              <span className="text-emerald-400/70">
+              <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 60 temas · {glossaryTerms.length} términos · {troubleshootingItems.length} soluciones
               </span>
             </p>
@@ -666,14 +664,14 @@ function BuscarContent() {
 
 function BuscarFallback() {
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
         <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
       </div>
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
         <div className="flex items-center justify-center py-20">
-          <div className="animate-pulse flex items-center gap-2 text-gray-500">
+          <div className="animate-pulse flex items-center gap-2 text-gray-400">
             <Search className="w-5 h-5" />
             <span className="text-sm">Cargando búsqueda...</span>
           </div>

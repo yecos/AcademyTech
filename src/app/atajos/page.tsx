@@ -9,6 +9,7 @@ import {
   Keyboard,
   Command,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Shortcut {
   keys: string[];
@@ -84,7 +85,7 @@ const shortcutCategories: ShortcutCategory[] = [
 
 function KeyCap({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-md bg-white/8 border border-white/15 border-b-2 border-b-white/20 text-[11px] font-mono font-medium text-gray-200 shadow-sm select-none">
+    <kbd className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-md bg-gray-200 dark:bg-white/8 border border-gray-300 dark:border-white/15 border-b-2 border-b-gray-400 dark:border-b-white/20 text-[11px] font-mono font-medium text-gray-700 dark:text-gray-200 shadow-sm select-none">
       {children}
     </kbd>
   );
@@ -97,7 +98,7 @@ function KeyCombo({ keys }: { keys: string[] }) {
         <span key={i} className="flex items-center gap-1">
           <KeyCap>{key}</KeyCap>
           {i < keys.length - 1 && (
-            <span className="text-gray-500 text-xs">+</span>
+            <span className="text-gray-400 dark:text-gray-500 text-xs">+</span>
           )}
         </span>
       ))}
@@ -109,7 +110,7 @@ export default function AtajosPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Background decorative elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -118,22 +119,19 @@ export default function AtajosPage() {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Back button */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/")}
-            className="text-gray-400 hover:text-white hover:bg-white/5 mb-6 gap-1.5"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Button>
-        </motion.div>
+          <ThemeToggle />
+        </div>
 
         {/* Header */}
         <motion.header
@@ -144,16 +142,16 @@ export default function AtajosPage() {
         >
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <Keyboard className="w-5 h-5 text-emerald-400" />
+              <Keyboard className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                 Atajos de{" "}
-                <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
                   Teclado
                 </span>
               </h1>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Referencia rápida de los atajos de D5 Render
               </p>
             </div>
@@ -172,13 +170,13 @@ export default function AtajosPage() {
               {/* Category header */}
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-lg">{category.icon}</span>
-                <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
                   {category.title}
                 </h2>
-                <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 text-[10px] px-1.5">
+                <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] px-1.5">
                   {category.shortcuts.length}
                 </Badge>
-                <div className="flex-1 h-px bg-white/5" />
+                <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
               </div>
 
               {/* Shortcuts grid */}
@@ -194,7 +192,7 @@ export default function AtajosPage() {
                     }}
                     className="glass-card glass-card-hover rounded-lg px-4 py-3 flex items-center justify-between gap-3 transition-all duration-200"
                   >
-                    <span className="text-sm text-gray-300 min-w-0">
+                    <span className="text-sm text-gray-600 dark:text-gray-300 min-w-0">
                       {shortcut.description}
                     </span>
                     <KeyCombo keys={shortcut.keys} />
@@ -213,16 +211,16 @@ export default function AtajosPage() {
           className="mt-10 glass-card rounded-xl p-5 border-emerald-500/10"
         >
           <div className="flex items-start gap-3">
-            <Command className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+            <Command className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-semibold text-white mb-1">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
                 Consejo
               </h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                 Los atajos de teclado pueden variar según la versión de D5 Render y tu
                 configuración regional. Algunos atajos solo están disponibles cuando la
                 ventana del viewport está activa. Personaliza tus atajos en{" "}
-                <span className="text-emerald-400/80">
+                <span className="text-emerald-600 dark:text-emerald-400/80">
                   Configuración → Atajos de teclado
                 </span>{" "}
                 para adaptarlos a tu flujo de trabajo.
@@ -239,9 +237,9 @@ export default function AtajosPage() {
           className="mt-10 pb-8 text-center"
         >
           <div className="glass-card rounded-xl p-4">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               Atajos de la Academia D5 Render —{" "}
-              <span className="text-emerald-400/70">
+              <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {shortcutCategories.reduce(
                   (acc, cat) => acc + cat.shortcuts.length,
                   0
