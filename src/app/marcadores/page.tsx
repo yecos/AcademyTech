@@ -58,7 +58,7 @@ export default function MarcadoresPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/curso/d5-render")}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -111,7 +111,7 @@ export default function MarcadoresPage() {
                 Añade marcadores a los temas que te interesen para acceder a ellos rápidamente. Haz clic en el icono de marcador en cualquier tema.
               </p>
               <Button
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/curso/d5-render")}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
               >
                 <Home className="w-4 h-4" />
@@ -217,7 +217,7 @@ export default function MarcadoresPage() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Marcadores de la Academia D5 Render —{" "}
+              Marcadores — Render Academy —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {bookmarkedTopics.length} tema{bookmarkedTopics.length !== 1 ? "s" : ""} guardado{bookmarkedTopics.length !== 1 ? "s" : ""}
               </span>

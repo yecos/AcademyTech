@@ -344,7 +344,7 @@ export default function CompararPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/curso/d5-render")}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -681,7 +681,7 @@ export default function CompararPage() {
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Comparación de motores de renderizado —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
-                Academia D5 Render
+                Render Academy
               </span>
             </p>
           </div>

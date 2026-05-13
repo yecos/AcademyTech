@@ -17,16 +17,16 @@ import {
   ChevronRight,
   Clock,
   Eye,
+  Home,
   Lightbulb,
   ListChecks,
   PenLine,
   Target,
   ExternalLink,
-  Home,
 } from "lucide-react";
 import { modules } from "@/lib/curriculum";
 import { getTopicContent } from "@/lib/topic-content";
-import { useCourse } from "@/hooks/use-course-context";
+import { useCourse, useCourseSlug } from "@/hooks/use-course-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
@@ -88,6 +88,10 @@ export default function TopicPage() {
   const router = useRouter();
   const moduleId = params.moduleId as string;
   const topicIndex = parseInt(params.topicId as string, 10);
+  const courseSlug = useCourseSlug();
+
+  // Build course URL prefix based on slug
+  const courseUrl = `/curso/${courseSlug}`;
 
   const moduleData = modules.find((m) => m.id === moduleId);
   const content = getTopicContent(moduleId, topicIndex);
@@ -142,6 +146,13 @@ export default function TopicPage() {
             >
               <Home className="w-3.5 h-3.5" />
               Inicio
+            </button>
+            <ChevronRight className="w-3 h-3" />
+            <button
+              onClick={() => router.push(courseUrl)}
+              className="hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
+            >
+              {courseSlug === "d5-render" ? "D5 Render" : courseSlug}
             </button>
             <ChevronRight className="w-3 h-3" />
             <span className="text-gray-400 dark:text-gray-500">Módulo {moduleData.number}</span>
@@ -422,11 +433,11 @@ export default function TopicPage() {
           ) : (
             <Button
               variant="outline"
-              onClick={() => router.push("/")}
+              onClick={() => router.push(courseUrl)}
               className="border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white gap-2"
             >
               <Home className="w-4 h-4" />
-              Inicio
+              Curso
             </Button>
           )}
 
@@ -457,7 +468,7 @@ export default function TopicPage() {
             </Button>
           ) : (
             <Button
-              onClick={() => router.push("/")}
+              onClick={() => router.push(courseUrl)}
               className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
             >
               Finalizar

@@ -19,9 +19,10 @@ import {
   GitCompare,
   Trophy,
   Flame,
+  ArrowLeft,
 } from "lucide-react";
 import { modules, Module } from "@/lib/curriculum";
-import { useCourse } from "@/hooks/use-course-context";
+import { useCourse, useCourseSlug } from "@/hooks/use-course-context";
 import { ProgressOverview } from "@/components/progress-overview";
 import { ModuleCard } from "@/components/module-card";
 import { QuizDialog } from "@/components/quiz-dialog";
@@ -41,14 +42,28 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+// Map slugs to display names
+const courseNames: Record<string, string> = {
+  "d5-render": "D5 Render",
+};
+
+// Map slugs to descriptions
+const courseDescriptions: Record<string, string> = {
+  "d5-render": "Sigue tu progreso a través del curso completo de D5 Render. Completa los temas y evalúa tus conocimientos con las evaluaciones de cada módulo.",
+};
+
 export function StudyApp() {
   const [quizModule, setQuizModule] = useState<Module | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const course = useCourse();
+  const courseSlug = useCourseSlug();
   const resetAll = course.resetAll;
   const overallProgress = course.getOverallProgress();
   const currentStreak = course.streak.current;
   const unlockedCount = course.getUnlockedCount();
+
+  const courseName = courseNames[courseSlug] || courseSlug;
+  const courseDescription = courseDescriptions[courseSlug] || "Sigue tu progreso y completa los temas del curso.";
 
   // Initialize achievement checker (runs streak check + achievement checks + toasts)
   useAchievementChecker();
@@ -83,9 +98,20 @@ export function StudyApp() {
           className="text-center mb-10"
         >
           {/* Theme toggle + User menu - top right */}
-          <div className="flex justify-end items-center gap-2 mb-2">
-            <UserMenu />
-            <ThemeToggle />
+          <div className="flex justify-between items-center mb-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
+            >
+              <ArrowLeft className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+              <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400">
+                Cursos
+              </span>
+            </Link>
+            <div className="flex items-center gap-2">
+              <UserMenu />
+              <ThemeToggle />
+            </div>
           </div>
 
           <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
@@ -180,7 +206,7 @@ export function StudyApp() {
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight flex items-center justify-center gap-3">
             Academia{" "}
             <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
-              D5 Render
+              {courseName}
             </span>
             {currentStreak > 0 && (
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-sm">
@@ -190,9 +216,7 @@ export function StudyApp() {
             )}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-            Sigue tu progreso a través del curso completo de D5 Render.
-            Completa los temas y evalúa tus conocimientos con las evaluaciones
-            de cada módulo.
+            {courseDescription}
           </p>
         </motion.header>
 
@@ -237,7 +261,7 @@ export function StudyApp() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10">
+                  <AlertDialogCancel className="bg-gray-100 dark:bg-white/05 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10">
                     Cancelar
                   </AlertDialogCancel>
                   <AlertDialogAction
@@ -278,7 +302,7 @@ export function StudyApp() {
                   ¡Felicidades! 🎉
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Has completado todos los temas del curso de D5 Render.
+                  Has completado todos los temas del curso de {courseName}.
                   ¡Ahora eres un experto!
                 </p>
                 <Link href="/certificado">
@@ -296,7 +320,7 @@ export function StudyApp() {
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Completa los temas y evaluaciones de cada módulo para avanzar
-                  en tu formación en D5 Render.
+                  en tu formación en {courseName}.
                 </p>
               </div>
             )}

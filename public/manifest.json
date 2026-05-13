@@ -1,7 +1,7 @@
 {
-  "name": "Academia D5 Render",
-  "short_name": "D5 Academy",
-  "description": "Plan de estudio interactivo para aprender D5 Render",
+  "name": "Render Academy",
+  "short_name": "Render Academy",
+  "description": "Plataforma de aprendizaje para herramientas de renderizado 3D",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090b",

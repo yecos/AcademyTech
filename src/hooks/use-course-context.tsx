@@ -5,13 +5,25 @@ import { useCourseData, CourseData } from "@/hooks/use-course-data";
 
 const CourseDataContext = createContext<CourseData | null>(null);
 
-export function CourseDataProvider({ children }: { children: ReactNode }) {
-  const courseData = useCourseData();
+// Separate context for the course slug so it can be set from child components
+const CourseSlugContext = createContext<string>("d5-render");
+
+export function CourseDataProvider({
+  children,
+  courseSlug,
+}: {
+  children: ReactNode;
+  courseSlug?: string;
+}) {
+  const effectiveSlug = courseSlug || "d5-render";
+  const courseData = useCourseData(effectiveSlug);
 
   return (
-    <CourseDataContext.Provider value={courseData}>
-      {children}
-    </CourseDataContext.Provider>
+    <CourseSlugContext.Provider value={effectiveSlug}>
+      <CourseDataContext.Provider value={courseData}>
+        {children}
+      </CourseDataContext.Provider>
+    </CourseSlugContext.Provider>
   );
 }
 
@@ -21,4 +33,8 @@ export function useCourse(): CourseData {
     throw new Error("useCourse must be used within a CourseDataProvider");
   }
   return context;
+}
+
+export function useCourseSlug(): string {
+  return useContext(CourseSlugContext);
 }

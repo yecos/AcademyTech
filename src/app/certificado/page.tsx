@@ -101,7 +101,7 @@ export default function CertificadoPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/curso/d5-render")}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -182,7 +182,7 @@ export default function CertificadoPage() {
               </div>
 
               <Button
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/curso/d5-render")}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
               >
                 <BookOpen className="w-4 h-4" />
@@ -329,7 +329,7 @@ export default function CertificadoPage() {
                   {/* Signature line */}
                   <div className="pt-2">
                     <p className="text-xs text-gray-500">
-                      Academia D5 Render — Programa de Formación en
+                      Academia 3D — Programa de Formación en
                       Visualización Arquitectónica
                     </p>
                   </div>

@@ -125,7 +125,7 @@ export default function AtajosPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/curso/d5-render")}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -242,7 +242,7 @@ export default function AtajosPage() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Atajos de la Academia D5 Render —{" "}
+              Atajos — Render Academy —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {shortcutCategories.reduce(
                   (acc, cat) => acc + cat.shortcuts.length,

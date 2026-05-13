@@ -99,19 +99,19 @@ export default function LoginPage() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
               <span className="text-xs font-medium text-emerald-400">
-                Plan de Estudio Interactivo
+                Plataforma de Aprendizaje 3D
               </span>
             </div>
 
             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
-              Academia{" "}
+              Render{" "}
               <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
-                D5 Render
+                Academy
               </span>
             </h1>
             <p className="text-sm text-gray-400 max-w-xs mx-auto leading-relaxed">
               Inicia sesión para guardar tu progreso, notas y evaluaciones
-              a través del curso completo.
+              en todos tus cursos.
             </p>
           </motion.div>
 

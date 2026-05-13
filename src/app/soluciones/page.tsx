@@ -134,7 +134,7 @@ export default function SolucionesPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/curso/d5-render")}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -444,7 +444,7 @@ export default function SolucionesPage() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Soluciones de la Academia D5 Render —{" "}
+              Soluciones — Render Academy —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {troubleshootingItems.length} problemas documentados
               </span>

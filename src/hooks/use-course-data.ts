@@ -44,17 +44,17 @@ function makeKey(moduleId: string, topicIndex: number): string {
   return `${moduleId}-${topicIndex}`;
 }
 
-// Global cache for course DB ID
-let cachedCourseId: string | null = null;
+// Global cache for course DB ID by slug
+const cachedCourseIds: Record<string, string> = {};
 
-async function getCourseId(): Promise<string | null> {
-  if (cachedCourseId) return cachedCourseId;
+async function getCourseId(slug: string): Promise<string | null> {
+  if (cachedCourseIds[slug]) return cachedCourseIds[slug];
   try {
-    const res = await fetch("/api/course?slug=d5-render");
+    const res = await fetch(`/api/course?slug=${slug}`);
     if (res.ok) {
       const data = await res.json();
-      cachedCourseId = data.id;
-      return cachedCourseId;
+      cachedCourseIds[slug] = data.id;
+      return cachedCourseIds[slug];
     }
   } catch {
     // ignore
@@ -62,7 +62,7 @@ async function getCourseId(): Promise<string | null> {
   return null;
 }
 
-export function useCourseData(): CourseData {
+export function useCourseData(courseSlug: string = "d5-render"): CourseData {
   const { status } = useSession();
   const isAuthenticated = status === "authenticated";
   const store = useStudyStore();
@@ -94,7 +94,7 @@ export function useCourseData(): CourseData {
   const loadCourseData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const courseId = await getCourseId();
+      const courseId = await getCourseId(courseSlug);
       if (!courseId) {
         setIsLoading(false);
         return;
@@ -122,7 +122,7 @@ export function useCourseData(): CourseData {
       console.error("Failed to load course data:", error);
     }
     setIsLoading(false);
-  }, []);
+  }, [courseSlug]);
 
   // Fetch all course data on mount for authenticated users
   useEffect(() => {
@@ -359,7 +359,7 @@ export function useCourseData(): CourseData {
   const resetAll = useCallback(async () => {
     if (isAuthenticated) {
       try {
-        const courseId = await getCourseId();
+        const courseId = await getCourseId(courseSlug);
         if (courseId) {
           await fetch("/api/reset", {
             method: "POST",
@@ -382,7 +382,7 @@ export function useCourseData(): CourseData {
     } else {
       store.resetAll();
     }
-  }, [isAuthenticated, store]);
+  }, [isAuthenticated, store, courseSlug]);
 
   // --- Computed helpers ---
   const isTopicCompleted = useCallback((moduleId: string, topicIndex: number): boolean => {
