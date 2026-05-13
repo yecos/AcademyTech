@@ -995,4 +995,661 @@ Para proyectos en el hemisferio norte, el sol se mueve de este a oeste pasando p
   ],
 });
 
+// ============================================================
+// MÓDULO 4: Materiales y Texturas
+// ============================================================
+
+register({
+  moduleId: "modulo-4",
+  topicIndex: 0,
+  title: "Editor de materiales: interfaz y propiedades",
+  objective: "Dominar la interfaz del editor de materiales de D5 Render, conocer todas las propiedades disponibles y entender cómo afectan al aspecto visual del material.",
+  explanation: `El editor de materiales es una de las herramientas más importantes de D5 Render, ya que la calidad de los materiales es frecuentemente lo que diferencia un render mediocre de uno fotorrealista. D5 Render utiliza un sistema de materiales PBR (Physically Based Rendering) que simula cómo la luz interactúa con las superficies reales, produciendo resultados convincentes bajo cualquier condición de iluminación.
+
+Para abrir el editor de materiales, selecciona cualquier objeto en la escena y ve al panel de Propiedades a la derecha. Haz clic en la pestaña de Material. Aquí encontrarás todos los parámetros que controlan el aspecto visual de la superficie del objeto.
+
+La propiedad más fundamental es el Color Base (Base Color o Albedo). Este define el color intrínseco del material sin la influencia de la iluminación o las reflexiones. Puede ser un color sólido o un mapa de textura. Es importante entender que el color base debe representar solo el color del material, no la sombra ni el reflejo, ya que el motor de renderizado se encarga de calcular esos efectos por separado.
+
+La Rugosidad (Roughness) controla qué tan mate o pulida es una superficie. Un valor de 0 produce una superficie perfectamente lisa y reflectante (como un espejo), mientras que un valor de 1 produce una superficie completamente mate (como tiza o concreto sin pulir). La rugosidad afecta directamente cómo se difuminan las reflexiones: superficies rugosas producen reflexiones borrosas, superficies lisas producen reflexiones nítidas.
+
+La Metalicidad (Metallic) es un valor binario en la vida real: un material es metálico o no lo es. Los metales tienen un comportamiento diferente a los no metales: su color base define tanto el color de la superficie como el color de las reflexiones. En D5 Render, el deslizador va de 0 a 1, pero para la mayoría de los materiales deberías usar valores extremos (0 para no metales, 1 para metales puros) ya que valores intermedios raramente existen en la naturaleza.
+
+La Opacidad controla la transparencia del material. Un valor de 1 es completamente opaco, 0 es completamente invisible. Para materiales de vidrio, se usa una combinación de opacidad parcial con transmisión en lugar de solo opacidad, ya que el vidrio real no es simplemente transparente sino que también transmite y refracta la luz.
+
+Otros parámetros importantes incluyen: el Índice de Refracción (IOR) para materiales translúcidos como vidrio y agua, la Transmisión para materiales que dejan pasar la luz (vidrio, plásticos translúcidos), y el mapa Normal que añade detalles superficiales sin modificar la geometría.`,
+  keyPoints: [
+    "Color Base: color intrínseco del material sin iluminación ni reflexiones",
+    "Rugosidad: 0 = espejo perfecto, 1 = superficie completamente mate",
+    "Metalicidad: 0 = no metálico, 1 = metálico (usar valores extremos)",
+    "Opacidad: 1 = opaco, 0 = invisible (para vidrio usar transmisión)",
+    "Mapa Normal: añade detalle superficial sin alterar la geometría",
+    "IOR (Índice de Refracción): crítico para vidrio y agua",
+  ],
+  steps: [
+    {
+      title: "Seleccionar un objeto y abrir el editor de materiales",
+      description: "Haz clic en cualquier objeto de la escena y ve al panel de Propiedades > Material. Familiarízate con la disposición de los controles: cada propiedad tiene un deslizador y un selector de color/textura.",
+    },
+    {
+      title: "Experimentar con el Color Base",
+      description: "Cambia el color base de un material y observa cómo cambia el aspecto del objeto. Nota que el color base no afecta las reflexiones ni las sombras, solo el color intrínseco de la superficie.",
+    },
+    {
+      title: "Ajustar la Rugosidad",
+      description: "Con un material metálico seleccionado, mueve el deslizador de Rugosidad de 0 a 1. Observa cómo las reflexiones pasan de nítidas (espejo) a completamente difuminadas (metal mate). Prueba valores intermedios para metales cepillados o satinados.",
+      tip: "La mayoría de los metales arquitectónicos tienen rugosidad entre 0.2 y 0.5, raramente 0 (espejo perfecto).",
+    },
+    {
+      title: "Probar la Metalicidad",
+      description: "Con un material de color gris, alterna la metalicidad entre 0 y 1. Observa cómo el mismo color base produce resultados completamente diferentes: no metálico = superficie pintada, metálico = superficie de metal.",
+    },
+    {
+      title: "Explorar parámetros avanzados",
+      description: "Revisa las secciones de Transmisión, IOR, y mapa Normal. No necesitas dominarlos ahora, pero saber que existen te ayudará cuando los necesites en proyectos futuros.",
+    },
+  ],
+  practice: "Selecciona 5 objetos diferentes en una escena y personaliza sus materiales desde cero. Para cada uno, ajusta el color base, rugosidad y metalicidad hasta obtener un resultado convincente. Documenta los valores utilizados.",
+  extraResources: [
+    { label: "Editor de materiales D5 Render", url: "https://www.d5render.com/help/material-editor" },
+    { label: "Guía de materiales PBR", url: "https://learn.microsoft.com/es-es/minecraft/creator/documents/physicallybasedrendering" },
+  ],
+});
+
+register({
+  moduleId: "modulo-4",
+  topicIndex: 1,
+  title: "Tipos de materiales PBR (metálicos, dieléctricos)",
+  objective: "Entender la diferencia fundamental entre materiales metálicos y dieléctricos (no metálicos) en el sistema PBR y cómo configurar cada tipo correctamente.",
+  explanation: `En el sistema de renderizado PBR, todos los materiales del mundo real se dividen en dos categorías fundamentales: metálicos y dieléctricos (no metálicos). Esta distinción es crucial porque cada tipo interactúa con la luz de manera completamente diferente, y configurar incorrectamente esta propiedad es uno de los errores más comunes que hacen que los renders parezcan artificiales.
+
+Los materiales dieléctricos son la categoría más amplia e incluye prácticamente todo lo que no es metal: madera, concreto, ladrillo, plástico, tela, piel, papel, cerámica, piedra, pintura, goma, etc. Su característica principal es que absorben y reflejan la luz de manera difusa: la luz penetra ligeramente en la superficie, interactúa con los pigmentos del material (dándole su color), y luego se emite de nuevo en direcciones aleatorias. Las reflexiones en los dieléctricos son siempre del mismo color (blanco neutro) independientemente del color del material, y son relativamente débiles (alrededor del 4% de la luz se refleja directamente).
+
+Los materiales metálicos tienen un comportamiento radicalmente diferente. Los metales conducten electricidad, lo que significa que su superficie refleja la mayor parte de la luz incidente de manera especular (entre 60-95% dependiendo del tipo de metal). A diferencia de los dieléctricos, los metales NO tienen un componente difuso: la luz no penetra en la superficie, por lo que el color que vemos en un metal proviene enteramente de sus reflexiones coloreadas. El oro refleja luz amarilla/dorada, el cobre refleja luz anaranjada/rojiza, y el aluminio refleja luz blanca/neutra.
+
+En D5 Render, la propiedad Metalicidad controla esta distinción. Un valor de 0 (dieléctrico) significa que el material refleja luz blanca débilmente y tiene un componente difuso fuerte. Un valor de 1 (metálico) significa que el material refleja luz intensamente con el color del color base y no tiene componente difuso.
+
+El error más común es usar valores intermedios de metalicidad (como 0.5) pensando que esto crea un 'semi-metal'. En realidad, los materiales semi-metálicos casi no existen en la naturaleza. Si necesitas un metal oxidado o pintado, debes usar capas o texturas: una capa base de metal con metalicidad 1 y una capa de pintura/óxido con metalicidad 0, usando un mapa de metalicidad que defina qué zonas son metálicas y cuáles no.
+
+Otro error común es hacer que los materiales dieléctricos sean demasiado reflectantes. En la realidad, el concreto fresco, la madera sin tratar y la tela no son reflectantes. Si tus paredes de concreto parecen brillantes, probablemente necesitas aumentar la rugosidad a 0.7-0.9.`,
+  keyPoints: [
+    "Dos categorías PBR: metálicos (metallic=1) y dieléctricos (metallic=0)",
+    "Dieléctricos: reflexiones débiles blancas + componente difuso fuerte (madera, concreto, plástico)",
+    "Metálicos: reflexiones fuertes coloreadas + sin componente difuso (oro, cobre, acero)",
+    "Evitar valores intermedios de metalicidad (0.5) - raramente existen en la naturaleza",
+    "Metales oxidados/pintados: usar mapa de metalicidad con zonas 0 y 1",
+    "Dieléctricos demasiado reflectantes son un error común - subir rugosidad",
+  ],
+  steps: [
+    {
+      title: "Crear un material dieléctrico",
+      description: "Selecciona un objeto y crea un material de concreto: color base gris claro, metalicidad 0, rugosidad 0.85. Observa cómo la superficie se ve mate con reflexiones mínimas. Este es el comportamiento correcto de un dieléctrico.",
+    },
+    {
+      title: "Crear un material metálico",
+      description: "Selecciona otro objeto y crea un material de acero inoxidable: color base gris claro, metalicidad 1, rugosidad 0.2. Observa cómo las reflexiones son intensas y el color base tiñe las reflexiones.",
+      tip: "Para acero inoxidable realista, usa un color base ligeramente azulado (#D4D4D8) en lugar de gris puro.",
+    },
+    {
+      title: "Comparar con el mismo color base",
+      description: "Usa exactamente el mismo color base para un material dieléctrico y uno metálico. Observa la enorme diferencia visual que produce cambiar solo la metalicidad. Esto demuestra por qué es tan importante configurar correctamente esta propiedad.",
+    },
+    {
+      title: "Crear materiales metálicos de colores",
+      description: "Crea un material de oro (color base dorado #FFD100, metalicidad 1, rugosidad 0.3) y uno de cobre (color base anaranjado #B87333, metalicidad 1, rugosidad 0.35). Observa cómo el color base define el color de las reflexiones metálicas.",
+    },
+  ],
+  practice: "Crea una paleta de 8 materiales PBR correctos: 4 dieléctricos (concreto, madera, plástico blanco, cerámica) y 4 metálicos (acero, oro, cobre, aluminio). Documenta los valores de color base, metalicidad y rugosidad de cada uno.",
+  extraResources: [
+    { label: "Materiales PBR: metálicos vs dieléctricos", url: "https://www.d5render.com/help/pbr-materials" },
+  ],
+});
+
+register({
+  moduleId: "modulo-4",
+  topicIndex: 2,
+  title: "Mapas de textura: difuso, normal, rugosidad, metálico",
+  objective: "Aprender qué es cada mapa de textura PBR, cómo afecta al material y cómo configurarlos correctamente en D5 Render para crear materiales detallados y realistas.",
+  explanation: `Los mapas de textura son imágenes que se aplican a las diferentes propiedades de un material PBR para añadir detalle y variación que sería imposible de lograr con valores uniformes. Mientras que un color sólido da un aspecto plano y uniforme, los mapas de textura permiten simular la variación natural de las superficies reales: las vetas de la madera, las grietas del concreto, las manchas del mármol, etc.
+
+El mapa Difuso (Base Color o Albedo Map) es el mapa más básico y el primero que se aplica. Define el color de cada píxel de la superficie. Cuando ves una textura de ladrillo con ladrillos rojos y mortero gris, estás viendo un mapa difuso. Es importante que el mapa difuso no contenga información de iluminación (sombras, resplandor, reflexiones) ya que el motor de renderizado calcula esos efectos por separado. Un mapa difuso correcto debe verse como la superficie vista con luz plana y uniforme.
+
+El mapa Normal (Normal Map) es quizás el mapa más mágico del sistema PBR. Añade detalle superficial tridimensional sin modificar la geometría del objeto. Funciona alterando la dirección de las normales de la superficie (los vectores que indican hacia dónde apunta cada punto), lo que engaña al motor de renderizado haciéndole creer que hay relieve donde en realidad la superficie es plana. Una textura de ladrillo con mapa normal mostrará ladrillos que parecen sobresalir del muro con sombras en los bordes, pero si miras la geometría de cerca, es completamente plana.
+
+El mapa de Rugosidad (Roughness Map) permite variar la rugosidad de la superficie píxel a píxel. Esto es esencial para materiales que tienen zonas más pulidas y zonas más desgastadas. Por ejemplo, un piso de madera tiene zonas de alto tráfico más pulidas (rugosidad baja) y zonas bajo los muebles más mate (rugosidad alta). El mapa de rugosidad usa escala de grises: blanco = rugoso (mate), negro = liso (reflectante).
+
+El mapa de Metalicidad (Metallic Map) define qué zonas del material son metálicas y cuáles no. Esto es crucial para materiales como metal pintado, metal oxidado o metal con zonas desgastadas donde la pintura se ha caído. El mapa usa escala de grises pero en la práctica solo debe tener valores de 0 (negro, no metálico) o 1 (blanco, metálico), ya que los valores intermedios no existen en materiales reales.
+
+Para aplicar mapas en D5 Render, haz clic en el cuadrado pequeño junto a cada propiedad del material. Esto abre un selector donde puedes elegir un mapa de textura de la biblioteca de D5 Render o importar tu propia imagen. D5 Render soporta los formatos PNG, JPG y TIFF para mapas de textura.
+
+Es importante que todos los mapas de un material tengan la misma resolución y estén alineados correctamente. Si el mapa difuso muestra ladrillos y el mapa normal muestra una textura de concreto, el resultado será incorrecto. Los mapas PBR suelen venir en paquetes coordinados que garantizan la consistencia entre todos los mapas.`,
+  keyPoints: [
+    "Mapa Difuso: color de cada píxel, sin sombras ni reflejos",
+    "Mapa Normal: añade relieve falso sin alterar geometría (el más mágico)",
+    "Mapa Rugosidad: blanco=mate, negro=pulido, variación por píxel",
+    "Mapa Metalicidad: negro=no metálico, blanco=metálico (solo usar 0 o 1)",
+    "Todos los mapas deben estar alineados y tener la misma resolución",
+    "Los paquetes PBR coordinados garantizan consistencia entre mapas",
+  ],
+  steps: [
+    {
+      title: "Aplicar un mapa difuso",
+      description: "Selecciona un muro y abre el editor de materiales. Haz clic en el cuadrado junto a Color Base y elige un mapa de textura de ladrillo de la biblioteca de D5 Render. Observa cómo el muro cambia de un color sólido a una superficie con patrón.",
+    },
+    {
+      title: "Añadir un mapa normal",
+      description: "En el mismo material, haz clic en el cuadrado junto a Normal Map y selecciona el mapa normal correspondiente al ladrillo. Observa cómo aparecen sombras en los bordes de los ladrillos y el mortero parece más profundo. Acércate para ver el efecto en detalle.",
+      tip: "El mapa normal es el que más impacto tiene en el realismo de un material. Siempre que puedas, úsalo.",
+    },
+    {
+      title: "Aplicar un mapa de rugosidad",
+      description: "Añade el mapa de rugosidad correspondiente. Observa cómo las zonas de mortero (más rugosas) se ven más mate y los ladrillos (más lisos) tienen reflexiones más definidas. Este detalle marca la diferencia entre un material plano y uno realista.",
+    },
+    {
+      title: "Añadir un mapa de metalicidad",
+      description: "Busca un material que combine zonas metálicas y no metálicas (como metal pintado desgastado). Aplica el mapa de metalicidad y observa cómo las zonas desgastadas (donde se ve el metal) son reflectantes y las zonas pintadas son mate.",
+    },
+    {
+      title: "Descargar un paquete PBR completo",
+      description: "Ve a una biblioteca de materiales PBR como Poly Haven y descarga un paquete completo de un material (difuso, normal, rugosidad, metalicidad). Impórtalo en D5 Render y configura todos los mapas para ver el resultado final.",
+      tip: "Poly Haven ofrece materiales PBR gratuitos de alta calidad, perfectos para práctica.",
+    },
+  ],
+  practice: "Crea 3 materiales personalizados usando paquetes PBR completos (difuso + normal + rugosidad). Compara el mismo material con y sin mapa normal para ver la diferencia que hace.",
+  extraResources: [
+    { label: "Biblioteca PBR gratuita (Poly Haven)", url: "https://polyhaven.com/textures" },
+    { label: "Mapas PBR en D5 Render", url: "https://www.d5render.com/help/pbr-maps" },
+  ],
+});
+
+register({
+  moduleId: "modulo-4",
+  topicIndex: 3,
+  title: "Vidrio y materiales translúcidos",
+  objective: "Dominar la creación de materiales de vidrio, plásticos translúcidos y otros materiales que transmiten luz, entendiendo los parámetros de transmisión, IOR y absorción.",
+  explanation: `Los materiales translúcidos son de los más desafiantes de configurar correctamente en cualquier motor de renderizado, pero también de los más impactantes visualmente cuando se hacen bien. D5 Render ofrece un sistema de transmisión que simula cómo la luz pasa a través de materiales semitransparentes como vidrio, plástico, agua y telas delgadas.
+
+El material de vidrio es el caso más común. A diferencia de otros materiales, el vidrio no es simplemente 'transparente' — refracta la luz (la dobla al pasar), refleja parte de la luz incidente, y en algunos casos absorbe ciertos colores. En D5 Render, para crear un vidrio realista necesitas configurar varias propiedades: opacidad parcial (o usar el modo de transmisión), índice de refracción (IOR), y opcionalmente color de tintado.
+
+El Índice de Refracción (IOR) es un número que define cuánto se dobla la luz al pasar de un medio a otro. El aire tiene un IOR de 1.0, el vidrio estándar tiene un IOR de aproximadamente 1.5, el agua 1.33, y el diamante 2.42. Este parámetro es crucial porque controla cuánto se distorsiona lo que vemos a través del material. Un IOR incorrecto hará que el vidrio parezca irreal.
+
+La Transmisión controla cuánta luz pasa a través del material. A diferencia de la simple opacidad, la transmisión simula físicamente la refracción y la absorción de la luz. Cuando activas la transmisión en D5 Render, el material calcula el camino de los rayos de luz a través del volumen del objeto, produciendo efectos como la distorsión de las imágenes vistas a través del vidrio y las caústicas (patrones de luz concentrada que el vidrio proyecta en superficies cercanas).
+
+Para vidrio arquitectónico estándar (ventanas), la configuración típica es: transmisión activada con valor alto (0.9-1.0), IOR de 1.5, rugosidad muy baja (0.0-0.05), y sin metalicidad. El color base debe ser blanco o muy ligeramente tintado (el vidrio real tiene un ligero tono verde visible en los bordes).
+
+Para vidrio de colores (vidrio esmerilado, vitrales), simplemente cambia el color base del material. El motor de renderizado se encargará de que la luz transmitida tenga el color correspondiente. La intensidad del color controla cuánta luz se absorbe.
+
+Los materiales translúcidos pero no transparentes (como plástico lechoso, alabastro, papel cebolla) usan un parámetro de subsuperficie o translucencia. Estos materiales dejan pasar algo de luz pero no se puede ver a través de ellos claramente. D5 Render configura esto mediante una combinación de opacidad y transmisión con rugosidad media.`,
+  keyPoints: [
+    "El vidrio requiere transmisión (no solo opacidad) para refracción realista",
+    "IOR del vidrio estándar: 1.5 / Agua: 1.33 / Diamante: 2.42",
+    "Vidrio arquitectónico: transmisión alta, IOR 1.5, rugosidad ~0, sin metalicidad",
+    "El vidrio real tiene un ligero tono verde visible en los bordes",
+    "Materiales translúcidos (no transparentes): usar subsuperficie/translucencia",
+    "Las caústicas son patrones de luz concentrada que el vidrio proyecta",
+  ],
+  steps: [
+    {
+      title: "Crear un vidrio básico",
+      description: "Selecciona una ventana o superficie de vidrio. En el editor de materiales: activa la transmisión, ajusta IOR a 1.5, rugosidad a 0.02, metalicidad a 0, color base blanco. Observa cómo la luz pasa y se refracta a través del vidrio.",
+    },
+    {
+      title: "Añadir tintado al vidrio",
+      description: "Cambia el color base a un verde muy suave (#F0FFF0) para simular el tintado natural del vidrio. Observa cómo los bordes del vidrio muestran más claramente el color verde, igual que en la realidad.",
+      tip: "El efecto de color en los bordes es más visible en vidrios gruesos. Para ventanas delgadas, el tintado será sutil.",
+    },
+    {
+      title: "Crear vidrio esmerilado",
+      description: "Aumenta la rugosidad del material de vidrio a 0.3-0.5. Observa cómo el vidrio se vuelve translúcido y difuso, permitiendo pasar la luz pero sin claridad visual. Este efecto es común en baños y oficinas.",
+    },
+    {
+      title: "Crear un plástico translúcido",
+      description: "Crea un material con: color base blanco, metalicidad 0, rugosidad 0.3, transmisión parcial (0.5). Este tipo de material simula plásticos como los de las pantallas de lámparas o difusores de luz.",
+    },
+    {
+      title: "Experimentar con IOR",
+      description: "Con un material de vidrio seleccionado, cambia el IOR entre 1.0 (sin refracción), 1.33 (agua), 1.5 (vidrio) y 2.42 (diamante). Observa cómo cambia la distorsión de las imágenes vistas a través del material.",
+    },
+  ],
+  practice: "Crea 4 tipos de vidrio: cristal transparente, vidrio tintado verde, vidrio esmerilado y vidrio de colores (tipo vitral). Colócalos en una escena con luz y documenta los parámetros de cada uno.",
+  extraResources: [
+    { label: "Materiales de vidrio en D5 Render", url: "https://www.d5render.com/help/glass-material" },
+    { label: "Referencia de IOR para materiales", url: "https://www.d5render.com/blog/ior-reference" },
+  ],
+});
+
+register({
+  moduleId: "modulo-4",
+  topicIndex: 4,
+  title: "Biblioteca de materiales de D5 Render",
+  objective: "Conocer y aprovechar al máximo la biblioteca integrada de materiales de D5 Render, aprendiendo a buscar, aplicar y personalizar los materiales predefinidos.",
+  explanation: `D5 Render incluye una extensa biblioteca de materiales predefinidos que pueden ahorrarte horas de trabajo. Estos materiales están configurados por profesionales con todos los parámetros PBR correctos, mapas de textura de alta calidad y ajustes optimizados para el motor de renderizado. Aprender a usar eficientemente esta biblioteca es fundamental para trabajar de manera productiva.
+
+Para acceder a la biblioteca de materiales, haz clic en el botón de Assets (generalmente en la barra lateral o con un atajo de teclado) y selecciona la pestaña de Materiales. La biblioteca está organizada por categorías: Madera, Metal, Piedra, Vidrio, Tela, Cerámica, Concreto, Azulejo, etc. Dentro de cada categoría encontrarás múltiples variantes con diferentes acabados, colores y estados de desgaste.
+
+Cada material de la biblioteca viene con todos los mapas PBR necesarios preconfigurados: difuso, normal, rugosidad, y metalicidad cuando corresponde. Esto significa que al aplicar un material de la biblioteca, inmediatamente obtienes un resultado fotorrealista sin necesidad de ajustar nada. Por supuesto, siempre puedes personalizar los parámetros después de aplicar el material si necesitas un acabado específico.
+
+La búsqueda es una herramienta poderosa en la biblioteca. Puedes buscar por nombre (ej: 'marble', 'concrete', 'oak') y D5 Render mostrará todos los materiales relevantes. También puedes filtrar por categoría usando las pestañas laterales.
+
+Para aplicar un material de la biblioteca, simplemente arrástralo desde la biblioteca hasta el objeto en el viewport, o selecciónalo y haz clic en 'Apply'. Si quieres aplicarlo a múltiples objetos, selecciónalos todos primero y luego arrastra el material. También puedes aplicar el material a una cara específica del objeto si solo necesitas cubrir una parte.
+
+La biblioteca se actualiza con cada versión de D5 Render, añadiendo nuevos materiales y mejorando los existentes. Es recomendable mantener D5 Render actualizado para tener acceso a los materiales más recientes. Además, D5 Render permite a los usuarios compartir materiales personalizados en la comunidad, ampliando las opciones disponibles más allá de la biblioteca oficial.
+
+Cuando uses materiales de la biblioteca, presta atención a la escala de las texturas. Un material de madera que se ve perfecto en un piso puede verse incorrecto en un mueble si la escala de las vetas es demasiado grande o pequeña. D5 Render permite ajustar la escala UV del material para corregir este problema, y la mayoría de los materiales de la biblioteca tienen un valor de escala predeterminado que funciona para su uso típico.`,
+  keyPoints: [
+    "Biblioteca organizada por categorías: madera, metal, piedra, vidrio, etc.",
+    "Cada material viene con todos los mapas PBR preconfigurados",
+    "Búsqueda por nombre y filtrado por categoría disponibles",
+    "Aplicar arrastrando al objeto o seleccionando y clic en Apply",
+    "Los materiales se pueden personalizar después de aplicar",
+    "Verificar escala UV del material al aplicarlo a diferentes objetos",
+  ],
+  steps: [
+    {
+      title: "Explorar la biblioteca de materiales",
+      description: "Abre la biblioteca de materiales en D5 Render y recorre todas las categorías. Familiarízate con la organización y la variedad de materiales disponibles. Pasa el ratón sobre los materiales para ver una vista previa ampliada.",
+    },
+    {
+      title: "Aplicar materiales a objetos",
+      description: "Selecciona varios objetos en tu escena (muros, pisos, muebles) y aplica materiales de la biblioteca arrastrándolos desde la biblioteca hasta cada objeto. Observa cómo cada material transforma instantáneamente el aspecto del objeto.",
+      tip: "Puedes aplicar materiales a múltiples objetos seleccionándolos todos antes de arrastrar el material.",
+    },
+    {
+      title: "Ajustar la escala de texturas",
+      description: "Si un material de madera se ve con vetas demasiado grandes en un mueble pequeño, selecciona el objeto y ajusta la escala UV del material en el panel de Propiedades. Reduce el valor hasta que las vetas tengan un tamaño natural para el objeto.",
+    },
+    {
+      title: "Personalizar un material de la biblioteca",
+      description: "Aplica un material de concreto de la biblioteca y luego personalízalo: cambia ligeramente el color base, ajusta la rugosidad, o modifica la intensidad del mapa normal. Esto te da un material único basado en uno profesional.",
+    },
+  ],
+  practice: "Aplica materiales de la biblioteca a todos los objetos de una escena de interior. Personaliza al menos 3 de los materiales aplicados para ajustarlos mejor al concepto de diseño. Documenta cuáles aplicaste directamente y cuáles modificaste.",
+  extraResources: [
+    { label: "Biblioteca de materiales D5 Render", url: "https://www.d5render.com/help/material-library" },
+    { label: "Materiales de comunidad", url: "https://forum.d5render.com/c/materials" },
+  ],
+});
+
+register({
+  moduleId: "modulo-4",
+  topicIndex: 5,
+  title: "Creación de materiales personalizados",
+  objective: "Aprender a crear materiales PBR personalizados desde cero, importando mapas de textura propios y ajustando todos los parámetros para lograr resultados únicos y realistas.",
+  explanation: `Aunque la biblioteca de D5 Render es extensa, siempre habrá situaciones donde necesites crear materiales personalizados: un tipo específico de mármol italiano, un acabado de pintura particular, o un material de diseño que no existe en ninguna biblioteca. Crear materiales personalizados es una habilidad fundamental para cualquier artista 3D.
+
+El primer paso es conseguir los mapas de textura necesarios. Hay varias fuentes para obtener mapas PBR de alta calidad: sitios web gratuitos como Poly Haven y AmbientCG, sitios de pago como Quixel Megascans y Poliigon, o puedes fotografiar y procesar tus propias texturas usando software como Substance Designer o Materialize.
+
+Para importar mapas de textura propios en D5 Render, abre el editor de materiales de un objeto y haz clic en el cuadrado junto a la propiedad donde quieres aplicar el mapa. En el selector, elige la opción de importar archivo y navega hasta la ubicación de tu textura. D5 Render soporta formatos PNG, JPG, TIFF y EXR para mapas de textura.
+
+Es crucial entender la convención de nombres de los mapas PBR para no confundirlos. Los sufijos más comunes son: '_basecolor' o '_albedo' o '_diffuse' para el mapa de color, '_normal' o '_nrm' para el mapa normal, '_roughness' o '_rgh' para rugosidad, '_metallic' o '_met' para metalicidad, '_height' o '_disp' para desplazamiento, y '_ao' para oclusión ambiental. Siempre verifica que estás asignando el mapa correcto a la propiedad correspondiente.
+
+Una técnica avanzada es crear materiales con mapas de desgaste (wear maps) o máscaras. Estas texturas en escala de grises definen zonas donde el material está más desgastado, sucio o dañado. Por ejemplo, un mapa de desgaste puede hacer que los bordes de un metal pintado muestren el metal subyacente, o que el centro de un piso de madera esté más pulido que los bordes.
+
+D5 Render también permite ajustar la proyección UV de los mapas. Los tipos más comunes son: Box (proyección desde 6 caras, ideal para objetos volumétricos), Planar (proyección plana, para fachadas y muros), Cylindrical (para columnas y tubos), y Spherical (para esferas). Elegir la proyección correcta evita distorsiones en la textura.
+
+Para crear variaciones de un mismo material sin duplicarlo, puedes ajustar parámetros como el tinte del color base, la intensidad del mapa normal, o el offset de la textura. Esto es útil cuando necesitas que dos muros de concreto se vean similares pero no idénticos.
+
+Finalmente, guarda tus materiales personalizados en la biblioteca de usuario de D5 Render para reutilizarlos en futuros proyectos. Hacer clic derecho en el material y seleccionar 'Save to Library' lo añadirá a tu colección personal.`,
+  keyPoints: [
+    "Fuentes de texturas PBR: Poly Haven (gratuito), Quixel Megascans (pago), propias",
+    "Importar mapas: clic en cuadrado junto a propiedad > Importar archivo",
+    "Convención de nombres: _basecolor, _normal, _roughness, _metallic",
+    "Mapas de desgaste: añaden realismo con zonas erosionadas o sucias",
+    "Proyección UV: Box, Planar, Cylindrical, Spherical según el objeto",
+    "Guardar materiales personalizados en la biblioteca de usuario",
+  ],
+  steps: [
+    {
+      title: "Descargar un paquete PBR",
+      description: "Ve a Poly Haven (polyhaven.com/textures) y descarga un paquete PBR completo de un material que te interese (mármol, cuero, metal). Descarga todos los mapas disponibles (1K es suficiente para práctica).",
+    },
+    {
+      title: "Crear el material base",
+      description: "En D5 Render, selecciona un objeto y abre el editor de materiales. Asigna el mapa de color base importando el archivo _basecolor. Ajusta la escala UV para que el patrón tenga el tamaño correcto.",
+    },
+    {
+      title: "Añadir mapas de detalle",
+      description: "Importa y asigna el mapa normal (_normal), rugosidad (_roughness), y metalicidad (_metallic) si aplica. Cada mapa se asigna en la propiedad correspondiente haciendo clic en el cuadrado junto a ella.",
+      tip: "Si el mapa normal parece invertido (el relieve se ve hundido), prueba activar la opción 'Flip Green Channel' en la configuración del mapa.",
+    },
+    {
+      title: "Ajustar parámetros finos",
+      description: "Con todos los mapas aplicados, ajusta los parámetros globales del material: intensidad del mapa normal (0.5-2.0), multiplicador de rugosidad, y color de tinte si es necesario. Busca el balance que más se acerque al material real.",
+    },
+    {
+      title: "Guardar el material personalizado",
+      description: "Una vez satisfecho con el resultado, haz clic derecho en el material y selecciona 'Save to Library'. Nómbralo descriptivamente (ej: 'Marble_Carrara_Custom') para encontrarlo fácilmente en futuros proyectos.",
+    },
+  ],
+  practice: "Crea 2 materiales personalizados desde cero usando texturas descargadas de Poly Haven. Para cada uno, documenta el proceso con capturas de pantalla: mapas originales, configuración en D5 Render, y resultado final.",
+  extraResources: [
+    { label: "Poly Haven (texturas PBR gratuitas)", url: "https://polyhaven.com/textures" },
+    { label: "AmbientCG (texturas PBR gratuitas)", url: "https://ambientcg.com" },
+  ],
+});
+
+// ============================================================
+// MÓDULO 5: Vegetación y Entorno
+// ============================================================
+
+register({
+  moduleId: "modulo-5",
+  topicIndex: 0,
+  title: "Sistema de vegetación de D5 Render",
+  objective: "Conocer el sistema de vegetación nativo de D5 Render, sus características únicas (animación de viento, respuesta al clima) y cómo aprovecharlo al máximo.",
+  explanation: `Uno de los puntos fuertes más destacados de D5 Render es su sistema de vegetación nativo. A diferencia de otros motores donde los árboles y plantas son geometría estática, la vegetación de D5 Render está viva: responde al viento con animaciones naturales, reacciona a las condiciones climáticas, y se integra perfectamente con la iluminación de la escena. Esta característica sola puede elevar significativamente la calidad de tus renders arquitectónicos.
+
+La biblioteca de vegetación de D5 Render contiene cientos de especies: árboles de diferentes tipos (caducifolios, perennifolios, palmeras, coníferas), arbustos, flores, pastos, y plantas de interior. Cada especie está modelada con geometría 3D detallada y texturas de alta calidad, pero optimizada para funcionar eficientemente con el ray tracing en tiempo real.
+
+La característica más impresionante es la animación de viento. Cuando colocas un árbol de la biblioteca de D5 Render, automáticamente se anima con el viento: las hojas se mueven suavemente, las ramas oscilan, y la hierba se mece. Esta animación no es una simple textura animada sino una simulación basada en la estructura del modelo, lo que produce movimientos naturales y convincentes. La intensidad del viento se controla globalmente en los ajustes de la escena.
+
+La vegetación también responde al clima. En días lluviosos, las hojas aparecen más oscuras y brillantes por la humedad. En días nevados, la nieve se acumula naturalmente sobre las ramas y hojas. Estos efectos se calculan automáticamente sin necesidad de configuración adicional.
+
+Para colocar vegetación, abre la biblioteca de Assets (generalmente con la tecla G o desde la barra de herramientas) y selecciona la categoría de Vegetación. Navega por las subcategorías o usa la búsqueda para encontrar la especie deseada. Haz clic en el modelo y luego haz clic en el terreno o superficie donde quieres colocarlo. También puedes arrastrar el modelo directamente desde la biblioteca.
+
+La vegetación de D5 Render está diseñada para ser eficiente. Usa técnicas de LOD (Level of Detail) automáticas: los árboles cercanos a la cámara muestran toda su geometría y texturas, mientras que los árboles lejanos se simplifican progresivamente para mantener el rendimiento. Esto te permite tener cientos de árboles en una escena sin problemas de rendimiento en la mayoría de los equipos.`,
+  keyPoints: [
+    "Vegetación nativa con animación de viento automática",
+    "Responde al clima: humedad en lluvia, nieve acumulada",
+    "Cientos de especies: árboles, arbustos, flores, pastos, plantas de interior",
+    "Colocación desde la biblioteca de Assets (tecla G)",
+    "LOD automático: árboles lejanos se simplifican para rendimiento",
+    "La intensidad del viento se controla globalmente en la escena",
+  ],
+  steps: [
+    {
+      title: "Abrir la biblioteca de vegetación",
+      description: "Presiona la tecla G o haz clic en el botón de Assets en la barra de herramientas. Selecciona la categoría de Vegetación. Explora las diferentes subcategorías: árboles, arbustos, flores, pastos.",
+    },
+    {
+      title: "Colocar un árbol",
+      description: "Selecciona un árbol de la biblioteca (por ejemplo, un roble o un arce) y haz clic en el terreno de tu escena para colocarlo. Observa cómo el árbol inmediatamente se anima con el viento.",
+      tip: "Usa la rueda del ratón mientras colocas para rotar el árbol antes de soltarlo.",
+    },
+    {
+      title: "Ajustar la intensidad del viento",
+      description: "Ve a los ajustes de la escena y busca el parámetro de viento. Aumenta y disminuye la intensidad y observa cómo la vegetación responde. Un viento suave crea un ambiente tranquilo, un viento fuerte añade dramatismo.",
+    },
+    {
+      title: "Colocar vegetación variada",
+      description: "Añade al menos un arbusto, un patch de pasto y unas flores alrededor del árbol. Observa cómo cada tipo de vegetación tiene su propio tipo de animación: el pasto se mueve más que los arbustos, y las flores se mecen suavemente.",
+    },
+    {
+      title: "Probar con diferentes climas",
+      description: "Cambia las condiciones climáticas de la escena a lluvia y observa cómo la vegetación reacciona. Luego prueba con nieve. Nota los cambios en el aspecto de las hojas y las acumulaciones en las ramas.",
+    },
+  ],
+  practice: "Crea un pequeño jardín con al menos 3 árboles, 5 arbustos, pasto y flores. Experimenta con la intensidad del viento y las condiciones climáticas. Haz renders con clima soleado y lluvioso para comparar.",
+  extraResources: [
+    { label: "Vegetación en D5 Render", url: "https://www.d5render.com/help/vegetation" },
+    { label: "Biblioteca de vegetación D5", url: "https://www.d5render.com/assets/vegetation" },
+  ],
+});
+
+register({
+  moduleId: "modulo-5",
+  topicIndex: 1,
+  title: "Colocación de árboles, arbustos y flores",
+  objective: "Dominar las técnicas de colocación de vegetación en D5 Render, incluyendo la colocación individual, en masa y el uso de herramientas de dispersión para crear paisajes naturales.",
+  explanation: `Colocar vegetación de manera natural y convincente es una habilidad que requiere práctica y conocimiento de cómo crecen las plantas en la realidad. D5 Render ofrece varias herramientas para colocar vegetación, desde la colocación individual precisa hasta la dispersión masiva para crear bosques y prados.
+
+La colocación individual es la más simple: seleccionas un modelo de vegetación de la biblioteca y haces clic en la superficie donde quieres colocarlo. Cada clic coloca una instancia del modelo. Puedes rotar el modelo antes de colocarlo moviendo la rueda del ratón, y puedes ajustar la escala después de colocarlo seleccionándolo y usando la herramienta de escalar.
+
+Para proyectos grandes, la colocación individual sería demasiado lenta. D5 Render ofrece herramientas de dispersión que permiten colocar docenas o cientos de plantas de una sola vez. La herramienta de dispersión funciona definiendo un área (generalmente una superficie o un camino) y configurando parámetros como la densidad, la variación de escala y la aleatorización de rotación. D5 Render genera automáticamente las instancias dentro del área definida.
+
+La clave para que la vegetación se vea natural es la variación. En la naturaleza, ningún árbol es idéntico a otro, y las plantas crecen en grupos irregulares. D5 Render permite configurar variación de escala (para que cada instancia tenga un tamaño ligeramente diferente) y aleatorización de rotación (para que cada instancia mire en una dirección diferente). Usar estos parámetros evita el aspecto repetitivo y artificial que resulta de colocar plantas idénticas en filas regulares.
+
+Otro aspecto importante es la elección de especies apropiadas. Un paisaje tropical no debería tener coníferas, y un jardín japonés no debería tener palmeras. D5 Render tiene una amplia variedad de especies que cubren la mayoría de los climas y estilos de paisajismo. Tómate el tiempo de elegir las especies correctas para tu proyecto.
+
+La colocación en capas es una técnica profesional: primero colocas los árboles grandes que definen la estructura del paisaje, luego los arbustos medianos que rellenan los espacios entre árboles, luego las plantas pequeñas y flores que añaden color y detalle, y finalmente el pasto o cubresuelos que unifican todo. Cada capa se coloca en una capa de escena diferente para facilitar la gestión.
+
+La densidad de la vegetación también es importante. Demasiada vegetación puede hacer que un proyecto se vea selvático y desordenado, mientras que muy poca puede hacer que se vea estéril y poco habitable. Estudia fotografías de referencia de paisajes reales para calibrar la densidad apropiada para tu tipo de proyecto.`,
+  keyPoints: [
+    "Colocación individual para control preciso, dispersión para áreas grandes",
+    "La variación de escala y rotación es crucial para un aspecto natural",
+    "Elegir especies apropiadas al clima y estilo del proyecto",
+    "Colocación en capas: árboles > arbustos > flores > pasto",
+    "Usar capas de escena para gestionar cada tipo de vegetación",
+    "Calibrar la densidad con fotografías de referencia reales",
+  ],
+  steps: [
+    {
+      title: "Colocar árboles individuales",
+      description: "Selecciona 2-3 especies de árboles de la biblioteca y colócalos individualmente en tu escena. Varía la escala de cada árbol (0.8 a 1.2 del tamaño original) y rota cada uno en una dirección diferente.",
+      tip: "Los árboles más grandes y viejos suelen ser más asimétricos. Rota los árboles para que su lado más interesante mire hacia la cámara.",
+    },
+    {
+      title: "Colocar arbustos como relleno",
+      description: "Selecciona arbustos de la biblioteca y colócalos en los espacios entre los árboles. Usa varias especies diferentes y varía la escala más que con los árboles (0.6 a 1.4) para crear un sotobosque natural.",
+    },
+    {
+      title: "Usar la herramienta de dispersión para pasto",
+      description: "Selecciona un patch de pasto de la biblioteca y usa la herramienta de dispersión para cubrir el suelo. Configura la densidad y la variación de escala. Observa cómo D5 Render genera cientos de instancias automáticamente.",
+    },
+    {
+      title: "Añadir flores como acento de color",
+      description: "Coloca macizos de flores cerca de la entrada o en puntos focales del paisaje. Las flores deben ser detalles, no dominar la escena. Usa colores que complementen la arquitectura del edificio.",
+    },
+    {
+      title: "Revisar y ajustar el conjunto",
+      description: "Aléjate de la escena y evalúa el paisaje completo. ¿Se ve natural? ¿Hay zonas vacías? ¿Hay demasiada vegetación en algún punto? Ajusta hasta lograr un equilibrio que complementa la arquitectura sin dominarla.",
+    },
+  ],
+  practice: "Diseña el paisaje completo para un proyecto residencial: jardín delantero con árboles y camino, jardín trasero con terraza y vegetación, y bordes con arbustos. Usa al menos 5 especies diferentes de vegetación.",
+  extraResources: [
+    { label: "Colocación de vegetación en D5 Render", url: "https://www.d5render.com/help/place-vegetation" },
+  ],
+});
+
+register({
+  moduleId: "modulo-5",
+  topicIndex: 2,
+  title: "Terreno y modelado del paisaje",
+  objective: "Aprender a crear y modificar terreno en D5 Render usando la herramienta Terrain, incluyendo elevaciones, depresiones, caminos y superficies naturales.",
+  explanation: `El terreno es la base de cualquier paisaje y D5 Render ofrece herramientas dedicadas para crear topografía personalizada sin necesidad de modelarla en un software externo. La herramienta Terrain permite esculpir el suelo de la escena añadiendo elevaciones, depresiones y caminos que luego se pueden cubrir con vegetación y materiales.
+
+Para acceder a la herramienta Terrain, ve a la barra de herramientas y selecciona el icono de Terrain o usa el atajo de teclado correspondiente. Esto activará el modo de edición de terreno donde verás una malla que representa la superficie del suelo.
+
+D5 Render ofrece varios modos de edición del terreno. El modo Raise eleva el terreno donde pintas, creando colinas y montículos. El modo Lower hace lo contrario, creando depresiones y valles. El modo Flatten nivela el terreno a una altura específica, útil para crear plataformas donde se ubicará el edificio. El modo Smooth suaviza las transiciones, eliminando irregularidades para que el terreno se vea más natural.
+
+El pincel de terreno tiene parámetros ajustables: tamaño (radio del efecto), intensidad (qué tan fuerte es la elevación o depresión por pasada), y suavizado (qué tan gradual es la transición entre el terreno modificado y el original). Para colinas suaves y naturales, usa un pincel grande con baja intensidad y alto suavizado. Para detalles más marcados como bordes de caminos, usa un pincel más pequeño con mayor intensidad.
+
+Un flujo de trabajo típico para crear un paisaje completo comienza creando las elevaciones principales: colinas suaves en los bordes del terreno que enmarcan el proyecto. Luego se crean las depresiones para elementos como estanques o jardines hundidos. Después se nivela la plataforma central donde se ubica el edificio. Finalmente se añaden los detalles como caminos, terrazas y bordes.
+
+Los caminos se pueden crear de dos maneras: bajando el terreno ligeramente y aplicando un material diferente (gravilla, adoquín), o usando la herramienta Flatten para crear una superficie plana y luego aplicando el material del camino. Los caminos deben tener una ligera pendiente para el drenaje del agua de lluvia.
+
+D5 Render también permite importar terreno desde datos topográficos. Si tienes un archivo DEM (Digital Elevation Model) o un modelo 3D del terreno hecho en otro software, puedes importarlo como geometría y D5 Render lo usará como superficie del terreno. Esto es útil para proyectos en sitios reales donde la topografía existente es importante.
+
+Después de esculpir el terreno, es importante aplicarle un material apropiado. D5 Render tiene materiales de tierra, césped, gravilla y roca en su biblioteca que funcionan bien como base. Luego, la vegetación se coloca sobre el terreno, y las plantas se ajustan automáticamente a la topografía.`,
+  keyPoints: [
+    "Herramienta Terrain: esculpir terreno directamente en D5 Render",
+    "Modos: Raise (elevar), Lower (bajar), Flatten (nivelar), Smooth (suavizar)",
+    "Pincel ajustable: tamaño, intensidad y suavizado",
+    "Flujo: elevaciones principales > depresiones > plataforma del edificio > detalles",
+    "Caminos: bajar terreno + material diferente, o Flatten + material",
+    "Se puede importar terreno topográfico desde archivos externos",
+  ],
+  steps: [
+    {
+      title: "Activar la herramienta Terrain",
+      description: "Abre un proyecto en D5 Render y activa la herramienta Terrain desde la barra de herramientas. Observa la malla del terreno en el viewport y los controles del pincel en el panel de Propiedades.",
+    },
+    {
+      title: "Crear elevaciones suaves",
+      description: "Selecciona el modo Raise con un pincel grande (radio 10+), baja intensidad (0.3) y alto suavizado. Pinta suavemente en los bordes del terreno para crear colinas que enmarquen el proyecto. Trabaja en múltiples pasadas suaves en lugar de una sola pasada intensa.",
+      tip: "Altérnate entre Raise y Smooth para lograr colinas naturales sin irregularidades.",
+    },
+    {
+      title: "Crear una plataforma para el edificio",
+      description: "Usa el modo Flatten para nivelar una zona rectangular en el centro del terreno. Ajusta la altura deseada y pinta sobre la zona hasta que quede completamente plana. Esta será la base del edificio.",
+    },
+    {
+      title: "Crear un camino de acceso",
+      description: "Usa el modo Lower con un pincel estrecho para crear una depresión suave desde el borde del terreno hasta la plataforma del edificio. Luego aplica un material de gravilla o adoquín al camino.",
+    },
+    {
+      title: "Aplicar material y vegetación",
+      description: "Aplica un material de césped al terreno general y un material de gravilla al camino. Coloca vegetación sobre el terreno: árboles en las colinas, arbustos junto al camino y flores cerca de la entrada.",
+    },
+  ],
+  practice: "Crea un terreno completo con colinas, una plataforma central para el edificio, un camino de acceso, y un jardín hundido. Aplica materiales y vegetación básica.",
+  extraResources: [
+    { label: "Herramienta Terrain en D5 Render", url: "https://www.d5render.com/help/terrain" },
+  ],
+});
+
+register({
+  moduleId: "modulo-5",
+  topicIndex: 3,
+  title: "Sistema de agua y océano",
+  objective: "Aprender a crear superficies de agua realistas en D5 Render, incluyendo piscinas, lagos, ríos y océano, con animación de olas y reflexiones dinámicas.",
+  explanation: `El agua es uno de los elementos más visualmente impactantes en la visualización arquitectónica, y D5 Render ofrece un sistema de agua nativo que produce resultados impresionantes con relativamente poca configuración. El sistema simula las propiedades ópticas del agua (reflexión, refracción, absorción de color) y añade animación de olas para crear superficies dinámicas y convincentes.
+
+Para crear una superficie de agua en D5 Render, ve a la biblioteca de Assets y busca la categoría de Agua (Water). Encontrarás varios presets: agua de piscina, agua de lago, agua de río, océano, y cascada. Cada preset viene con parámetros preconfigurados para el tipo de agua que simula. Simplemente arrastra el preset a la escena y se creará un plano de agua que puedes escalar y posicionar.
+
+El material de agua de D5 Render es un material especial que combina varias propiedades: reflexión especular (el agua refleja el cielo y los objetos circundantes), refracción (deforma lo que se ve bajo la superficie), absorción de color (el agua profunda se ve más azul/verde que la superficial), y animación de ondas (simula el movimiento natural del agua).
+
+La profundidad del agua afecta significativamente su color. En agua poco profunda (como el borde de una piscina), la luz atraviesa el agua y se refleja en el fondo, produciendo un color turquesa claro. En agua profunda (como el océano), la luz se absorbe progresivamente, produciendo un azul oscuro. D5 Render simula este efecto automáticamente basándose en la geometría del lecho.
+
+Las olas y la turbulencia del agua se controlan mediante parámetros de animación. Puedes ajustar la altura de las olas, la frecuencia (qué tan juntas están), la dirección del viento, y la velocidad de la animación. Para una piscina, usa olas mínimas con frecuencia alta (pequeñas ondas). Para un océano, usa olas grandes con frecuencia variable.
+
+Las caústicas son otro efecto importante del agua. Son los patrones de luz que el agua enfoca y dispersa en el fondo y las superficies cercanas. D5 Render calcula caústicas automáticamente cuando hay una superficie de agua con luz atravesándola. Este efecto es especialmente visible en piscinas iluminadas por el sol y añade un nivel de realismo difícil de lograr manualmente.
+
+Para piscinas, D5 Render tiene presets específicos que ya incluyen el color turquesa característico, la profundidad correcta y las olas suaves. Solo necesitas escalar el plano de agua al tamaño de la piscina y posicionarlo a la altura correcta del agua. El material de azulejo de la piscina se aplica a las paredes y el fondo del volumen de la piscina.`,
+  keyPoints: [
+    "Presets de agua: piscina, lago, río, océano, cascada",
+    "El agua combina reflexión + refracción + absorción + animación de olas",
+    "La profundidad afecta el color: poca profundidad = turquesa, mucha = azul oscuro",
+    "Las caústicas (patrones de luz) se calculan automáticamente",
+    "Olas: altura, frecuencia, dirección y velocidad son ajustables",
+    "Las piscinas tienen presets específicos con color y olas preconfigurados",
+  ],
+  steps: [
+    {
+      title: "Crear una piscina",
+      description: "Busca el preset de piscina en la biblioteca de Assets y arrástralo a la escena. Escala el plano de agua al tamaño de la piscina y posiciónalo a la altura del agua. Verifica que las caústicas son visibles en el fondo de la piscina.",
+    },
+    {
+      title: "Crear un lago",
+      description: "Usa el preset de lago y colócalo en una depresión del terreno. Escala el plano para cubrir el área del lago. Ajusta las olas a una altura media con frecuencia baja para simular agua tranquila.",
+      tip: "Añade vegetación acuática en los bordes del lago para un aspecto más natural.",
+    },
+    {
+      title: "Crear un océano",
+      description: "Usa el preset de océano y colócalo como fondo de la escena. Aumenta la altura de las olas y la frecuencia para simular un mar agitado. Observa cómo el color del agua cambia con la profundidad.",
+    },
+    {
+      title: "Ajustar los parámetros del agua",
+      description: "Selecciona la superficie de agua y experimenta con los parámetros: color de absorción (para cambiar el tono del agua), altura de olas, velocidad de animación, y rugosidad de la superficie. Cada ajuste debe hacer que el agua se vea más como el tipo de agua que quieres simular.",
+    },
+  ],
+  practice: "Crea una escena con una piscina y un océano visible al fondo. Ajusta los parámetros de cada tipo de agua para que se vean realistas. Haz renders en diferentes momentos del día para ver cómo la iluminación afecta el agua.",
+  extraResources: [
+    { label: "Sistema de agua en D5 Render", url: "https://www.d5render.com/help/water" },
+  ],
+});
+
+register({
+  moduleId: "modulo-5",
+  topicIndex: 4,
+  title: "Skybox y atmósfera",
+  objective: "Dominar la configuración del skybox y los efectos atmosféricos en D5 Render para crear fondos y ambientes convincentes que complementen la arquitectura.",
+  explanation: `El skybox es el fondo de la escena, la imagen esférica que rodea todo el entorno y que representa el cielo y el horizonte. En D5 Render, el skybox trabaja en conjunto con el sistema de iluminación para crear un ambiente coherente donde la iluminación, el fondo y la atmósfera están perfectamente sincronizados.
+
+D5 Render ofrece dos modos de skybox: procedural y HDRI. El skybox procedural genera el cielo matemáticamente basándose en parámetros como la hora del día, la nubosidad y la turbidez atmosférica. Es el modo por defecto y ofrece control total sobre las condiciones del cielo con resultados convincentes. El skybox HDRI usa una imagen real de 360 grados como fondo y fuente de iluminación, como vimos en el módulo de iluminación.
+
+Los ajustes atmosféricos de D5 Render controlan la apariencia del aire entre la cámara y los objetos. La niebla (fog) añade una capa de bruma que reduce la visibilidad a distancia, creando un efecto de profundidad atmosférica. La niebla delgada simula mañanas húmedas o paisajes costeros. La niebla espesa crea ambientes místicos o escenas de mal tiempo.
+
+La turbidez atmosférica controla la claridad del cielo. Valores bajos producen un cielo azul profundo y transparente, típicos de días secos y despejados. Valores altos producen un cielo más pálido y lavado, típicos de días húmedos o contaminados. La turbidez también afecta la calidad de la luz: cielos más turbios producen iluminación más difusa y menos sombras definidas.
+
+Las nubes son otro elemento atmosférico importante. D5 Render genera nubes volumétricas proceduralmente que se integran con la iluminación de la escena. Puedes ajustar la cantidad de nubes, su tipo (cirros, cúmulos, estratos) y su altitud. Las nubes no solo son estéticas sino que también afectan la iluminación: nubes densas entre el sol y la escena crearán sombras suaves.
+
+El color del horizonte es un ajuste frecuentemente ignorado pero importante. En la realidad, el horizonte siempre es más claro y lavado que el cenit debido a la mayor cantidad de atmósfera que la luz atraviesa. D5 Render simula esto automáticamente, pero puedes ajustar la intensidad del efecto.
+
+Para crear atardeceres y amaneceres convincentes, la combinación de skybox procedural + posición baja del sol + nubosidad media produce los mejores resultados. Las nubes capturan los colores cálidos del sol bajo y crean los gradientes de color característicos de estas horas.`,
+  keyPoints: [
+    "Dos modos de skybox: procedural (generado) y HDRI (imagen real)",
+    "Niebla: crea profundidad atmosférica y efectos de clima",
+    "Turbidez: cielo claro (baja) vs cielo lavado (alta)",
+    "Nubes volumétricas: afectan iluminación y estética",
+    "El color del horizonte es naturalmente más claro que el cenit",
+    "Atardeceres convincentes: sol bajo + nubosidad media + skybox procedural",
+  ],
+  steps: [
+    {
+      title: "Explorar el skybox procedural",
+      description: "En un proyecto, ve a los ajustes de cielo/atmósfera. Configura el skybox en modo procedural y ajusta la hora a diferentes momentos del día. Observa cómo el cielo cambia de azul a naranja a oscuro.",
+    },
+    {
+      title: "Añadir niebla",
+      description: "Activa la niebla en los ajustes atmosféricos. Empieza con una cantidad baja (0.1) y ve aumentando gradualmente. Observa cómo los objetos lejanos se difuminan y la escena gana profundidad atmosférica.",
+      tip: "La niebla más efectiva es la que apenas se nota: suaviza los bordes lejanos sin hacer que la escena se vea brumosa.",
+    },
+    {
+      title: "Configurar nubes",
+      description: "Añade nubes al skybox procedural. Experimenta con diferentes cantidades y tipos. Observa cómo las nubes crean sombras suaves cuando pasan entre el sol y la escena.",
+    },
+    {
+      title: "Crear un atardecer",
+      description: "Configura el sol a una altitud baja (5-10 grados), nubosidad media, y turbidez ligeramente alta. Observa los colores cálidos en el cielo y las nubes. Ajusta hasta obtener un atardecer convincente.",
+    },
+  ],
+  practice: "Crea 3 ambientes diferentes usando solo los ajustes de skybox y atmósfera: un mediodía despejado, un atardecer nublado, y una mañana con niebla. Haz renders de cada uno y compara el mood de cada escena.",
+  extraResources: [
+    { label: "Atmósfera en D5 Render", url: "https://www.d5render.com/help/atmosphere" },
+  ],
+});
+
+register({
+  moduleId: "modulo-5",
+  topicIndex: 5,
+  title: "Efectos climáticos: lluvia y nieve",
+  objective: "Aprender a usar los efectos climáticos integrados de D5 Render (lluvia, nieve) para crear escenas con condiciones meteorológicas que añadan dramatismo y variedad visual.",
+  explanation: `D5 Render incluye efectos climáticos nativos que permiten simular lluvia y nieve de manera convincente sin necesidad de plugins o composición posterior. Estos efectos se integran con el sistema de iluminación y la vegetación, creando resultados coherentes donde cada elemento de la escena responde al clima de forma realista.
+
+El efecto de lluvia de D5 Render consiste en varias capas: partículas de lluvia visibles (las gotas cayendo), salpicaduras en las superficies (donde las gotas impactan), y el efecto sobre los materiales (las superficies se ven más oscuras y brillantes por la humedad). Todo esto se calcula automáticamente cuando activas la lluvia.
+
+Para activar la lluvia, ve a los ajustes de clima/atmósfera de la escena y activa el efecto de lluvia. Aparecerán controles para ajustar la intensidad (de llovizna a tormenta), la dirección del viento (que afecta el ángulo de las gotas), y la velocidad de las partículas. Una intensidad baja simula una llovizna ligera, mientras que una intensidad alta simula una tormenta con gotas grandes y abundantes.
+
+La vegetación responde automáticamente a la lluvia: las hojas se ven más oscuras y brillantes, simulando la humedad acumulada. Las superficies de los materiales también se ven más oscuras y reflectantes, lo que es físicamente correcto ya que el agua forma una capa que actúa como una superficie reflectante adicional.
+
+El efecto de nieve funciona de manera similar. Cuando lo activas, D5 Render añade partículas de nieve cayendo y acumulación de nieve en las superficies horizontales y los objetos. La nieve se acumula en los techos, las ramas de los árboles, las cornisas y las superficies planas. La cantidad de acumulación es proporcional a la intensidad del efecto.
+
+La nieve también afecta la vegetación de forma automática: los árboles y arbustos muestran nieve acumulada en las ramas y hojas, y el pasto se cubre parcialmente de blanco. Este efecto es especialmente impresionante con la vegetación nativa de D5 Render.
+
+Combinar los efectos climáticos con otros ajustes atmosféricos potencia el resultado. Una escena de lluvia con niebla ligera y cielo nublado se ve mucho más convincente que solo con las partículas de lluvia. Una escena de nieve con cielo gris y luz difusa recrea la atmósfera de un día invernal de forma creíble.
+
+Es importante notar que los efectos climáticos aumentan la carga de renderizado, especialmente en escenas complejas. Si experimentas problemas de rendimiento, reduce la intensidad del efecto o desactívalo mientras trabajas en otros aspectos de la escena.`,
+  keyPoints: [
+    "Lluvia: partículas + salpicaduras + superficies húmedas (automático)",
+    "Nieve: partículas + acumulación en superficies horizontales",
+    "La vegetación responde automáticamente: hojas húmedas, nieve en ramas",
+    "Combinar con niebla y cielo nublado para mayor realismo",
+    "Los materiales se ven más oscuros y reflectantes con humedad",
+    "Los efectos climáticos aumentan la carga de renderizado",
+  ],
+  steps: [
+    {
+      title: "Activar el efecto de lluvia",
+      description: "Ve a los ajustes de clima y activa la lluvia. Empieza con intensidad baja y ve aumentando. Observa cómo las gotas caen, las salpicaduras aparecen en las superficies y los materiales se oscurecen por la humedad.",
+    },
+    {
+      title: "Configurar una tormenta",
+      description: "Aumenta la intensidad de la lluvia al máximo. Añade viento fuerte para que las gotas caigan en ángulo. Oscurece el cielo con nubes densas. Observa el dramatismo que aporta la tormenta a la escena.",
+      tip: "Una tormenta es el momento perfecto para usar luz volumétrica si hay una abertura o un rayo de luz que atraviesa las nubes.",
+    },
+    {
+      title: "Activar el efecto de nieve",
+      description: "Desactiva la lluvia y activa la nieve. Observa cómo los copos caen y se acumulan gradualmente en los techos, ramas y superficies horizontales. Ajusta la intensidad para simular desde una nevada ligera hasta una tormenta de nieve.",
+    },
+    {
+      title: "Combinar clima con atmósfera",
+      description: "Añade niebla ligera y cielo nublado al efecto de lluvia o nieve. Observa cómo la combinación crea un ambiente mucho más inmersivo que el efecto climático solo.",
+    },
+  ],
+  practice: "Crea dos versiones de un proyecto: una con lluvia y otra con nieve. Ajusta todos los parámetros atmosféricos para cada condición. Compara el mood y el impacto visual de cada versión.",
+  extraResources: [
+    { label: "Efectos climáticos en D5 Render", url: "https://www.d5render.com/help/weather" },
+  ],
+});
+
 console.log(`Topic content loaded: ${contentMap.size} topics`);
