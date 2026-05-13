@@ -14,6 +14,7 @@ import {
   Layers,
   Keyboard,
   AlertTriangle,
+  Search,
 } from "lucide-react";
 import { modules, Module } from "@/lib/curriculum";
 import { useStudyStore } from "@/lib/store";
@@ -105,6 +106,15 @@ export function StudyApp() {
               <AlertTriangle className="w-3 h-3 text-gray-400" />
               <span className="text-[11px] font-medium text-gray-400 hover:text-gray-300">
                 Soluciones
+              </span>
+            </Link>
+            <Link
+              href="/buscar"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 hover:border-emerald-500/30 transition-all duration-200"
+            >
+              <Search className="w-3 h-3 text-emerald-400" />
+              <span className="text-[11px] font-medium text-emerald-400">
+                Buscar
               </span>
             </Link>
           </div>
