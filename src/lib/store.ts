@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { modules } from "./curriculum";
+import { achievements } from "./achievements";
 
 interface QuizResult {
   moduleId: string;
@@ -19,6 +20,14 @@ interface StudyStore {
   // Certificate state
   studentName: string;
   completionDate: string | null;
+
+  // Study streaks
+  lastStudyDate: string | null; // ISO date string (YYYY-MM-DD)
+  currentStreak: number;
+  longestStreak: number;
+
+  // Achievements unlocked
+  unlockedAchievements: Record<string, string>; // achievementId -> unlockedAt ISO string
 
   // Navigation state
   currentView: 'modules' | 'topic';
@@ -53,6 +62,32 @@ interface StudyStore {
   // Certificate actions
   setStudentName: (name: string) => void;
   setCompletionDate: (date: string) => void;
+
+  // Streak actions
+  checkAndUpdateStreak: () => void;
+  updateStudyDate: () => void;
+
+  // Achievement actions
+  unlockAchievement: (id: string) => void;
+  isAchievementUnlocked: (id: string) => boolean;
+  getTotalAchievements: () => number;
+  getUnlockedCount: () => number;
+  checkAndUnlockAchievements: () => string[]; // returns newly unlocked achievement IDs
+}
+
+function getTodayDateString(): string {
+  const now = new Date();
+  return now.getFullYear() + "-" +
+    String(now.getMonth() + 1).padStart(2, "0") + "-" +
+    String(now.getDate()).padStart(2, "0");
+}
+
+function getYesterdayDateString(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday.getFullYear() + "-" +
+    String(yesterday.getMonth() + 1).padStart(2, "0") + "-" +
+    String(yesterday.getDate()).padStart(2, "0");
 }
 
 export const useStudyStore = create<StudyStore>()(
@@ -64,12 +99,18 @@ export const useStudyStore = create<StudyStore>()(
       bookmarks: {},
       studentName: "",
       completionDate: null,
+      lastStudyDate: null,
+      currentStreak: 0,
+      longestStreak: 0,
+      unlockedAchievements: {},
       currentView: 'modules' as const,
       selectedModule: null,
       selectedTopic: null,
 
       toggleTopic: (moduleId: string, topicIndex: number) => {
         const key = `${moduleId}-${topicIndex}`;
+        const wasCompleted = !!get().completedTopics[key];
+
         set((state) => {
           const newCompleted = { ...state.completedTopics };
           if (newCompleted[key]) {
@@ -79,6 +120,12 @@ export const useStudyStore = create<StudyStore>()(
           }
           return { completedTopics: newCompleted };
         });
+
+        // If topic was just marked as complete, update study date
+        if (!wasCompleted) {
+          get().updateStudyDate();
+        }
+
         // Check if overall progress reached 100% and set completion date
         const state = get();
         let totalTopics = 0;
@@ -187,7 +234,16 @@ export const useStudyStore = create<StudyStore>()(
       },
 
       resetAll: () => {
-        set({ completedTopics: {}, quizResults: {} });
+        set({
+          completedTopics: {},
+          quizResults: {},
+          topicNotes: {},
+          bookmarks: {},
+          lastStudyDate: null,
+          currentStreak: 0,
+          longestStreak: 0,
+          unlockedAchievements: {},
+        });
       },
 
       navigateToTopic: (moduleId: string, topicIndex: number) => {
@@ -257,6 +313,113 @@ export const useStudyStore = create<StudyStore>()(
       setCompletionDate: (date: string) => {
         set({ completionDate: date });
       },
+
+      // Streak actions
+      checkAndUpdateStreak: () => {
+        const state = get();
+        const today = getTodayDateString();
+        const yesterday = getYesterdayDateString();
+
+        if (state.lastStudyDate === today) {
+          // Already studied today, do nothing
+          return;
+        }
+
+        if (state.lastStudyDate === yesterday) {
+          // Studied yesterday, continue streak
+          const newStreak = state.currentStreak + 1;
+          const newLongest = Math.max(state.longestStreak, newStreak);
+          set({
+            currentStreak: newStreak,
+            longestStreak: newLongest,
+            lastStudyDate: today,
+          });
+        } else if (state.lastStudyDate !== null) {
+          // Streak broken - reset to 0 (but don't set lastStudyDate until they study)
+          set({ currentStreak: 0 });
+        }
+      },
+
+      updateStudyDate: () => {
+        const state = get();
+        const today = getTodayDateString();
+        const yesterday = getYesterdayDateString();
+
+        if (state.lastStudyDate === today) {
+          // Already studied today, do nothing
+          return;
+        }
+
+        if (state.lastStudyDate === yesterday) {
+          // Studied yesterday, increment streak
+          const newStreak = state.currentStreak + 1;
+          const newLongest = Math.max(state.longestStreak, newStreak);
+          set({
+            currentStreak: newStreak,
+            longestStreak: newLongest,
+            lastStudyDate: today,
+          });
+        } else {
+          // First time studying or streak was broken
+          const newStreak = 1;
+          const newLongest = Math.max(state.longestStreak, newStreak);
+          set({
+            currentStreak: newStreak,
+            longestStreak: newLongest,
+            lastStudyDate: today,
+          });
+        }
+      },
+
+      // Achievement actions
+      unlockAchievement: (id: string) => {
+        const state = get();
+        if (state.unlockedAchievements[id]) return; // already unlocked
+        set({
+          unlockedAchievements: {
+            ...state.unlockedAchievements,
+            [id]: new Date().toISOString(),
+          },
+        });
+      },
+
+      isAchievementUnlocked: (id: string) => {
+        return !!get().unlockedAchievements[id];
+      },
+
+      getTotalAchievements: () => {
+        return achievements.length;
+      },
+
+      getUnlockedCount: () => {
+        return Object.keys(get().unlockedAchievements).length;
+      },
+
+      checkAndUnlockAchievements: () => {
+        const state = get();
+        const getState = () => ({
+          completedTopics: state.completedTopics,
+          quizResults: state.quizResults,
+          topicNotes: state.topicNotes,
+          currentStreak: state.currentStreak,
+          longestStreak: state.longestStreak,
+          lastStudyDate: state.lastStudyDate,
+          unlockedAchievements: state.unlockedAchievements,
+        });
+
+        const newlyUnlocked: string[] = [];
+
+        for (const achievement of achievements) {
+          if (!state.unlockedAchievements[achievement.id]) {
+            if (achievement.condition(getState)) {
+              get().unlockAchievement(achievement.id);
+              newlyUnlocked.push(achievement.id);
+            }
+          }
+        }
+
+        return newlyUnlocked;
+      },
     }),
     {
       name: "d5-render-study-store",
@@ -267,6 +430,10 @@ export const useStudyStore = create<StudyStore>()(
         bookmarks: state.bookmarks,
         studentName: state.studentName,
         completionDate: state.completionDate,
+        lastStudyDate: state.lastStudyDate,
+        currentStreak: state.currentStreak,
+        longestStreak: state.longestStreak,
+        unlockedAchievements: state.unlockedAchievements,
       }),
     }
   )

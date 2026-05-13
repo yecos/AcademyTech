@@ -17,12 +17,15 @@ import {
   Search,
   Award,
   GitCompare,
+  Trophy,
+  Flame,
 } from "lucide-react";
 import { modules, Module } from "@/lib/curriculum";
 import { useStudyStore } from "@/lib/store";
 import { ProgressOverview } from "@/components/progress-overview";
 import { ModuleCard } from "@/components/module-card";
 import { QuizDialog } from "@/components/quiz-dialog";
+import { useAchievementChecker } from "@/hooks/use-achievement-checker";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +43,11 @@ export function StudyApp() {
   const [quizOpen, setQuizOpen] = useState(false);
   const resetAll = useStudyStore((s) => s.resetAll);
   const overallProgress = useStudyStore((s) => s.getOverallProgress());
+  const currentStreak = useStudyStore((s) => s.currentStreak);
+  const unlockedCount = useStudyStore((s) => s.getUnlockedCount());
+
+  // Initialize achievement checker (runs streak check + achievement checks + toasts)
+  useAchievementChecker();
 
   const handleEvaluar = (module: Module) => {
     setQuizModule(module);
@@ -141,12 +149,32 @@ export function StudyApp() {
                 Certificado
               </span>
             </Link>
+            <Link
+              href="/logros"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 hover:border-amber-500/30 transition-all duration-200"
+            >
+              <Trophy className="w-3 h-3 text-amber-400" />
+              <span className="text-[11px] font-medium text-amber-400">
+                Logros
+              </span>
+              {unlockedCount > 0 && (
+                <span className="text-[9px] bg-amber-500/20 text-amber-300 rounded-full px-1.5 py-0">
+                  {unlockedCount}
+                </span>
+              )}
+            </Link>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight flex items-center justify-center gap-3">
             Academia{" "}
             <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
               D5 Render
             </span>
+            {currentStreak > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 text-sm">
+                <Flame className="w-4 h-4 text-amber-400" />
+                <span className="text-amber-400 font-bold">{currentStreak}</span>
+              </span>
+            )}
           </h1>
           <p className="text-sm text-gray-400 max-w-md mx-auto">
             Sigue tu progreso a través del curso completo de D5 Render.
