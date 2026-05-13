@@ -1,0 +1,128 @@
+"use client";
+
+import { motion } from "framer-motion";
+import {
+  BookOpen,
+  CheckCircle2,
+  Trophy,
+  TrendingUp,
+  Target,
+} from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { useStudyStore } from "@/lib/store";
+import { modules } from "@/lib/curriculum";
+
+export function ProgressOverview() {
+  const getOverallProgress = useStudyStore((s) => s.getOverallProgress);
+  const getTotalCompletedTopics = useStudyStore(
+    (s) => s.getTotalCompletedTopics
+  );
+  const getTotalTopics = useStudyStore((s) => s.getTotalTopics);
+  const getAverageQuizScore = useStudyStore((s) => s.getAverageQuizScore);
+  const quizResults = useStudyStore((s) => s.quizResults);
+  const getModuleProgress = useStudyStore((s) => s.getModuleProgress);
+
+  const overallProgress = getOverallProgress();
+  const completedTopics = getTotalCompletedTopics();
+  const totalTopics = getTotalTopics();
+  const avgQuizScore = getAverageQuizScore();
+  const quizzesCompleted = Object.keys(quizResults).length;
+  const modulesCompleted = modules.filter(
+    (m) => getModuleProgress(m.id) === 100
+  ).length;
+
+  const stats = [
+    {
+      icon: BookOpen,
+      label: "Temas Completados",
+      value: `${completedTopics}/${totalTopics}`,
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-500/10",
+    },
+    {
+      icon: Trophy,
+      label: "Módulos Completados",
+      value: `${modulesCompleted}/${modules.length}`,
+      color: "text-amber-400",
+      bgColor: "bg-amber-500/10",
+    },
+    {
+      icon: Target,
+      label: "Evaluaciones Hechas",
+      value: `${quizzesCompleted}/${modules.length}`,
+      color: "text-sky-400",
+      bgColor: "bg-sky-500/10",
+    },
+    {
+      icon: TrendingUp,
+      label: "Promedio Evaluaciones",
+      value: quizzesCompleted > 0 ? `${avgQuizScore}%` : "—",
+      color: "text-violet-400",
+      bgColor: "bg-violet-500/10",
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Overall Progress */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="glass-card rounded-2xl p-6 space-y-4"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-emerald-500/15">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                Progreso General del Curso
+              </h2>
+              <p className="text-sm text-gray-400">
+                Avanza por todos los módulos para completar el curso
+              </p>
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-emerald-400">
+            {overallProgress}%
+          </div>
+        </div>
+        <div className="relative">
+          <Progress
+            value={overallProgress}
+            className="h-3 bg-white/5 rounded-full overflow-hidden"
+          />
+          <motion.div
+            className="absolute top-0 left-0 h-3 rounded-full progress-emerald"
+            initial={{ width: 0 }}
+            animate={{ width: `${overallProgress}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          />
+        </div>
+      </motion.div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {stats.map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 * index }}
+            className="glass-card rounded-xl p-4 text-center"
+          >
+            <div
+              className={`inline-flex p-2 rounded-lg ${stat.bgColor} mb-2`}
+            >
+              <stat.icon className={`w-4 h-4 ${stat.color}`} />
+            </div>
+            <div className="text-xl font-bold text-white">{stat.value}</div>
+            <div className="text-xs text-gray-400 mt-0.5">{stat.label}</div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
