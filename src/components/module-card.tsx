@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   BookOpen,
+  Bookmark,
   CheckCircle2,
   ClipboardCheck,
   Trophy,
@@ -39,6 +40,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
   const progress = useStudyStore((s) => s.getModuleProgress(module.id));
   const toggleTopic = useStudyStore((s) => s.toggleTopic);
   const isTopicCompleted = useStudyStore((s) => s.isTopicCompleted);
+  const isBookmarked = useStudyStore((s) => s.isBookmarked);
   const quizResult = useStudyStore((s) => s.quizResults[module.id]);
 
   const isComplete = progress === 100;
@@ -169,6 +171,9 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                         <Clock className="w-2.5 h-2.5" />
                         {topic.estimatedTime}
                       </span>
+                      {isBookmarked(module.id, topicIndex) && (
+                        <Bookmark className="w-3 h-3 text-emerald-400 fill-emerald-400 shrink-0" />
+                      )}
                       <ChevronRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-emerald-400 transition-colors shrink-0" />
                     </button>
                   </motion.div>

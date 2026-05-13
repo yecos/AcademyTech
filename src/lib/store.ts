@@ -13,6 +13,8 @@ interface QuizResult {
 interface StudyStore {
   completedTopics: Record<string, boolean>; // "moduleId-topicIndex" -> true
   quizResults: Record<string, QuizResult>; // moduleId -> QuizResult
+  topicNotes: Record<string, string>; // "moduleId-topicIndex" -> note text
+  bookmarks: Record<string, boolean>; // "moduleId-topicIndex" -> true
 
   // Navigation state
   currentView: 'modules' | 'topic';
@@ -34,6 +36,15 @@ interface StudyStore {
   resetAll: () => void;
   navigateToTopic: (moduleId: string, topicIndex: number) => void;
   navigateToModules: () => void;
+
+  // Notes actions
+  saveTopicNote: (moduleId: string, topicIndex: number, note: string) => void;
+  getTopicNote: (moduleId: string, topicIndex: number) => string;
+
+  // Bookmarks actions
+  toggleBookmark: (moduleId: string, topicIndex: number) => void;
+  isBookmarked: (moduleId: string, topicIndex: number) => boolean;
+  getBookmarkedTopics: () => Array<{ moduleId: string; topicIndex: number; moduleName: string; topicName: string }>;
 }
 
 export const useStudyStore = create<StudyStore>()(
@@ -41,6 +52,8 @@ export const useStudyStore = create<StudyStore>()(
     (set, get) => ({
       completedTopics: {},
       quizResults: {},
+      topicNotes: {},
+      bookmarks: {},
       currentView: 'modules' as const,
       selectedModule: null,
       selectedTopic: null,
@@ -159,12 +172,65 @@ export const useStudyStore = create<StudyStore>()(
       navigateToModules: () => {
         set({ currentView: 'modules', selectedModule: null, selectedTopic: null });
       },
+
+      // Notes actions
+      saveTopicNote: (moduleId: string, topicIndex: number, note: string) => {
+        const key = `${moduleId}-${topicIndex}`;
+        set((state) => ({
+          topicNotes: { ...state.topicNotes, [key]: note },
+        }));
+      },
+
+      getTopicNote: (moduleId: string, topicIndex: number) => {
+        const key = `${moduleId}-${topicIndex}`;
+        return get().topicNotes[key] || "";
+      },
+
+      // Bookmarks actions
+      toggleBookmark: (moduleId: string, topicIndex: number) => {
+        const key = `${moduleId}-${topicIndex}`;
+        set((state) => {
+          const newBookmarks = { ...state.bookmarks };
+          if (newBookmarks[key]) {
+            delete newBookmarks[key];
+          } else {
+            newBookmarks[key] = true;
+          }
+          return { bookmarks: newBookmarks };
+        });
+      },
+
+      isBookmarked: (moduleId: string, topicIndex: number) => {
+        const key = `${moduleId}-${topicIndex}`;
+        return !!get().bookmarks[key];
+      },
+
+      getBookmarkedTopics: () => {
+        const state = get();
+        const result: Array<{ moduleId: string; topicIndex: number; moduleName: string; topicName: string }> = [];
+        for (const mod of modules) {
+          for (let i = 0; i < mod.topics.length; i++) {
+            const key = `${mod.id}-${i}`;
+            if (state.bookmarks[key]) {
+              result.push({
+                moduleId: mod.id,
+                topicIndex: i,
+                moduleName: `Módulo ${mod.number}: ${mod.title}`,
+                topicName: mod.topics[i].name,
+              });
+            }
+          }
+        }
+        return result;
+      },
     }),
     {
       name: "d5-render-study-store",
       partialize: (state) => ({
         completedTopics: state.completedTopics,
         quizResults: state.quizResults,
+        topicNotes: state.topicNotes,
+        bookmarks: state.bookmarks,
       }),
     }
   )

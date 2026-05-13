@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
   BookOpen,
+  Bookmark,
   GraduationCap,
   RotateCcw,
   Sparkles,
@@ -85,6 +86,15 @@ export function StudyApp() {
               <Keyboard className="w-3 h-3 text-gray-400" />
               <span className="text-[11px] font-medium text-gray-400 hover:text-gray-300">
                 Atajos
+              </span>
+            </Link>
+            <Link
+              href="/marcadores"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/3 border border-white/8 hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
+            >
+              <Bookmark className="w-3 h-3 text-gray-400" />
+              <span className="text-[11px] font-medium text-gray-400 hover:text-gray-300">
+                Marcadores
               </span>
             </Link>
           </div>
