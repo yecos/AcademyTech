@@ -15,6 +15,8 @@ import {
   Keyboard,
   AlertTriangle,
   Search,
+  Award,
+  GitCompare,
 } from "lucide-react";
 import { modules, Module } from "@/lib/curriculum";
 import { useStudyStore } from "@/lib/store";
@@ -117,6 +119,28 @@ export function StudyApp() {
                 Buscar
               </span>
             </Link>
+            <Link
+              href="/comparar"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/3 border border-white/8 hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
+            >
+              <GitCompare className="w-3 h-3 text-gray-400" />
+              <span className="text-[11px] font-medium text-gray-400 hover:text-gray-300">
+                Comparar
+              </span>
+            </Link>
+            <Link
+              href="/certificado"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-200 ${
+                overallProgress === 100
+                  ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15 hover:border-emerald-500/30"
+                  : "bg-white/3 border-white/8 hover:bg-white/6 hover:border-emerald-500/20 opacity-50"
+              }`}
+            >
+              <Award className={`w-3 h-3 ${overallProgress === 100 ? "text-emerald-400" : "text-gray-400"}`} />
+              <span className={`text-[11px] font-medium ${overallProgress === 100 ? "text-emerald-400" : "text-gray-400"}`}>
+                Certificado
+              </span>
+            </Link>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
             Academia{" "}
@@ -207,7 +231,7 @@ export function StudyApp() {
         >
           <div className="glass-card rounded-xl p-5">
             {overallProgress === 100 ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <GraduationCap className="w-8 h-8 text-emerald-400 mx-auto" />
                 <h3 className="text-lg font-bold text-white">
                   ¡Felicidades! 🎉
@@ -216,6 +240,12 @@ export function StudyApp() {
                   Has completado todos los temas del curso de D5 Render.
                   ¡Ahora eres un experto!
                 </p>
+                <Link href="/certificado">
+                  <Button className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2 mt-2">
+                    <Award className="w-4 h-4" />
+                    Obtener Certificado
+                  </Button>
+                </Link>
               </div>
             ) : (
               <div className="space-y-2">

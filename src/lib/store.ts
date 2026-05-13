@@ -16,6 +16,10 @@ interface StudyStore {
   topicNotes: Record<string, string>; // "moduleId-topicIndex" -> note text
   bookmarks: Record<string, boolean>; // "moduleId-topicIndex" -> true
 
+  // Certificate state
+  studentName: string;
+  completionDate: string | null;
+
   // Navigation state
   currentView: 'modules' | 'topic';
   selectedModule: string | null;
@@ -45,6 +49,10 @@ interface StudyStore {
   toggleBookmark: (moduleId: string, topicIndex: number) => void;
   isBookmarked: (moduleId: string, topicIndex: number) => boolean;
   getBookmarkedTopics: () => Array<{ moduleId: string; topicIndex: number; moduleName: string; topicName: string }>;
+
+  // Certificate actions
+  setStudentName: (name: string) => void;
+  setCompletionDate: (date: string) => void;
 }
 
 export const useStudyStore = create<StudyStore>()(
@@ -54,6 +62,8 @@ export const useStudyStore = create<StudyStore>()(
       quizResults: {},
       topicNotes: {},
       bookmarks: {},
+      studentName: "",
+      completionDate: null,
       currentView: 'modules' as const,
       selectedModule: null,
       selectedTopic: null,
@@ -69,6 +79,21 @@ export const useStudyStore = create<StudyStore>()(
           }
           return { completedTopics: newCompleted };
         });
+        // Check if overall progress reached 100% and set completion date
+        const state = get();
+        let totalTopics = 0;
+        let completedCount = 0;
+        for (const mod of modules) {
+          totalTopics += mod.topics.length;
+          for (let i = 0; i < mod.topics.length; i++) {
+            if (state.completedTopics[`${mod.id}-${i}`]) {
+              completedCount++;
+            }
+          }
+        }
+        if (totalTopics > 0 && completedCount === totalTopics && !state.completionDate) {
+          set({ completionDate: new Date().toISOString() });
+        }
       },
 
       isTopicCompleted: (moduleId: string, topicIndex: number) => {
@@ -223,6 +248,15 @@ export const useStudyStore = create<StudyStore>()(
         }
         return result;
       },
+
+      // Certificate actions
+      setStudentName: (name: string) => {
+        set({ studentName: name });
+      },
+
+      setCompletionDate: (date: string) => {
+        set({ completionDate: date });
+      },
     }),
     {
       name: "d5-render-study-store",
@@ -231,6 +265,8 @@ export const useStudyStore = create<StudyStore>()(
         quizResults: state.quizResults,
         topicNotes: state.topicNotes,
         bookmarks: state.bookmarks,
+        studentName: state.studentName,
+        completionDate: state.completionDate,
       }),
     }
   )
