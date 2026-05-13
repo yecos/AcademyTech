@@ -1,24 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 import { getAchievementById } from "@/lib/achievements";
 import { toast } from "sonner";
 
 export function useAchievementChecker() {
-  const checkAndUnlockAchievements = useStudyStore((s) => s.checkAndUnlockAchievements);
-  const checkAndUpdateStreak = useStudyStore((s) => s.checkAndUpdateStreak);
-  const unlockedAchievements = useStudyStore((s) => s.unlockedAchievements);
-  const completedTopics = useStudyStore((s) => s.completedTopics);
-  const quizResults = useStudyStore((s) => s.quizResults);
-  const topicNotes = useStudyStore((s) => s.topicNotes);
-  const currentStreak = useStudyStore((s) => s.currentStreak);
-  const lastStudyDate = useStudyStore((s) => s.lastStudyDate);
-
+  const course = useCourse();
   const isInitialMountRef = useRef(true);
 
   const runCheck = useCallback((showToast: boolean) => {
-    const newlyUnlocked = checkAndUnlockAchievements();
+    const newlyUnlocked = course.checkAndUnlockAchievements();
 
     if (showToast && newlyUnlocked.length > 0) {
       for (const id of newlyUnlocked) {
@@ -31,14 +23,14 @@ export function useAchievementChecker() {
         }
       }
     }
-  }, [checkAndUnlockAchievements]);
+  }, [course]);
 
   // On mount: check streak and achievements (without showing toasts)
   useEffect(() => {
-    checkAndUpdateStreak();
+    course.updateStreak();
     runCheck(false);
     isInitialMountRef.current = false;
-  }, [checkAndUpdateStreak, runCheck]);
+  }, [runCheck, course]);
 
   // Re-check achievements when relevant state changes
   useEffect(() => {
@@ -49,5 +41,5 @@ export function useAchievementChecker() {
     }, 100);
 
     return () => clearTimeout(timeout);
-  }, [completedTopics, quizResults, topicNotes, currentStreak, lastStudyDate, runCheck]);
+  }, [course.progress, course.quizResults, course.notes, course.streak.current, course.streak.lastDate, runCheck]);
 }

@@ -21,7 +21,7 @@ import {
   Flame,
 } from "lucide-react";
 import { modules, Module } from "@/lib/curriculum";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 import { ProgressOverview } from "@/components/progress-overview";
 import { ModuleCard } from "@/components/module-card";
 import { QuizDialog } from "@/components/quiz-dialog";
@@ -44,10 +44,11 @@ import {
 export function StudyApp() {
   const [quizModule, setQuizModule] = useState<Module | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
-  const resetAll = useStudyStore((s) => s.resetAll);
-  const overallProgress = useStudyStore((s) => s.getOverallProgress());
-  const currentStreak = useStudyStore((s) => s.currentStreak);
-  const unlockedCount = useStudyStore((s) => s.getUnlockedCount());
+  const course = useCourse();
+  const resetAll = course.resetAll;
+  const overallProgress = course.getOverallProgress();
+  const currentStreak = course.streak.current;
+  const unlockedCount = course.getUnlockedCount();
 
   // Initialize achievement checker (runs streak check + achievement checks + toasts)
   useAchievementChecker();

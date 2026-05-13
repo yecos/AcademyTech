@@ -12,14 +12,15 @@ import {
   X,
 } from "lucide-react";
 import { modules } from "@/lib/curriculum";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
 export default function MarcadoresPage() {
   const router = useRouter();
-  const bookmarkedTopics = useStudyStore((s) => s.getBookmarkedTopics());
-  const toggleBookmark = useStudyStore((s) => s.toggleBookmark);
+  const course = useCourse();
+  const bookmarkedTopics = course.getBookmarkedTopics();
+  const toggleBookmark = course.toggleBookmark;
 
   // Group bookmarks by module
   const groupedBookmarks = bookmarkedTopics.reduce<

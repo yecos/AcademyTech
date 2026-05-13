@@ -16,7 +16,7 @@ import {
   Award,
   Zap,
 } from "lucide-react";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 import { achievements, achievementCategories, getAchievementById } from "@/lib/achievements";
 import { useAchievementChecker } from "@/hooks/use-achievement-checker";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -28,14 +28,12 @@ export default function LogrosPage() {
 
   useAchievementChecker();
 
-  const unlockedAchievements = useStudyStore((s) => s.unlockedAchievements);
-  const currentStreak = useStudyStore((s) => s.currentStreak);
-  const longestStreak = useStudyStore((s) => s.longestStreak);
-  const getTotalAchievements = useStudyStore((s) => s.getTotalAchievements);
-  const getUnlockedCount = useStudyStore((s) => s.getUnlockedCount);
-
-  const totalAchievements = getTotalAchievements();
-  const unlockedCount = getUnlockedCount();
+  const course = useCourse();
+  const unlockedAchievements = course.achievements;
+  const currentStreak = course.streak.current;
+  const longestStreak = course.streak.longest;
+  const totalAchievements = course.getTotalAchievements();
+  const unlockedCount = course.getUnlockedCount();
   const progressPercent = totalAchievements > 0 ? Math.round((unlockedCount / totalAchievements) * 100) : 0;
 
   const filteredAchievements =

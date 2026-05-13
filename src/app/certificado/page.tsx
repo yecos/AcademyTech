@@ -15,7 +15,9 @@ import {
   Star,
   Shield,
 } from "lucide-react";
+import { useCourse } from "@/hooks/use-course-context";
 import { useStudyStore } from "@/lib/store";
+import { useSession } from "next-auth/react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
@@ -24,14 +26,19 @@ export default function CertificadoPage() {
   const certificateRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const getOverallProgress = useStudyStore((s) => s.getOverallProgress);
-  const studentName = useStudyStore((s) => s.studentName);
-  const setStudentName = useStudyStore((s) => s.setStudentName);
-  const completionDate = useStudyStore((s) => s.completionDate);
-  const setCompletionDate = useStudyStore((s) => s.setCompletionDate);
+  const course = useCourse();
+  const { status } = useSession();
+  const store = useStudyStore();
 
-  const overallProgress = getOverallProgress();
+  const overallProgress = course.getOverallProgress();
   const isComplete = overallProgress === 100;
+
+  // For student name and completion date, use store (local) for now
+  // These are display-only fields not stored in DB
+  const studentName = store.studentName;
+  const setStudentName = store.setStudentName;
+  const completionDate = store.completionDate;
+  const setCompletionDate = store.setCompletionDate;
 
   const displayName = studentName || "Nombre del Estudiante";
 

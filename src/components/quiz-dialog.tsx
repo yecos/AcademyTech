@@ -24,7 +24,7 @@ import {
   Award,
 } from "lucide-react";
 import { Module, QuizQuestion } from "@/lib/curriculum";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 
 interface QuizDialogProps {
   module: Module;
@@ -42,8 +42,7 @@ export function QuizDialog({
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
 
-  const saveQuizResult = useStudyStore((s) => s.saveQuizResult);
-  const existingResult = useStudyStore((s) => s.quizResults[module.id]);
+  const course = useCourse();
 
   const questions = module.quiz;
   const totalQuestions = questions.length;
@@ -61,13 +60,7 @@ export function QuizDialog({
     }
     setScore(correct);
     setSubmitted(true);
-    saveQuizResult({
-      moduleId: module.id,
-      score: correct,
-      totalQuestions,
-      answers,
-      completedAt: new Date().toISOString(),
-    });
+    course.saveQuizResult(module.id, correct, totalQuestions, JSON.stringify(answers));
   };
 
   const handleRetake = () => {

@@ -26,29 +26,28 @@ import {
 } from "lucide-react";
 import { modules } from "@/lib/curriculum";
 import { getTopicContent } from "@/lib/topic-content";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
 function TopicNotes({ moduleId, topicIndex }: { moduleId: string; topicIndex: number }) {
-  const saveTopicNote = useStudyStore((s) => s.saveTopicNote);
-  const getTopicNote = useStudyStore((s) => s.getTopicNote);
-  const [noteText, setNoteText] = useState(() => getTopicNote(moduleId, topicIndex));
+  const course = useCourse();
+  const [noteText, setNoteText] = useState(() => course.getTopicNote(moduleId, topicIndex));
   const [savedIndicator, setSavedIndicator] = useState(false);
 
   // Debounced auto-save for notes
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const currentNote = getTopicNote(moduleId, topicIndex);
+      const currentNote = course.getTopicNote(moduleId, topicIndex);
       if (noteText !== currentNote) {
-        saveTopicNote(moduleId, topicIndex, noteText);
+        course.saveNote(moduleId, topicIndex, noteText);
         setSavedIndicator(true);
         const hideTimer = setTimeout(() => setSavedIndicator(false), 2000);
         return () => clearTimeout(hideTimer);
       }
     }, 500);
     return () => clearTimeout(timeout);
-  }, [noteText, moduleId, topicIndex, getTopicNote, saveTopicNote]);
+  }, [noteText, moduleId, topicIndex, course]);
 
   return (
     <motion.section
@@ -93,10 +92,11 @@ export default function TopicPage() {
   const moduleData = modules.find((m) => m.id === moduleId);
   const content = getTopicContent(moduleId, topicIndex);
 
-  const toggleTopic = useStudyStore((s) => s.toggleTopic);
-  const isCompleted = useStudyStore((s) => s.isTopicCompleted(moduleId, topicIndex));
-  const toggleBookmark = useStudyStore((s) => s.toggleBookmark);
-  const bookmarked = useStudyStore((s) => s.isBookmarked(moduleId, topicIndex));
+  const course = useCourse();
+  const toggleTopic = course.toggleProgress;
+  const isCompleted = course.isTopicCompleted(moduleId, topicIndex);
+  const toggleBookmark = course.toggleBookmark;
+  const bookmarked = course.isBookmarked(moduleId, topicIndex);
 
   if (!moduleData || topicIndex < 0 || topicIndex >= moduleData.topics.length) {
     return (
@@ -438,7 +438,7 @@ export default function TopicPage() {
                 className={`w-2.5 h-2.5 rounded-full transition-all ${
                   i === topicIndex
                     ? "bg-emerald-500 dark:bg-emerald-400 w-6"
-                    : useStudyStore.getState().isTopicCompleted(moduleId, i)
+                    : course.isTopicCompleted(moduleId, i)
                       ? "bg-emerald-500/50"
                       : "bg-gray-300 dark:bg-white/10 hover:bg-gray-400 dark:hover:bg-white/20"
                 }`}

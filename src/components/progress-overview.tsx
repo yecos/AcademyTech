@@ -9,26 +9,19 @@ import {
   Target,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 import { modules } from "@/lib/curriculum";
 
 export function ProgressOverview() {
-  const getOverallProgress = useStudyStore((s) => s.getOverallProgress);
-  const getTotalCompletedTopics = useStudyStore(
-    (s) => s.getTotalCompletedTopics
-  );
-  const getTotalTopics = useStudyStore((s) => s.getTotalTopics);
-  const getAverageQuizScore = useStudyStore((s) => s.getAverageQuizScore);
-  const quizResults = useStudyStore((s) => s.quizResults);
-  const getModuleProgress = useStudyStore((s) => s.getModuleProgress);
+  const course = useCourse();
 
-  const overallProgress = getOverallProgress();
-  const completedTopics = getTotalCompletedTopics();
-  const totalTopics = getTotalTopics();
-  const avgQuizScore = getAverageQuizScore();
-  const quizzesCompleted = Object.keys(quizResults).length;
+  const overallProgress = course.getOverallProgress();
+  const completedTopics = course.getTotalCompletedTopics();
+  const totalTopics = modules.reduce((sum, m) => sum + m.topics.length, 0);
+  const avgQuizScore = course.getAverageQuizScore();
+  const quizzesCompleted = Object.keys(course.quizResults).length;
   const modulesCompleted = modules.filter(
-    (m) => getModuleProgress(m.id) === 100
+    (m) => course.getModuleProgress(m.id) === 100
   ).length;
 
   const stats = [

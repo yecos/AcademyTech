@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
+import { CourseDataProvider } from "@/hooks/use-course-context";
 import { ServiceWorkerRegistration } from "@/components/sw-registration";
 
 const geistSans = Geist({
@@ -60,9 +61,11 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            {children}
-            <Toaster />
-            <ServiceWorkerRegistration />
+            <CourseDataProvider>
+              {children}
+              <Toaster />
+              <ServiceWorkerRegistration />
+            </CourseDataProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

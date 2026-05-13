@@ -24,7 +24,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Module, TopicInfo } from "@/lib/curriculum";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 
 interface ModuleCardProps {
   module: Module;
@@ -34,20 +34,19 @@ interface ModuleCardProps {
 
 export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
   const router = useRouter();
-  const completedTopics = useStudyStore((s) =>
-    s.getModuleCompletedCount(module.id)
-  );
+  const course = useCourse();
+
+  const completedTopics = course.getModuleCompletedCount(module.id);
   const totalTopics = module.topics.length;
-  const progress = useStudyStore((s) => s.getModuleProgress(module.id));
-  const toggleTopic = useStudyStore((s) => s.toggleTopic);
-  const isTopicCompleted = useStudyStore((s) => s.isTopicCompleted);
-  const isBookmarked = useStudyStore((s) => s.isBookmarked);
-  const quizResult = useStudyStore((s) => s.quizResults[module.id]);
+  const progress = course.getModuleProgress(module.id);
+  const isTopicCompleted = course.isTopicCompleted;
+  const isBookmarked = course.isBookmarked;
+  const quizResult = course.quizResults[module.id];
 
   const isComplete = progress === 100;
   const hasQuiz = !!quizResult;
   const quizScore = quizResult
-    ? Math.round((quizResult.score / quizResult.totalQuestions) * 100)
+    ? Math.round((quizResult.score / quizResult.total) * 100)
     : 0;
 
   return (
@@ -158,7 +157,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                       id={key}
                       checked={checked}
                       onCheckedChange={() =>
-                        toggleTopic(module.id, topicIndex)
+                        course.toggleProgress(module.id, topicIndex)
                       }
                       onClick={(e) => e.stopPropagation()}
                       className="border-gray-300 dark:border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"

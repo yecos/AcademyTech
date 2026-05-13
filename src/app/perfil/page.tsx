@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
-import { useStudyStore } from "@/lib/store";
+import { useCourse } from "@/hooks/use-course-context";
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -37,17 +37,14 @@ export default function PerfilPage() {
     setEditName(userName);
   }
 
-  // Study stats from store
-  const overallProgress = useStudyStore((s) => s.getOverallProgress());
-  const currentStreak = useStudyStore((s) => s.currentStreak);
-  const longestStreak = useStudyStore((s) => s.longestStreak);
-  const getTotalCompletedTopics = useStudyStore((s) => s.getTotalCompletedTopics);
-  const getAverageQuizScore = useStudyStore((s) => s.getAverageQuizScore);
-  const quizResults = useStudyStore((s) => s.quizResults);
-
-  const completedTopics = getTotalCompletedTopics();
-  const quizzesTaken = Object.keys(quizResults).length;
-  const avgScore = getAverageQuizScore();
+  // Study stats from course data hook
+  const course = useCourse();
+  const overallProgress = course.getOverallProgress();
+  const currentStreak = course.streak.current;
+  const longestStreak = course.streak.longest;
+  const completedTopics = course.getTotalCompletedTopics();
+  const avgScore = course.getAverageQuizScore();
+  const quizzesTaken = Object.keys(course.quizResults).length;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -417,7 +414,7 @@ export default function PerfilPage() {
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Perfil de la Academia D5 Render —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
-                Tu progreso se guarda localmente
+                Tu progreso se guarda en la base de datos
               </span>
             </p>
           </div>
