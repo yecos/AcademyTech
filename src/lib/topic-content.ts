@@ -2591,4 +2591,658 @@ Otra técnica es renderizar una imagen de profundidad (Z-depth pass) que codific
   ],
 });
 
+// ============================================================
+// MÓDULO 9: Animación
+// ============================================================
+
+register({
+  moduleId: "modulo-9",
+  topicIndex: 0,
+  title: "Introducción a la línea de tiempo",
+  objective: "Conocer la interfaz de la línea de tiempo de D5 Render y entender los conceptos básicos de animación: keyframes, interpolación y reproducción.",
+  explanation: `La línea de tiempo (Timeline) es la herramienta central para crear animaciones en D5 Render. Funciona de manera similar a las líneas de tiempo de software de edición de video y animación, mostrando una representación visual del tiempo donde puedes colocar y editar keyframes que definen los estados de los objetos en momentos específicos.
+
+Para acceder a la línea de tiempo en D5 Render, haz clic en el botón de Timeline en la barra de herramientas o usa el atajo de teclado. La línea de tiempo aparece en la parte inferior de la pantalla como una franja horizontal con marcas de tiempo, un cursor de reproducción (playhead) y pistas para los diferentes elementos animados.
+
+El concepto fundamental de la animación es el keyframe (fotograma clave). Un keyframe define el estado de una propiedad (posición, rotación, escala, etc.) en un momento específico del tiempo. Por ejemplo, si quieres que una cámara se mueva del punto A al punto B en 5 segundos, creas un keyframe en el segundo 0 con la cámara en A, y otro keyframe en el segundo 5 con la cámara en B. D5 Render interpola automáticamente los estados intermedios, creando un movimiento suave.
+
+La interpolación es el proceso de calcular los estados intermedios entre keyframes. D5 Render usa interpolación suave (smooth) por defecto, que crea transiciones fluidas con aceleración y desaceleración natural. También puedes elegir interpolación lineal, que mantiene una velocidad constante entre keyframes.
+
+La duración de la animación se mide en segundos y se configura en los ajustes de la línea de tiempo. Los frames por segundo (FPS) determinan la fluidez: 24 FPS es cinematográfico, 30 FPS es estándar para web, y 60 FPS es ultra suave. Mayor FPS significa más frames a renderizar y por lo tanto más tiempo de render.
+
+Para crear un keyframe, selecciona el objeto que quieres animar, mueve el playhead al momento deseado, ajusta las propiedades del objeto (posición, rotación, etc.), y haz clic en el botón de añadir keyframe o usa el atajo de teclado. Un diamante aparece en la línea de tiempo indicando la posición del keyframe.
+
+La reproducción te permite previsualizar la animación en tiempo real directamente en el viewport. Usa los controles de reproducción (play, pause, stop) o arrastra el playhead manualmente para revisar la animación a cualquier velocidad. Esta previsualización es esencial para verificar que los movimientos son suaves y naturales antes de renderizar.`,
+  keyPoints: [
+    "Timeline: interfaz para crear y editar animaciones en D5 Render",
+    "Keyframe: define el estado de una propiedad en un momento específico",
+    "Interpolación: D5 Render calcula automáticamente los estados intermedios",
+    "Interpolación suave (por defecto): transiciones fluidas con aceleración/desaceleración",
+    "FPS: 24 (cine), 30 (web), 60 (ultra suave)",
+    "Previsualización en tiempo real antes de renderizar",
+  ],
+  steps: [
+    {
+      title: "Abrir la línea de tiempo",
+      description: "Abre la línea de tiempo en D5 Render. Familiarízate con la interfaz: las marcas de tiempo, el playhead, las pistas de objetos y los controles de reproducción. Observa cómo se ve vacía antes de añadir keyframes.",
+    },
+    {
+      title: "Crear keyframes de cámara",
+      description: "Selecciona la cámara y muévela a una posición inicial. Añade un keyframe en el segundo 0. Luego mueve el playhead al segundo 5, reposiciona la cámara, y añade otro keyframe. Reproduce la animación para ver el movimiento.",
+      tip: "Empieza con solo 2 keyframes para entender el concepto básico antes de crear animaciones complejas.",
+    },
+    {
+      title: "Ajustar la interpolación",
+      description: "Selecciona los keyframes y cambia el tipo de interpolación entre suave y lineal. Observa la diferencia: la interpolación suave acelera y desacelera, la lineal mantiene velocidad constante.",
+    },
+    {
+      title: "Añadir más keyframes",
+      description: "Añade un tercer keyframe en el segundo 10 con la cámara en otra posición. Reproduce la animación completa. Observa cómo la cámara se mueve entre los tres puntos con transiciones suaves.",
+    },
+  ],
+  practice: "Crea una animación de cámara simple con 4 keyframes que recorra un espacio. Reproduce la animación y ajusta los keyframes hasta que el movimiento sea suave y natural.",
+  extraResources: [
+    { label: "Animación en D5 Render", url: "https://www.d5render.com/help/animation" },
+  ],
+});
+
+register({
+  moduleId: "modulo-9",
+  topicIndex: 1,
+  title: "Keyframes y animación de cámara",
+  objective: "Dominar la creación de keyframes para animar la cámara, creando recorridos fluidos y cinematográficos a través de la escena.",
+  explanation: `La animación de cámara es el tipo más común de animación en visualización arquitectónica y es la base de los recorridos virtuales. Un buen recorrido de cámara puede hacer que el espectador se sienta como si realmente estuviera caminando por el edificio, experimentando la secuencia de espacios y la relación entre interior y exterior.
+
+Para crear un recorrido de cámara efectivo, necesitas planificar la ruta antes de empezar a crear keyframes. Piensa en qué espacios quieres mostrar, en qué orden, y desde qué perspectiva. Un recorrido típico empieza con una vista exterior del edificio, se acerca a la entrada, entra al interior, recorre los espacios principales, y termina con una vista memorable (una ventana con vista, una terraza, o el edificio desde lejos al atardecer).
+
+La velocidad de la cámara debe variar para mantener el interés. Las aproximaciones a espacios importantes deben ser más lentas, dando tiempo al espectador para apreciar los detalles. Las transiciones entre espacios pueden ser más rápidas. Evita mantener la misma velocidad durante todo el recorrido, ya que se vuelve monótona.
+
+La altura de la cámara también es importante. Para simular una persona caminando, mantén la cámara a aproximadamente 1.60m de altura. Para vistas más dramáticas, puedes subir la cámara ligeramente (1.80-2.00m) para mostrar más del espacio. Evita cambiar la altura bruscamente, ya que crea un efecto desorientador.
+
+La dirección de la mirada es tan importante como la posición de la cámara. En D5 Render, puedes animar la dirección de la cámara independientemente de su posición. Esto te permite hacer que la cámara mire hacia diferentes elementos mientras se mueve, creando un recorrido más natural e interesante que si la cámara siempre mirara hacia adelante.
+
+Los ángulos de las curvas del recorrido afectan la suavidad del movimiento. Evita giros bruscos de la cámara, ya que son desorientadores para el espectador. Los cambios de dirección deben ser graduales, idealmente con curvas suaves. D5 Render suaviza automáticamente las curvas entre keyframes, pero puedes ajustar manualmente los puntos de control para refinar el movimiento.
+
+Para recorridos de interior, es útil seguir las líneas arquitectónicas del espacio: mover la cámara a lo largo de un corredor, girar en las esquinas, y detenerse en los puntos donde el espacio se abre. Esto crea un recorrido que tiene sentido arquitectónico y muestra la secuencia de experiencias como el diseñador la concibió.`,
+  keyPoints: [
+    "Planificar la ruta antes de crear keyframes",
+    "Variar la velocidad: lento en espacios importantes, rápido en transiciones",
+    "Mantener la cámara a ~1.60m para simular una persona",
+    "Animar la dirección de la mirada independientemente de la posición",
+    "Evitar giros bruscos: cambios de dirección graduales y suaves",
+    "Seguir líneas arquitectónicas del espacio en recorridos de interior",
+  ],
+  steps: [
+    {
+      title: "Planificar el recorrido",
+      description: "En papel o mentalmente, define la ruta: empieza con una vista exterior, acércate a la entrada, entra al edificio, recorre 2-3 espacios interiores, y termina con una vista memorable. Define dónde quieres que la cámara se detenga o vaya más lento.",
+    },
+    {
+      title: "Crear keyframes de posición",
+      description: "Empieza en la primera posición y crea un keyframe en el segundo 0. Avanza 3 segundos, mueve la cámara al siguiente punto, crea otro keyframe. Repite hasta completar el recorrido. No te preocupes por la suavidad aún.",
+      tip: "Usa pocos keyframes al principio (5-8 para un recorrido de 30 segundos). Puedes añadir más después para refinar.",
+    },
+    {
+      title: "Ajustar la dirección de la mirada",
+      description: "Para cada keyframe, ajusta hacia dónde mira la cámara. En los puntos importantes, haz que la cámara mire hacia el elemento destacado del espacio. En las transiciones, haz que mire hacia donde se dirige.",
+    },
+    {
+      title: "Refinar la suavidad del movimiento",
+      description: "Reproduce la animación y busca movimientos bruscos o giros repentinos. Añade keyframes intermedios para suavizar las transiciones. Ajusta la interpolación para que las aceleraciones y desaceleraciones sean naturales.",
+    },
+    {
+      title: "Ajustar la velocidad",
+      description: "Haz que la cámara se mueva más lento en los espacios importantes (añadiendo más tiempo entre keyframes) y más rápido en las transiciones (menos tiempo entre keyframes). Verifica que la velocidad variable mantiene el interés.",
+    },
+  ],
+  practice: "Crea un recorrido de cámara completo de 30 segundos a través de un proyecto. Incluye aproximación exterior, entrada, recorrido interior y vista final. Ajusta hasta que el movimiento sea fluido y cinematográfico.",
+  extraResources: [
+    { label: "Animación de cámara en D5 Render", url: "https://www.d5render.com/help/camera-animation" },
+  ],
+});
+
+register({
+  moduleId: "modulo-9",
+  topicIndex: 2,
+  title: "Animación de objetos y transformaciones",
+  objective: "Aprender a animar objetos en D5 Render, incluyendo posición, rotación y escala, para crear animaciones dinámicas más allá del recorrido de cámara.",
+  explanation: `Además de la cámara, D5 Render permite animar cualquier objeto de la escena. Esto abre un mundo de posibilidades para crear presentaciones dinámicas donde los elementos se mueven, aparecen o se transforman. La animación de objetos es especialmente útil para mostrar cómo funciona un espacio, cómo se abren puertas y ventanas, o cómo cambia la escena con el tiempo.
+
+Las propiedades animables de un objeto son: posición (X, Y, Z), rotación (X, Y, Z), y escala (X, Y, Z). Para animar cualquiera de estas propiedades, selecciona el objeto, mueve el playhead al momento deseado, ajusta la propiedad, y añade un keyframe. El proceso es idéntico al de la cámara.
+
+Una aplicación común es animar puertas y ventanas que se abren. Puedes animar la rotación de una puerta desde cerrada (0 grados) hasta abierta (90 grados) para mostrar cómo el espacio se conecta con el exterior. Esta animación es muy efectiva en recorridos donde la cámara se acerca a una puerta que se abre revelando un nuevo espacio.
+
+Otra aplicación es la animación de elementos dinámicos como persianas que suben, cortinas que se corren, o muebles modulares que se reconfiguran. Estas animaciones demuestran la flexibilidad de un espacio y son especialmente valoradas en proyectos donde la adaptabilidad es importante.
+
+La animación de escala permite hacer que objetos aparezcan o desaparezcan. Un objeto con escala 0 es invisible, y al animar su escala de 0 a 1, parece aparecer de la nada. Esta técnica es útil para presentaciones donde quieres revelar elementos gradualmente.
+
+La animación de luz también es posible en D5 Render. Puedes animar la intensidad de las luces para crear transiciones entre día y noche, o animar el color de la luz para cambiar el ambiente de la escena. Esto es poderoso para mostrar cómo un espacio se ve en diferentes momentos del día.
+
+Para animaciones complejas con muchos objetos, usa las capas de la línea de tiempo para organizar los keyframes. Cada objeto tiene su propia pista donde puedes ver y editar sus keyframes. Puedes expandir y colapsar las pistas para gestionar la complejidad.
+
+Un truco profesional es usar objetos de referencia invisibles durante el render. Por ejemplo, puedes crear un objeto vacío que se mueve a lo largo de una ruta y hacer que la cámara lo siga, creando un recorrido más controlado que si animas la cámara directamente.`,
+  keyPoints: [
+    "Propiedades animables: posición, rotación y escala (X, Y, Z)",
+    "Animar puertas/ventanas: rotación para mostrar apertura",
+    "Animación de escala: objetos que aparecen (escala 0 a 1) o desaparecen",
+    "Animación de luces: intensidad y color para transiciones día/noche",
+    "Usar pistas de la línea de tiempo para organizar objetos animados",
+    "Objetos de referencia invisibles para controlar recorridos complejos",
+  ],
+  steps: [
+    {
+      title: "Animar una puerta abriéndose",
+      description: "Selecciona una puerta en la escena. En el segundo 0, con la puerta cerrada, crea un keyframe de rotación. Avanza al segundo 2, rota la puerta 90 grados, y crea otro keyframe. Reproduce para ver la puerta abriéndose.",
+      tip: "Asegúrate de que el pivote de la puerta esté en el borde de las bisagras, no en el centro. De lo contrario, la puerta rotará incorrectamente.",
+    },
+    {
+      title: "Animar la intensidad de una luz",
+      description: "Selecciona una luz puntual. En el segundo 0, con intensidad baja, crea un keyframe. Avanza al segundo 3, sube la intensidad al máximo, y crea otro keyframe. Observa cómo la habitación se ilumina gradualmente.",
+    },
+    {
+      title: "Animar un objeto apareciendo",
+      description: "Selecciona un objeto decorativo. En el segundo 0, reduce su escala a 0 en todos los ejes y crea un keyframe. Avanza al segundo 2, restaura la escala a 1 y crea otro keyframe. Reproduce para ver el objeto apareciendo.",
+    },
+    {
+      title: "Combinar animaciones",
+      description: "Crea una escena donde: la cámara se acerca, una puerta se abre, la luz interior se enciende, y un objeto aparece. Coordina los keyframes para que las animaciones se sucedan de forma natural.",
+    },
+  ],
+  practice: "Crea una animación de 15 segundos donde la cámara se acerca a un edificio, una puerta se abre, la luz interior se enciende y la cámara entra al espacio. Coordina todas las animaciones para que fluyan naturalmente.",
+  extraResources: [
+    { label: "Animación de objetos en D5 Render", url: "https://www.d5render.com/help/object-animation" },
+  ],
+});
+
+register({
+  moduleId: "modulo-9",
+  topicIndex: 3,
+  title: "Animación de luces y materiales",
+  objective: "Aprender a animar propiedades de luces y materiales en D5 Render para crear transiciones atmosféricas y efectos dinámicos.",
+  explanation: `La animación de luces y materiales añade una capa adicional de dinamismo a las presentaciones arquitectónicas. Mientras que la animación de objetos y cámara muestra la geometría y el espacio, la animación de luces y materiales muestra el carácter y la atmósfera del proyecto, revelando cómo cambia su percepción bajo diferentes condiciones.
+
+La animación de luces permite crear transiciones entre diferentes estados de iluminación. El caso más impactante es la transición día-noche: empiezas con la escena iluminada por el sol, y gradualmente el sol se pone, las luces artificiales se encienden, y la escena pasa de un ambiente diurno a uno nocturno. Esta transición es especialmente poderosa porque muestra la versatilidad del proyecto.
+
+Para crear una transición día-noche, necesitas animar varias propiedades simultáneamente: la posición del sol (de alta a baja altitud), la intensidad de las luces artificiales (de apagadas a encendidas), y opcionalmente la posición de la cámara para mostrar diferentes ángulos en cada momento.
+
+La animación de la intensidad de las luces es directa: crea keyframes de la propiedad de intensidad en diferentes momentos. La transición debe ser gradual para simular cómo las luces se encienden realmente al caer la noche. Puedes añadir variación haciendo que diferentes luces se enciendan en momentos ligeramente diferentes.
+
+La animación del color de las luces permite cambiar la temperatura de la iluminación. Por ejemplo, puedes animar una luz de cálida (2700K) a fría (6500K) para mostrar cómo cambia el ambiente con diferentes tipos de iluminación. Esto es útil para proyectos donde el usuario puede controlar la temperatura de la luz.
+
+La animación de materiales es más limitada pero igualmente poderosa. Puedes animar la opacidad de un material para hacer que un objeto se vuelva transparente gradualmente, revelando lo que hay detrás. Esto es útil para mostrar la estructura detrás de un revestimiento o el interior de un mueble.
+
+También puedes animar la emisión (emissive) de un material para hacer que una superficie brille progresivamente. Por ejemplo, una pantalla LED que se enciende gradualmente o una señal luminosa que se activa.
+
+La animación de la vegetación por el viento es automática en D5 Render, pero puedes animar la intensidad del viento para crear variación: un día tranquilo que se vuelve ventoso añade dinamismo a la escena.
+
+Para coordinar todas estas animaciones, usa la línea de tiempo y asegúrate de que los keyframes de diferentes propiedades estén sincronizados. Una buena práctica es crear los keyframes de la iluminación primero y luego ajustar los de los materiales para que respondan a los cambios de luz.`,
+  keyPoints: [
+    "Transición día-noche: animar sol + luces artificiales simultáneamente",
+    "Animar intensidad de luces: gradual para simular encendido real",
+    "Animar color de luces: cambio de temperatura de iluminación",
+    "Animar opacidad de materiales: revelar elementos ocultos",
+    "Animar emisión de materiales: superficies que brillan progresivamente",
+    "Coordinar keyframes: iluminación primero, materiales después",
+  ],
+  steps: [
+    {
+      title: "Crear una transición día-noche",
+      description: "En una escena con sol y luces artificiales, anima la posición del sol desde alta (mediodía) hasta baja (noche) en 10 segundos. Simultáneamente, anima las luces artificiales de apagadas a encendidas. Reproduce para ver la transición completa.",
+      tip: "Las luces artificiales deben empezar a encenderse antes de que el sol se ponga completamente, imitando cómo encendemos las luces en la vida real.",
+    },
+    {
+      title: "Animar el color de la iluminación",
+      description: "En una escena de interior, anima el color de las luces de cálido (2700K) a neutro (4000K) a frío (6500K) y de vuelta a cálido. Observa cómo el ambiente del espacio cambia completamente con cada temperatura.",
+    },
+    {
+      title: "Animar la opacidad de un material",
+      description: "Selecciona un muro con material opaco. En el segundo 0, con opacidad 1, crea un keyframe. En el segundo 3, reduce la opacidad a 0.2 y crea otro keyframe. Observa cómo el muro se vuelve translúcido revelando la estructura detrás.",
+    },
+    {
+      title: "Coordinar múltiples animaciones",
+      description: "Crea una secuencia donde: el sol se pone, las luces cálidas se encienden, un material se vuelve translúcido, y la cámara cambia de ángulo. Coordina los tiempos para que la secuencia sea fluida y natural.",
+    },
+  ],
+  practice: "Crea una animación de 15 segundos con transición día-noche completa. Anima el sol, las luces artificiales, y al menos una propiedad de material. Renderiza el video y revisa la fluidez de la transición.",
+  extraResources: [
+    { label: "Animación de luces y materiales", url: "https://www.d5render.com/help/light-animation" },
+  ],
+});
+
+register({
+  moduleId: "modulo-9",
+  topicIndex: 4,
+  title: "Transiciones y efectos de cámara",
+  objective: "Aprender a crear transiciones cinematográficas y efectos de cámara en D5 Render para producir videos profesionales y atractivos.",
+  explanation: `Las transiciones y efectos de cámara son lo que diferencia un video amateur de uno profesional. En el cine y la televisión, cada movimiento de cámara y cada transición entre escenas tiene un propósito narrativo. Aplicar estos principios a los recorridos arquitectónicos eleva significativamente la calidad de las presentaciones.
+
+Las transiciones más comunes son: el corte (cambio directo de una vista a otra), el fundido (una imagen se desvanece mientras otra aparece), y la transición por movimiento (la cámara se mueve de un espacio a otro de forma continua). D5 Render soporta principalmente transiciones por movimiento y fundidos.
+
+El fundido (fade) es la transición más sencilla. Se usa típicamente al principio y al final del video: un fundido desde negro al inicio (fade in) y un fundido hacia negro al final (fade out). También se usa fundidos entre escenas diferentes para suavizar el cambio. En D5 Render, puedes crear fundidos animando la exposición de la cámara de normal a completamente oscura.
+
+Las transiciones por movimiento son las más naturales en recorridos arquitectónicos. La cámara se mueve continuamente de un espacio a otro sin cortes, creando una experiencia inmersiva. Para que estas transiciones funcionen, el movimiento debe ser suave y la dirección de la mirada debe guiar al espectador hacia el siguiente espacio.
+
+Los efectos de cámara incluyen: el dolly (la cámara se mueve hacia adelante o atrás), el tracking (la cámara se mueve lateralmente), el crane (la cámara sube o baja), y la orbit (la cámara rota alrededor de un punto). Cada efecto tiene un propósito narrativo diferente.
+
+El dolly in (acercamiento) se usa para revelar detalles o crear intimidad. El dolly out (alejamiento) se usa para mostrar contexto o crear una sensación de amplitud. El tracking lateral muestra la fachada o una serie de elementos. El crane up (subida) revela el edificio en su entorno, mientras que el crane down (bajada) pasa de una vista aérea al nivel del suelo.
+
+La velocidad de los movimientos de cámara debe ser moderada. Los movimientos demasiado rápidos son desorientadores y no permiten apreciar la arquitectura. Los movimientos demasiado lentos son aburridos. La velocidad ideal permite al espectador absorber la información visual sin sentir que se queda atrás.
+
+Para unir diferentes efectos de cámara en un solo recorrido, usa puntos de transición donde el movimiento cambia suavemente. Por ejemplo, después de un dolly in, la cámara puede transicionar a un tracking lateral reduciendo la velocidad del movimiento hacia adelante mientras aumenta la lateral.`,
+  keyPoints: [
+    "Corte: cambio directo / Fundido: desvanecimiento / Movimiento: transición continua",
+    "Fade in/out: fundido desde/hacia negro al inicio y final",
+    "Dolly: adelante/atrás / Tracking: lateral / Crane: arriba/abajo / Orbit: rotación",
+    "Velocidad moderada: ni muy rápida (desorienta) ni muy lenta (aburre)",
+    "Puntos de transición suaves entre diferentes efectos de cámara",
+    "Cada movimiento debe tener un propósito narrativo claro",
+  ],
+  steps: [
+    {
+      title: "Crear un fundido de inicio",
+      description: "Al inicio de tu animación, crea un fundido desde negro: en el segundo 0, reduce la exposición al mínimo (imagen negra), y en el segundo 2, sube la exposición a normal. Reproduce para ver la imagen apareciendo suavemente.",
+    },
+    {
+      title: "Crear un dolly in",
+      description: "Anima la cámara acercándose a la entrada del edificio. Usa un movimiento suave y constante. La dirección de la mirada debe mantenerse en la entrada durante todo el acercamiento.",
+    },
+    {
+      title: "Crear un tracking lateral",
+      description: "Después del dolly in, haz que la cámara se mueva lateralmente frente a la fachada. Esta transición debe ser suave: reduce la velocidad del acercamiento mientras inicias el movimiento lateral.",
+      tip: "El tracking lateral es perfecto para mostrar fachadas completas. Mantén la cámara a una distancia constante del edificio.",
+    },
+    {
+      title: "Crear un crane up",
+      description: "Al final del recorrido, haz que la cámara suba revelando el edificio en su entorno. Esta vista aérea es un cierre clásico que muestra el proyecto en contexto.",
+    },
+  ],
+  practice: "Crea un recorrido de 30 segundos que combine al menos 3 efectos de cámara diferentes (dolly, tracking, crane) con fundidos de inicio y final. Asegúrate de que las transiciones entre efectos sean suaves.",
+  extraResources: [
+    { label: "Efectos de cámara en D5 Render", url: "https://www.d5render.com/help/camera-effects" },
+  ],
+});
+
+register({
+  moduleId: "modulo-9",
+  topicIndex: 5,
+  title: "Exportación de animaciones en video",
+  objective: "Aprender a configurar y exportar animaciones como archivos de video en D5 Render, optimizando la calidad y el tamaño del archivo.",
+  explanation: `La exportación de animaciones es el paso final del proceso de animación. Configurar correctamente los parámetros de exportación es crucial para obtener un video con la calidad, el tamaño y la compatibilidad adecuados para su destino final.
+
+La resolución del video debe coincidir con el destino de visualización. Para presentaciones en pantallas estándar, 1920x1080 (Full HD) es adecuado. Para pantallas grandes o proyecciones, usa 3840x2160 (4K). Para redes sociales como Instagram, puedes usar resoluciones más bajas como 1080x1080 (cuadrado) o 1080x1920 (vertical).
+
+Los frames por segundo (FPS) determinan la fluidez del video. 24 FPS produce un aspecto cinematográfico con un ligero motion blur natural. 30 FPS es estándar para presentaciones corporativas y web. 60 FPS es ultra suave pero duplica el tiempo de render y el tamaño del archivo. Para la mayoría de los recorridos arquitectónicos, 30 FPS es el mejor equilibrio.
+
+El códec de video determina cómo se comprime la información visual. H.264 es el códec más compatible: funciona en todos los dispositivos y plataformas. H.265 (HEVC) ofrece mejor compresión (menor tamaño de archivo a igual calidad) pero no es universalmente compatible. Para post-producción en After Effects, exporta como secuencia de imágenes PNG o EXR.
+
+La calidad de renderizado por frame debe ser mayor que para imágenes fijas. Cada frame se muestra solo 1/30 de segundo, lo que hace que el ruido sea más visible que en una imagen fija que se observa durante segundos. Se recomienda un mínimo de 500 pases por frame con Denoiser activado para videos.
+
+El tiempo de render de un video puede ser significativo. Un video de 30 segundos a 30 FPS y 500 pases por frame equivale a renderizar 900 imágenes. En una RTX 3060, esto puede tomar entre 1-4 horas dependiendo de la complejidad de la escena. Para videos más largos, considera renderizar por la noche o en horas donde el equipo no se necesita para otras tareas.
+
+D5 Render permite renderizar un rango específico de frames, lo que es útil para probar un segmento del video antes de lanzar el render completo. Renderiza los primeros 5 segundos para verificar calidad y movimiento, y si todo está bien, lanza el render completo.
+
+Después de renderizar, revisa el video completo en pantalla completa. Busca: cortes bruscos, ruido visible, parpadeos de iluminación, y objetos que aparecen o desaparecen incorrectamente. Si encuentras problemas, puedes re-renderizar solo los frames afectados usando el rango de frames.`,
+  keyPoints: [
+    "Resolución: 1920x1080 (web), 3840x2160 (proyección), 1080x1080 (Instagram)",
+    "FPS: 24 (cine), 30 (web/estándar), 60 (ultra suave)",
+    "Códec: H.264 (compatible), H.265 (mejor compresión), secuencia PNG (post)",
+    "Mínimo 500 pases por frame con Denoiser para videos",
+    "Renderizar rangos de frames para pruebas antes del render completo",
+    "Revisar el video completo en pantalla completa antes de aprobar",
+  ],
+  steps: [
+    {
+      title: "Configurar los parámetros de video",
+      description: "Abre el panel de renderizado de video. Configura la resolución (1920x1080), FPS (30), códec (H.264), y calidad (500+ pases con Denoiser). Establece la carpeta de destino.",
+    },
+    {
+      title: "Renderizar un segmento de prueba",
+      description: "En lugar de renderizar todo el video, renderiza solo los primeros 5 segundos (frames 0-150 a 30 FPS). Revisa la calidad y la fluidez del movimiento. Ajusta cualquier problema antes de continuar.",
+      tip: "Es mucho mejor descubrir problemas en un render de 5 segundos que después de renderizar un video de 2 minutos.",
+    },
+    {
+      title: "Lanzar el render completo",
+      description: "Si el segmento de prueba se ve bien, configura el rango de frames para todo el video y lanza el render. D5 Render mostrará el progreso frame por frame. El proceso puede tardar de minutos a horas.",
+    },
+    {
+      title: "Revisar y entregar el video",
+      description: "Abre el video renderizado en un reproductor y míralo completo en pantalla completa. Verifica calidad, movimiento y audio (si aplica). Si encuentras problemas, re-renderiza solo los frames afectados.",
+    },
+  ],
+  practice: "Exporta una animación de 15 segundos como video Full HD a 30 FPS. Renderiza primero un segmento de prueba de 5 segundos, verifica la calidad, y luego renderiza el video completo.",
+  extraResources: [
+    { label: "Exportación de video en D5 Render", url: "https://www.d5render.com/help/video-export" },
+  ],
+});
+
+// ============================================================
+// MÓDULO 10: Proyecto Final y Tips Avanzados
+// ============================================================
+
+register({
+  moduleId: "modulo-10",
+  topicIndex: 0,
+  title: "Planificación de un proyecto completo",
+  objective: "Aprender a planificar un proyecto de visualización completo, definiendo entregables, tiempos, y recursos necesarios antes de empezar a trabajar.",
+  explanation: `La planificación es la fase más importante de cualquier proyecto de visualización arquitectónica, aunque a menudo se subestima. Un proyecto bien planificado se ejecuta más rápido, con menos correcciones y con resultados más consistentes. Este tema te enseña cómo planificar profesionalmente antes de abrir D5 Render.
+
+El primer paso es definir los entregables con el cliente o equipo. ¿Qué necesitan exactamente? ¿Imágenes fijas? ¿Cuántas? ¿De qué espacios? ¿Video? ¿Panoramas 360°? Cada tipo de entregable tiene diferentes requisitos de tiempo y esfuerzo. Un set típico de 6-8 imágenes fijas puede tomar 2-3 días, mientras que un video de 2 minutos puede tomar 1-2 semanas.
+
+Define el estilo visual del proyecto. ¿Fotorrealista? ¿Ilustración? ¿Conceptual? Recopila referencias visuales (imágenes de otros renders, fotografías de proyectos similares) que definan la estética deseada. Comparte estas referencias con el cliente para alinear expectativas antes de empezar.
+
+Estima los tiempos realistamente. Un flujo de trabajo típico incluye: preparación del modelo (10-20% del tiempo), iluminación y materiales (30-40%), vegetación y entorno (15-20%), renderizado (10-15%), y post-producción (10-15%). Si el proyecto requiere 40 horas de trabajo total, asigna aproximadamente 12-16 horas solo a iluminación y materiales.
+
+Identifica los recursos necesarios: modelos 3D específicos (mobiliario, vehículos), texturas especiales, HDRIs particulares, y assets de vegetación. Verifica que tienes todo lo necesario antes de empezar para evitar interrupciones. Si necesitas comprar assets, hazlo al inicio del proyecto.
+
+Establece hitos de revisión con el cliente. En lugar de mostrar el resultado final sin contexto, programa revisiones intermedias: la primera después de configurar la iluminación básica, la segunda después de asignar materiales, y la tercera antes del renderizado final. Las correcciones tempranas son mucho más fáciles y baratas que las correcciones al final.
+
+Documenta todo en un brief de proyecto que incluya: lista de entregables, estilo visual, plazos, revisiones programadas, y recursos necesarios. Este documento es tu hoja de ruta durante todo el proyecto y evita malentendidos con el cliente.`,
+  keyPoints: [
+    "Definir entregables: tipo, cantidad, espacios, estilo visual",
+    "Recopilar referencias visuales y alinear expectativas con el cliente",
+    "Estimar tiempos: modelo 10-20%, iluminación/materiales 30-40%, entorno 15-20%",
+    "Identificar recursos necesarios antes de empezar",
+    "Programar revisiones intermedias con el cliente",
+    "Documentar todo en un brief de proyecto",
+  ],
+  steps: [
+    {
+      title: "Crear un brief de proyecto",
+      description: "Escribe un documento que incluya: nombre del proyecto, lista de entregables (6 renders + 1 video), estilo visual (fotorrealista cálido), plazos (2 semanas), y revisiones programadas (3 revisiones intermedias).",
+    },
+    {
+      title: "Recopilar referencias",
+      description: "Busca 10-15 imágenes de referencia que definan el estilo deseado. Incluye renders de otros artistas, fotografías de arquitectura, y ejemplos de iluminación. Organízalas en un moodboard digital.",
+      tip: "Pinterest es una excelente herramienta para recopilar y organizar referencias visuales.",
+    },
+    {
+      title: "Estimar tiempos por tarea",
+      description: "Desglosa el proyecto en tareas específicas y asigna horas a cada una: preparación del modelo (4h), iluminación (6h), materiales (6h), vegetación (4h), renderizado (4h), post-producción (4h), revisiones (4h). Total: ~32 horas.",
+    },
+    {
+      title: "Verificar recursos",
+      description: "Haz una lista de todos los assets que necesitas: modelos de mobiliario, texturas PBR, HDRIs, modelos de vegetación. Verifica que tienes todo disponible o planifica la compra/descarga.",
+    },
+  ],
+  practice: "Planifica un proyecto completo de visualización para una casa residencial: define entregables, recopila referencias, estima tiempos, y crea un brief detallado.",
+  extraResources: [
+    { label: "Planificación de proyectos 3D", url: "https://www.d5render.com/blog/project-planning" },
+  ],
+});
+
+register({
+  moduleId: "modulo-10",
+  topicIndex: 1,
+  title: "Flujo de trabajo profesional: del modelo al render final",
+  objective: "Conocer el flujo de trabajo profesional completo en D5 Render, desde la recepción del modelo hasta la entrega de los renders finales.",
+  explanation: `El flujo de trabajo profesional en visualización arquitectónica sigue una secuencia lógica que maximiza la eficiencia y minimiza las correcciones. Cada etapa se construye sobre la anterior, y completar cada una correctamente antes de avanzar ahorra tiempo y frustración.
+
+Etapa 1: Recepción y preparación del modelo. Recibes el modelo del arquitecto o diseñador. Antes de importar a D5 Render, revísalo en el software original: verifica que no haya geometría duplicada, que las unidades sean correctas, y que la organización por capas sea lógica. Limpia el modelo eliminando elementos innecesarios (líneas de construcción, cotas, elementos ocultos). Un modelo limpio se importa mejor y funciona más rápido.
+
+Etapa 2: Importación y verificación. Importa el modelo a D5 Render usando el plugin de sincronización o formato FBX. Verifica que la escala es correcta comparando con objetos de referencia. Revisa que todos los objetos se importaron y que la jerarquía se mantuvo. Organiza los objetos en capas si es necesario.
+
+Etapa 3: Iluminación base. Configura la iluminación natural (sol o HDRI) antes de añadir luces artificiales. Esto establece el ambiente general de la escena. Luego añade las luces artificiales principales. No ajustes los detalles de iluminación todavía; solo establece la base.
+
+Etapa 4: Materiales principales. Asigna los materiales más importantes primero: muros, pisos, techos, ventanas. Usa la biblioteca de D5 Render para materiales estándar y personaliza los que necesiten ajustes. No te preocupes por los materiales pequeños (decoración, accesorios) hasta después.
+
+Etapa 5: Entorno y vegetación. Coloca el terreno, la vegetación principal y los elementos del paisaje. Estos elementos dan contexto al proyecto y afectan la iluminación (los árboles proyectan sombras). Ajusta la vegetación al nivel de detalle apropiado.
+
+Etapa 6: Detalles y accesorios. Añade el mobiliario, decoración y elementos que dan vida al espacio. Estos son los detalles que hacen que un render pase de bueno a excepcional, pero deben añadirse después de que la estructura (iluminación, materiales, entorno) esté sólida.
+
+Etapa 7: Cámaras y composición. Configura las vistas de cámara para cada entregable. Ajusta la distancia focal, la exposición y el balance de blancos para cada vista. Guarda todas las vistas con nombres descriptivos.
+
+Etapa 8: Renderizado y post-producción. Renderiza las imágenes finales y aplica los ajustes de post-producción. Revisa cada imagen cuidadosamente antes de aprobarla.
+
+Etapa 9: Entrega. Organiza los archivos finales con nomenclatura clara y entrega al cliente en el formato acordado.`,
+  keyPoints: [
+    "1. Preparar modelo: limpiar geometría, verificar unidades, organizar capas",
+    "2. Importar y verificar: escala correcta, jerarquía completa",
+    "3. Iluminación base: natural primero, artificial después",
+    "4. Materiales principales: muros, pisos, techos, ventanas primero",
+    "5. Entorno y vegetación: contexto y sombras",
+    "6. Detalles: mobiliario y decoración al final",
+    "7. Cámaras y composición para cada entregable",
+    "8. Renderizado + post-producción",
+    "9. Entrega organizada con nomenclatura clara",
+  ],
+  steps: [
+    {
+      title: "Ejecutar el flujo completo",
+      description: "Toma un proyecto real y ejecuta cada etapa del flujo de trabajo secuencialmente. No saltes etapas ni vuelvas atrás innecesariamente. Documenta cuánto tiempo te toma cada etapa.",
+    },
+    {
+      title: "Identificar cuellos de botella",
+      description: "Después de completar el proyecto, analiza qué etapas tomaron más tiempo del esperado. Identifica las causas y piensa cómo optimizar esas etapas para el próximo proyecto.",
+      tip: "Los cuellos de botella más comunes son: materiales (demasiado tiempo buscando texturas) y vegetación (colocación manual lenta).",
+    },
+    {
+      title: "Crear una checklist personal",
+      description: "Basándote en tu experiencia, crea una checklist personalizada del flujo de trabajo. Incluye puntos de verificación en cada etapa para asegurarte de que no olvidas nada importante.",
+    },
+  ],
+  practice: "Ejecuta un proyecto completo siguiendo el flujo de trabajo profesional. Cronometra cada etapa y crea un reporte de tiempos. Identifica áreas de mejora para tu próximo proyecto.",
+  extraResources: [
+    { label: "Flujo de trabajo profesional", url: "https://www.d5render.com/blog/professional-workflow" },
+  ],
+});
+
+register({
+  moduleId: "modulo-10",
+  topicIndex: 2,
+  title: "Optimización de escenas pesadas",
+  objective: "Aprender técnicas avanzadas para optimizar escenas complejas y pesadas, manteniendo la calidad visual mientras se mejora el rendimiento.",
+  explanation: `A medida que tus proyectos crecen en complejidad, inevitablemente encontrarás escenas que ponen a prueba los límites de tu hardware. Escenas con millones de polígonos, cientos de texturas de alta resolución, y docenas de luces pueden hacer que D5 Render funcione lentamente o incluso se cierre por falta de VRAM. Saber optimizar estas escenas es una habilidad profesional esencial.
+
+El primer paso es identificar qué está consumiendo recursos. D5 Render muestra estadísticas de rendimiento en la barra de estado: FPS (frames por segundo del viewport), uso de VRAM, y número de objetos/luces. Si el FPS es bajo (menos de 10-15) o la VRAM está casi llena, necesitas optimizar.
+
+La geometría es a menudo el mayor consumidor de recursos. Los modelos importados de software BIM como Revit pueden tener geometría innecesaria: tuberías dentro de muros, estructura no visible, detalles de juntas que no se ven. Elimina esta geometría antes de importar o usa capas para ocultarla en D5 Render. Cada polígono que no contribuye al render es un desperdicio de VRAM.
+
+Las texturas de alta resolución son otro consumidor importante. Una textura 8K (8192x8192) ocupa 256MB de VRAM por sí sola. Si tienes 20 texturas 8K, eso son 5GB solo en texturas. Reducir texturas a 4K o 2K para objetos que no están cerca de la cámara puede liberar varios GB de VRAM sin pérdida de calidad visible.
+
+Los objetos duplicados deben instanciarse en lugar de copiarse. Una instancia comparte la geometría y texturas del objeto original, consumiendo memoria solo una vez. D5 Render maneja instancias automáticamente para assets de la biblioteca, pero si importas objetos FBX duplicados, cada copia consume memoria independiente.
+
+Las luces también afectan el rendimiento. Cada luz adicional aumenta la complejidad del cálculo de sombras y contribuciones. Para luces que no son visibles en la vista actual (luces en habitaciones que no se ven), considéralas desactivar o eliminar. Usa el menor número de luces posible para lograr el efecto deseado.
+
+El LOD (Level of Detail) manual es una técnica donde reemplazas objetos complejos cercanos a la cámara con versiones simplificadas para los que están lejos. D5 Render hace esto automáticamente para la vegetación, pero puedes aplicarlo manualmente a otros objetos: un sofá lejano puede ser reemplazado por una caja del mismo color.
+
+Finalmente, la técnica más drástica pero efectiva es renderizar por capas. Renderiza los elementos más pesados (vegetación, mobiliario) por separado y compónlos en post-producción. Esto reduce la carga de VRAM por render y te da más control sobre cada elemento.`,
+  keyPoints: [
+    "Monitorear FPS y VRAM para identificar cuellos de botella",
+    "Eliminar geometría innecesaria y ocultar elementos no visibles",
+    "Reducir resolución de texturas para objetos lejanos (8K a 4K o 2K)",
+    "Usar instancias en lugar de copias para objetos duplicados",
+    "Minimizar el número de luces activas",
+    "LOD manual: reemplazar objetos lejanos con versiones simplificadas",
+  ],
+  steps: [
+    {
+      title: "Diagnosticar el problema de rendimiento",
+      description: "Abre una escena pesada y revisa las estadísticas de rendimiento: FPS, VRAM usada, número de objetos y luces. Identifica cuál recurso está saturado (VRAM llena o FPS bajo).",
+    },
+    {
+      title: "Reducir texturas innecesarias",
+      description: "Identifica objetos lejanos que usan texturas de alta resolución. Reemplaza sus texturas con versiones de menor resolución (4K a 2K, 2K a 1K). Observa cómo se libera VRAM.",
+      tip: "Los objetos que ocupan menos de 50 píxeles en el render final no necesitan texturas mayores de 512x512.",
+    },
+    {
+      title: "Eliminar geometría oculta",
+      description: "Revisa las capas de la escena y oculta o elimina objetos que no son visibles desde las vistas configuradas: estructura, instalaciones, elementos tras muros. Cada objeto eliminado libera VRAM.",
+    },
+    {
+      title: "Verificar instancias",
+      description: "Si has importado objetos duplicados (como sillas o mesas idénticas), reemplázalos con instancias del mismo objeto. Las instancias comparten geometría y consumen mucha menos memoria.",
+    },
+  ],
+  practice: "Toma una escena pesada y optimízala siguiendo todas las técnicas anteriores. Mide el FPS y la VRAM antes y después de cada optimización. Documenta el impacto de cada técnica.",
+  extraResources: [
+    { label: "Optimización de escenas en D5 Render", url: "https://www.d5render.com/help/scene-optimization" },
+  ],
+});
+
+register({
+  moduleId: "modulo-10",
+  topicIndex: 3,
+  title: "Tips y trucos para resultados realistas",
+  objective: "Conocer los trucos y técnicas profesionales que transforman renders buenos en renders excepcionalmente realistas.",
+  explanation: `El realismo en un render no depende de un solo factor sino de la acumulación de muchos detalles pequeños que, individualmente, pueden parecer insignificantes pero que juntos crean la ilusión de realidad. Estos son los tips y trucos que los profesionales usan para elevar sus renders al siguiente nivel.
+
+Tip 1: Imperfecciones controladas. La realidad no es perfecta, y los renders demasiado perfectos se ven artificiales. Añade imperfecciones sutiles: una ligera asimetría en la vegetación, un mapa de desgaste en los metales, manchas sutiles en el concreto, o una textura de huellas en el piso de madera. Estas imperfecciones deben ser apenas perceptibles pero su ausencia se nota.
+
+Tip 2: Iluminación con historia. La iluminación real nunca es perfectamente uniforme. Añade variación: una lámpara que parpadea ligeramente, una sombra que se desvía, una zona ligeramente más oscura en una esquina. Estas variaciones cuentan una historia sobre el espacio y cómo se usa.
+
+Tip 3: Reflexiones creíbles. Las reflexiones perfectamente nítidas son un signo de render CG. En la realidad, las superficies reflectantes siempre tienen algún grado de imperfección: un vidrio ligeramente sucio, un metal con micro-rayones, un piso con zonas más pulidas que otras. Usa mapas de rugosidad para variar la reflectividad.
+
+Tip 4: Escala humana. Los renders sin personas se ven como maquetas. Añade siluetas humanas (la biblioteca de D5 Render tiene figuras) para dar escala y mostrar cómo se usaría el espacio. Las personas no necesitan ser fotorrealistas; incluso siluetas simplificadas funcionan si están bien proporcionadas y posicionadas.
+
+Tip 5: Profundidad atmosférica. Incluso en días claros, los objetos distantes se ven más claros y menos saturados debido a la atmósfera. Añade una niebla muy sutil o reduce la saturación de los elementos lejanos. Esta profundidad atmosférica es casi imperceptible individualmente pero su ausencia hace que la imagen se vea plana.
+
+Tip 6: Iluminación volumétrica estratégica. Un rayo de luz entrando por una ventana, incluso sutil, añade dramatismo y dirección a la escena. No abuses de este efecto, pero úsalo en al menos una vista del proyecto para crear un punto focal.
+
+Tip 7: Detalles de vida. Objetos que sugieren actividad humana: una taza de café en una mesa, un libro abierto, una planta regada, una chaqueta en una silla. Estos detalles hacen que el espacio se sienta habitado y real, no como un escaparate de muebles.
+
+Tip 8: Post-producción sutil. Un ligero ajuste de contraste (+5-10%), una reducción de saturación (-5%), y una viñeta muy sutil pueden transformar un render bueno en uno excepcional. La clave es que estos ajustes sean casi imperceptibles individualmente.`,
+  keyPoints: [
+    "Imperfecciones controladas: desgaste, manchas, asimetrías sutiles",
+    "Iluminación con historia: variación, no uniformidad perfecta",
+    "Reflexiones creíbles: mapas de rugosidad para variar reflectividad",
+    "Escala humana: figuras para dar escala y mostrar uso del espacio",
+    "Profundidad atmosférica: objetos lejanos más claros y menos saturados",
+    "Detalles de vida: objetos que sugieren actividad humana",
+  ],
+  steps: [
+    {
+      title: "Añadir imperfecciones a los materiales",
+      description: "Toma un material de metal y añade un mapa de desgaste en los bordes. Toma un material de concreto y añade manchas sutiles. Observa cómo estos detalles hacen que los materiales se vean más reales.",
+    },
+    {
+      title: "Añadir figuras humanas",
+      description: "Coloca 2-3 figuras humanas de la biblioteca de D5 Render en puntos estratégicos del proyecto. Usa las figuras como elementos compositivos que dan escala y muestran cómo se usa el espacio.",
+      tip: "Las figuras deben estar en poses naturales y mirando hacia puntos lógicos (ventanas, obras de arte, otras personas).",
+    },
+    {
+      title: "Añadir profundidad atmosférica",
+      description: "Activa una niebla muy sutil o ajusta la atmósfera para que los objetos lejanos se vean ligeramente más claros y menos saturados. Compara con y sin el efecto.",
+    },
+    {
+      title: "Añadir detalles de vida",
+      description: "Coloca objetos cotidianos en las superficies: una taza en la mesa, un libro en el sofá, un par de zapatos cerca de la puerta. Estos detalles hacen que el espacio se sienta habitado.",
+    },
+  ],
+  practice: "Toma un render ya completado y aplícale cada uno de los tips anteriores. Compara el antes y después y documenta cuáles tuvieron mayor impacto visual.",
+  extraResources: [
+    { label: "Tips de realismo en D5 Render", url: "https://www.d5render.com/blog/realism-tips" },
+  ],
+});
+
+register({
+  moduleId: "modulo-10",
+  topicIndex: 4,
+  title: "Errores comunes y cómo evitarlos",
+  objective: "Conocer los errores más frecuentes que cometen los principiantes en D5 Render y aprender a identificarlos y corregirlos para mejorar la calidad de los renders.",
+  explanation: `Todos los artistas 3D cometen errores, especialmente al principio. Conocer los errores más comunes te ayudará a evitarlos o a identificarlos rápidamente cuando aparezcan en tus renders. Estos errores se dividen en varias categorías.
+
+Errores de iluminación: El más común es la iluminación plana y sin contraste. Si toda la escena tiene el mismo nivel de brillo, se ve aburrida y poco profesional. La buena iluminación tiene contraste: zonas claras y zonas oscuras que dirigen la atención. Otro error es depender solo de la luz del sol sin añadir luces artificiales de relleno en los interiores, resultando en zonas completamente oscuras.
+
+Errores de materiales: El error más grave es usar metalicidad incorrecta. Un material que debería ser metal con metalicidad 0 se ve como plástico pintado, y un no-metal con metalicidad 1 se ve irreal. Otro error común es usar rugosidad demasiado baja en materiales que deberían ser mate (concreto con rugosidad 0.1 se ve como plástico brillante).
+
+Errores de escala: Los objetos que están fuera de escala rompen completamente la ilusión de realidad. Un árbol de 50 metros de altura o una puerta de 1 metro de ancho se notan inmediatamente. Siempre verifica las dimensiones de los objetos después de importarlos y usa las figuras humanas como referencia de escala.
+
+Errores de composición: Centrar siempre el sujeto es el error compositivo más común. Un edificio perfectamente centrado en la imagen se ve estático y poco interesante. Usar la regla de tercios para desplazar el sujeto crea composiciones más dinámicas.
+
+Errores de post-producción: El más frecuente es la sobre-post-producción: demasiado contraste, demasiada saturación, bloom excesivo, o viñeta demasiado fuerte. La post-producción debe ser invisible: si se nota que se aplicaron efectos, es demasiado.
+
+Errores de vegetación: Colocar árboles perfectamente alineados o con el mismo tamaño y rotación se ve artificial. La vegetación real es caótica y variada. Usa variación de escala, rotación aleatoria y especies mixtas.
+
+Errores de reflexiones: Las reflexiones perfectamente nítidas en todas las superficies son un signo de CG. En la realidad, las reflexiones varían en nitidez según la limpieza y suavidad de la superficie. Añade rugosidad variable a los materiales reflectantes.
+
+Para verificar tus renders, míralos con ojos críticos y compáralos con fotografías reales de espacios similares. Las diferencias entre tu render y la foto real te indicarán qué aspectos mejorar.`,
+  keyPoints: [
+    "Iluminación plana: añadir contraste y luces de relleno",
+    "Metalicidad incorrecta: verificar si el material es metal o no-metal",
+    "Rugosidad inadecuada: concreto mate no debe verse brillante",
+    "Escala incorrecta: verificar dimensiones con figuras humanas de referencia",
+    "Sujeto centrado: usar regla de tercios para composiciones dinámicas",
+    "Sobre-post-producción: los efectos deben ser invisibles",
+  ],
+  steps: [
+    {
+      title: "Auditar un render por errores",
+      description: "Toma uno de tus renders anteriores y revisa cada categoría de errores: iluminación, materiales, escala, composición, post-producción. Marca cada problema que encuentres y anota cómo corregirlo.",
+    },
+    {
+      title: "Comparar con fotografías reales",
+      description: "Busca fotografías profesionales de espacios similares a tu render. Compara la iluminación, los colores, las texturas y la composición. Identifica las diferencias específicas que hacen que tu render se vea menos real.",
+      tip: "Guarda las fotos de referencia junto a tus renders para comparación constante.",
+    },
+    {
+      title: "Corregir los errores identificados",
+      description: "Vuelve a tu escena en D5 Render y corrige cada error identificado. Haz un nuevo render y compara con la versión anterior. Documenta las mejoras.",
+    },
+    {
+      title: "Crear una checklist de verificación",
+      description: "Basándote en los errores que encontraste, crea una checklist personal de verificación que revisarás antes de cada render final. Incluye todos los errores comunes y los específicos que sueles cometer.",
+    },
+  ],
+  practice: "Revisa 3 de tus renders anteriores buscando errores de cada categoría. Corrige los errores y re-renderiza. Compara las versiones antes y después de las correcciones.",
+  extraResources: [
+    { label: "Errores comunes en renderizado", url: "https://www.d5render.com/blog/common-mistakes" },
+  ],
+});
+
+register({
+  moduleId: "modulo-10",
+  topicIndex: 5,
+  title: "Recursos y comunidad D5 Render",
+  objective: "Conocer los recursos disponibles para seguir aprendiendo D5 Render y cómo participar en la comunidad para mejorar continuamente.",
+  explanation: `El aprendizaje de D5 Render no termina con este curso. El software se actualiza constantemente con nuevas funcionalidades, y la comunidad de usuarios comparte continuamente nuevos trucos, assets y técnicas. Saber dónde encontrar recursos y cómo participar en la comunidad es esencial para tu crecimiento continuo como artista 3D.
+
+La documentación oficial de D5 Render (help.d5render.com) es la primera referencia para cualquier duda. Contiene guías detalladas de todas las funcionalidades, tutoriales paso a paso, y respuestas a las preguntas más frecuentes. La documentación se actualiza con cada versión del software, así que es importante consultarla regularmente.
+
+El canal de YouTube de D5 Render publica regularmente tutoriales, demostraciones de nuevas funcionalidades, y showcases de proyectos de la comunidad. Suscribirte y ver los videos nuevos es una forma fácil de mantenerse actualizado. Los tutoriales oficiales suelen ser más completos y precisos que los de terceros.
+
+El foro oficial de D5 Render (forum.d5render.com) es un espacio donde los usuarios comparten problemas, soluciones, y recursos. Puedes buscar respuestas a problemas específicos, pedir feedback en tus proyectos, y compartir tus propios conocimientos. Participar activamente en el foro te conecta con la comunidad global de usuarios.
+
+Las comunidades en redes sociales también son valiosas. Hay grupos de Facebook, servidores de Discord, y cuentas de Instagram dedicados a D5 Render donde los artistas comparten sus trabajos, trucos y recursos. Estas comunidades suelen ser más informales y dinámicas que el foro oficial.
+
+Los recursos de assets son fundamentales para trabajar eficientemente. Además de la biblioteca integrada de D5 Render, hay sitios como Poly Haven (texturas y HDRIs gratuitos), Sketchfab (modelos 3D), y 3D Sky (modelos arquitectónicos). Mantener una biblioteca personal organizada de assets descargados te ahorra tiempo en futuros proyectos.
+
+Para seguir mejorando, establece una rutina de práctica: intenta recrear un render de un artista que admires, participa en desafíos de la comunidad, y busca feedback regular en tus trabajos. El crecimiento como artista 3D requiere práctica constante y exposición a trabajos de calidad.
+
+Finalmente, mantén D5 Render actualizado. Cada nueva versión trae mejoras de rendimiento, nuevas funcionalidades y correcciones de errores. Configurar las actualizaciones automáticas te asegura estar siempre trabajando con la versión más reciente y estable.`,
+  keyPoints: [
+    "Documentación oficial: help.d5render.com - referencia completa y actualizada",
+    "Canal de YouTube: tutoriales, novedades y showcases de la comunidad",
+    "Foro oficial: forum.d5render.com - problemas, soluciones y feedback",
+    "Recursos de assets: Poly Haven, Sketchfab, 3D Sky",
+    "Comunidades en redes sociales: Facebook, Discord, Instagram",
+    "Mantener D5 Render actualizado para nuevas funcionalidades",
+  ],
+  steps: [
+    {
+      title: "Crear cuentas en recursos clave",
+      description: "Regístrate en el foro oficial de D5 Render, suscríbete al canal de YouTube, y únete a al menos una comunidad en redes sociales. Explora cada plataforma y familiarízate con el contenido disponible.",
+    },
+    {
+      title: "Descargar recursos gratuitos",
+      description: "Visita Poly Haven y descarga 5-10 texturas PBR y 2-3 HDRIs de tu preferencia. Organízalos en carpetas por categoría para encontrarlos fácilmente cuando los necesites.",
+    },
+    {
+      title: "Participar en la comunidad",
+      description: "Publica al menos un render en el foro o en una comunidad de redes sociales, pidiendo feedback específico. Responde constructivamente a otros usuarios. La participación activa acelera tu aprendizaje.",
+      tip: "Cuando pidas feedback, sé específico sobre qué aspectos quieres mejorar (iluminación, materiales, composición). Feedback específico es más útil que comentarios generales.",
+    },
+    {
+      title: "Establecer una rutina de aprendizaje",
+      description: "Dedica al menos 1 hora semanal a aprender algo nuevo: ver un tutorial, probar una funcionalidad que no has usado, o recrear un render de referencia. La consistencia es más importante que la intensidad.",
+    },
+  ],
+  practice: "Crea una lista de 10 recursos útiles para D5 Render (sitios web, canales, comunidades). Únete a al menos 2 comunidades y comparte un render pidiendo feedback. Documenta las sugerencias recibidas y cómo las aplicarás.",
+  extraResources: [
+    { label: "Documentación oficial D5 Render", url: "https://help.d5render.com" },
+    { label: "Foro oficial", url: "https://forum.d5render.com" },
+    { label: "Canal de YouTube", url: "https://www.youtube.com/@D5Render" },
+    { label: "Poly Haven (recursos gratuitos)", url: "https://polyhaven.com" },
+  ],
+});
+
 console.log(`Topic content loaded: ${contentMap.size} topics`);
