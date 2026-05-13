@@ -51,7 +51,8 @@ export default function TopicPage() {
     );
   }
 
-  const topicTitle = module.topics[topicIndex];
+  const topicInfo = module.topics[topicIndex];
+  const topicTitle = topicInfo.name;
   const totalTopics = module.topics.length;
   const hasPrev = topicIndex > 0;
   const hasNext = topicIndex < totalTopics - 1;
@@ -104,6 +105,19 @@ export default function TopicPage() {
                 </Badge>
                 <Badge className="bg-white/5 text-gray-400 border-white/10 text-xs">
                   Tema {topicIndex + 1} de {totalTopics}
+                </Badge>
+                <Badge className={`text-xs ${
+                  topicInfo.difficulty === 'basico'
+                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20'
+                    : topicInfo.difficulty === 'intermedio'
+                      ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                      : 'bg-red-500/15 text-red-400 border-red-500/20'
+                }`}>
+                  {topicInfo.difficulty === 'basico' ? 'Básico' : topicInfo.difficulty === 'intermedio' ? 'Intermedio' : 'Avanzado'}
+                </Badge>
+                <Badge className="bg-white/5 text-gray-400 border-white/10 text-xs flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {topicInfo.estimatedTime}
                 </Badge>
                 {isCompleted && (
                   <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs">

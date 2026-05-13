@@ -19,8 +19,9 @@ import {
   ClipboardCheck,
   Trophy,
   ChevronRight,
+  Clock,
 } from "lucide-react";
-import { Module } from "@/lib/curriculum";
+import { Module, TopicInfo } from "@/lib/curriculum";
 import { useStudyStore } from "@/lib/store";
 
 interface ModuleCardProps {
@@ -121,6 +122,16 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
               {module.topics.map((topic, topicIndex) => {
                 const key = `${module.id}-${topicIndex}`;
                 const checked = isTopicCompleted(module.id, topicIndex);
+                const diffColors = {
+                  basico: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
+                  intermedio: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
+                  avanzado: 'bg-red-500/15 text-red-400 border-red-500/20',
+                };
+                const diffLabels = {
+                  basico: 'Básico',
+                  intermedio: 'Intermedio',
+                  avanzado: 'Avanzado',
+                };
                 return (
                   <motion.div
                     key={key}
@@ -150,7 +161,14 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                       <span className="text-gray-500 mr-1.5 text-xs">
                         {topicIndex + 1}.
                       </span>
-                      <span className="flex-1 text-sm">{topic}</span>
+                      <span className="flex-1 text-sm">{topic.name}</span>
+                      <Badge className={`text-[9px] px-1.5 py-0 ${diffColors[topic.difficulty]} shrink-0`}>
+                        {diffLabels[topic.difficulty]}
+                      </Badge>
+                      <span className="text-[10px] text-gray-500 shrink-0 flex items-center gap-0.5">
+                        <Clock className="w-2.5 h-2.5" />
+                        {topic.estimatedTime}
+                      </span>
                       <ChevronRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-emerald-400 transition-colors shrink-0" />
                     </button>
                   </motion.div>
