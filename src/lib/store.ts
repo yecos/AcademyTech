@@ -14,6 +14,11 @@ interface StudyStore {
   completedTopics: Record<string, boolean>; // "moduleId-topicIndex" -> true
   quizResults: Record<string, QuizResult>; // moduleId -> QuizResult
 
+  // Navigation state
+  currentView: 'modules' | 'topic';
+  selectedModule: string | null;
+  selectedTopic: number | null;
+
   // Actions
   toggleTopic: (moduleId: string, topicIndex: number) => void;
   isTopicCompleted: (moduleId: string, topicIndex: number) => boolean;
@@ -27,6 +32,8 @@ interface StudyStore {
   getTotalTopics: () => number;
   getAverageQuizScore: () => number;
   resetAll: () => void;
+  navigateToTopic: (moduleId: string, topicIndex: number) => void;
+  navigateToModules: () => void;
 }
 
 export const useStudyStore = create<StudyStore>()(
@@ -34,6 +41,9 @@ export const useStudyStore = create<StudyStore>()(
     (set, get) => ({
       completedTopics: {},
       quizResults: {},
+      currentView: 'modules' as const,
+      selectedModule: null,
+      selectedTopic: null,
 
       toggleTopic: (moduleId: string, topicIndex: number) => {
         const key = `${moduleId}-${topicIndex}`;
@@ -141,9 +151,21 @@ export const useStudyStore = create<StudyStore>()(
       resetAll: () => {
         set({ completedTopics: {}, quizResults: {} });
       },
+
+      navigateToTopic: (moduleId: string, topicIndex: number) => {
+        set({ currentView: 'topic', selectedModule: moduleId, selectedTopic: topicIndex });
+      },
+
+      navigateToModules: () => {
+        set({ currentView: 'modules', selectedModule: null, selectedTopic: null });
+      },
     }),
     {
       name: "d5-render-study-store",
+      partialize: (state) => ({
+        completedTopics: state.completedTopics,
+        quizResults: state.quizResults,
+      }),
     }
   )
 );
