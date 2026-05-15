@@ -57,10 +57,20 @@ export const authOptions: NextAuthOptions = {
       if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true },
+          select: { role: true, email: true },
         });
         if (dbUser) {
-          token.role = dbUser.role;
+          // Auto-upgrade to admin if email matches ADMIN_EMAIL (works even if already logged in)
+          const adminEmail = process.env.ADMIN_EMAIL;
+          if (adminEmail && dbUser.email === adminEmail && dbUser.role !== "admin") {
+            await prisma.user.update({
+              where: { id: token.id as string },
+              data: { role: "admin" },
+            });
+            token.role = "admin";
+          } else {
+            token.role = dbUser.role;
+          }
         }
       }
       return token;
