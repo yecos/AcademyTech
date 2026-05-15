@@ -10,11 +10,9 @@ export async function GET() {
     const userId = session?.user?.id;
 
     // Fetch all published courses with module/topic counts
-    // Backward compat: show course if published: true OR status: "published"
+    // Use published: true for backward compatibility
     const courses = await prisma.course.findMany({
-      where: {
-        OR: [{ published: true }, { status: "published" }],
-      },
+      where: { published: true },
       select: {
         id: true,
         slug: true,
@@ -23,27 +21,6 @@ export async function GET() {
         image: true,
         icon: true,
         order: true,
-        level: true,
-        duration: true,
-        status: true,
-        categoryId: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-            icon: true,
-            color: true,
-            slug: true,
-          },
-        },
-        teacherId: true,
-        teacher: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
         modules: {
           select: {
             id: true,
@@ -55,6 +32,44 @@ export async function GET() {
       },
       orderBy: { order: "asc" },
     });
+
+    // Try to get extra fields if available (category, teacher, level, etc.)
+    let coursesExtra: Record<string, any> = {};
+    try {
+      const extra = await prisma.course.findMany({
+        where: { published: true },
+        select: {
+          id: true,
+          level: true,
+          duration: true,
+          status: true,
+          categoryId: true,
+          teacherId: true,
+          category: {
+            select: {
+              id: true,
+              name: true,
+              icon: true,
+              color: true,
+              slug: true,
+            },
+          },
+          teacher: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+      });
+      for (const c of extra) {
+        coursesExtra[c.id] = c;
+      }
+    } catch (e) {
+      // Extra fields not available yet (migration not applied)
+      console.log("Extra course fields not available, using defaults");
+    }
 
     // Calculate module/topic counts and user progress if authenticated
     const coursesWithStats = await Promise.all(
@@ -95,6 +110,8 @@ export async function GET() {
           }
         }
 
+        const extra = coursesExtra[course.id] || {};
+
         return {
           id: course.id,
           slug: course.slug,
@@ -106,13 +123,13 @@ export async function GET() {
           topicCount,
           progress,
           enrolled,
-          level: course.level,
-          duration: course.duration,
-          status: course.status,
-          categoryId: course.categoryId,
-          category: course.category,
-          teacherId: course.teacherId,
-          teacher: course.teacher,
+          level: extra.level || "principiante",
+          duration: extra.duration || null,
+          status: extra.status || "published",
+          categoryId: extra.categoryId || null,
+          category: extra.category || null,
+          teacherId: extra.teacherId || null,
+          teacher: extra.teacher || null,
         };
       })
     );

@@ -14,28 +14,27 @@ export async function GET() {
         description: true,
         color: true,
         order: true,
-        courses: {
-          select: { id: true },
-          where: {
-            OR: [{ published: true }, { status: "published" }],
-          },
-        },
       },
       orderBy: { order: "asc" },
     });
 
-    const result = categories.map((cat) => ({
-      id: cat.id,
-      slug: cat.slug,
-      name: cat.name,
-      icon: cat.icon,
-      description: cat.description,
-      color: cat.color,
-      order: cat.order,
-      courseCount: cat.courses.length,
-    }));
+    // Get course counts separately to avoid relation filter issues
+    const categoriesWithCounts = await Promise.all(
+      categories.map(async (cat) => {
+        const courseCount = await prisma.course.count({
+          where: {
+            categoryId: cat.id,
+            published: true,
+          },
+        });
+        return {
+          ...cat,
+          courseCount,
+        };
+      })
+    );
 
-    return NextResponse.json(result);
+    return NextResponse.json(categoriesWithCounts);
   } catch (error) {
     console.error("Error fetching categories:", error);
     return NextResponse.json(
