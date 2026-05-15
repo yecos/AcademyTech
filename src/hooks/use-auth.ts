@@ -10,9 +10,10 @@ export function useAuth() {
   const isLoading = status === "loading";
   const isAuthenticated = status === "authenticated";
   const user = session?.user ?? null;
-  const isTeacher = user?.role === "teacher";
-  const isAdmin = user?.role === "teacher" || user?.role === "admin";
-  const isGuest = user?.email?.endsWith("@d5academy.guest") ?? false;
+  const isStudent = user?.role === "student";
+  const isTeacher = user?.role === "teacher" || user?.role === "admin";
+  const isAdmin = user?.role === "admin";
+  const isGuest = user?.email?.endsWith("@academytech.guest") ?? false;
 
   const login = () => {
     router.push("/login");
@@ -34,6 +35,7 @@ export function useAuth() {
     user,
     isLoading,
     isAuthenticated,
+    isStudent,
     isTeacher,
     isAdmin,
     isGuest,

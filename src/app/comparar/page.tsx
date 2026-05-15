@@ -681,7 +681,7 @@ export default function CompararPage() {
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Comparación de motores de renderizado —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
-                Render Academy
+                Academy Tech
               </span>
             </p>
           </div>

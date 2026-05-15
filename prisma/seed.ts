@@ -3,13 +3,44 @@ import { modules } from "../src/lib/curriculum";
 
 const prisma = new PrismaClient();
 
+// Categories to seed
+const categories = [
+  { slug: "arquitectura", name: "Arquitectura", icon: "🏗️", description: "Herramientas de visualización y renderizado arquitectónico", color: "#10b981", order: 1 },
+  { slug: "programacion", name: "Programación", icon: "💻", description: "Desarrollo de software, lenguajes de programación y frameworks", color: "#3b82f6", order: 2 },
+  { slug: "ciberseguridad", name: "Ciberseguridad", icon: "🔒", description: "Seguridad informática, ethical hacking y protección de datos", color: "#ef4444", order: 3 },
+  { slug: "inteligencia-artificial", name: "Inteligencia Artificial", icon: "🤖", description: "Machine learning, deep learning y aplicaciones de IA", color: "#8b5cf6", order: 4 },
+];
+
 async function main() {
   console.log("Seeding database...");
 
-  // Create D5 Render course
+  // 1. Create categories
+  const categoryRecords: Record<string, { id: string }> = {};
+  for (const cat of categories) {
+    const record = await prisma.category.upsert({
+      where: { slug: cat.slug },
+      update: {
+        name: cat.name,
+        icon: cat.icon,
+        description: cat.description,
+        color: cat.color,
+        order: cat.order,
+      },
+      create: cat,
+    });
+    categoryRecords[cat.slug] = record;
+    console.log(`Category created: ${record.name} (${record.id})`);
+  }
+
+  // 2. Create D5 Render course with categoryId pointing to "arquitectura"
+  const arquitecturaCategory = categoryRecords["arquitectura"];
+
   const course = await prisma.course.upsert({
     where: { slug: "d5-render" },
-    update: {},
+    update: {
+      categoryId: arquitecturaCategory.id,
+      status: "published",
+    },
     create: {
       slug: "d5-render",
       title: "D5 Render - Curso Completo",
@@ -19,12 +50,16 @@ async function main() {
       icon: "🎨",
       order: 1,
       published: true,
+      categoryId: arquitecturaCategory.id,
+      level: "principiante",
+      duration: "40 horas",
+      status: "published",
     },
   });
 
   console.log(`Course created: ${course.title} (${course.id})`);
 
-  // Create modules and topics
+  // 3. Create modules and topics
   for (const mod of modules) {
     const dbModule = await prisma.module.upsert({
       where: {
@@ -72,7 +107,7 @@ async function main() {
 
   console.log("\nSeeding complete!");
   console.log(
-    `Total: ${modules.length} modules, ${modules.reduce((s, m) => s + m.topics.length, 0)} topics`
+    `Total: ${categories.length} categories, ${modules.length} modules, ${modules.reduce((s, m) => s + m.topics.length, 0)} topics`
   );
 }
 

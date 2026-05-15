@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         const guestUser = await prisma.user.create({
           data: {
             name: `Estudiante-${randomSuffix}`,
-            email: `guest-${Date.now()}@d5academy.guest`,
+            email: `guest-${Date.now()}@academytech.guest`,
             role: "student",
           },
         });
@@ -38,10 +38,10 @@ export const authOptions: NextAuthOptions = {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
           });
-          if (existingUser && existingUser.role !== "teacher") {
+          if (existingUser && existingUser.role !== "admin") {
             await prisma.user.update({
               where: { id: existingUser.id },
-              data: { role: "teacher" },
+              data: { role: "admin" },
             });
           }
         }

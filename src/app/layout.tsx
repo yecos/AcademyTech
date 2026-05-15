@@ -18,21 +18,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Render Academy - Plataforma de Aprendizaje 3D",
+  title: "Academy Tech - Tu Plataforma de Aprendizaje Tecnológico",
   description:
-    "Aprende las herramientas líderes de renderizado 3D con cursos interactivos, evaluaciones y seguimiento de progreso.",
-  keywords: ["renderizado", "3D", "arquitectura", "curso", "aprender", "D5 Render", "Lumion", "V-Ray"],
+    "Aprende Arquitectura, Programación, Ciberseguridad e Inteligencia Artificial con cursos interactivos, evaluaciones y seguimiento de progreso.",
+  keywords: ["tecnología", "arquitectura", "programación", "ciberseguridad", "inteligencia artificial", "curso", "aprender", "academy tech"],
   openGraph: {
-    title: "Render Academy - Plataforma de Aprendizaje 3D",
+    title: "Academy Tech - Tu Plataforma de Aprendizaje Tecnológico",
     description:
-      "Aprende las herramientas líderes del mercado con cursos interactivos y seguimiento de progreso.",
+      "Aprende Arquitectura, Programación, Ciberseguridad e IA con cursos interactivos y seguimiento de progreso.",
     type: "website",
   },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Render Academy",
+    title: "Academy Tech",
   },
 };
 

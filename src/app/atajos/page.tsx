@@ -242,7 +242,7 @@ export default function AtajosPage() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Atajos — Render Academy —{" "}
+              Atajos — Academy Tech —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {shortcutCategories.reduce(
                   (acc, cat) => acc + cat.shortcuts.length,

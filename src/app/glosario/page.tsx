@@ -115,7 +115,7 @@ export default function GlosarioPage() {
                 </span>
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {glossaryTerms.length} términos de renderizado 3D y D5 Render
+                {glossaryTerms.length} términos de tecnología
               </p>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function GlosarioPage() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Glosario — Render Academy{" "}
+              Glosario — Academy Tech{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {glossaryTerms.length} términos definidos
               </span>

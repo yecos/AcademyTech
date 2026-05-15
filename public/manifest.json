@@ -1,7 +1,7 @@
 {
-  "name": "Render Academy",
-  "short_name": "Render Academy",
-  "description": "Plataforma de aprendizaje para herramientas de renderizado 3D",
+  "name": "Academy Tech",
+  "short_name": "Academy Tech",
+  "description": "Tu plataforma de aprendizaje tecnológico: Arquitectura, Programación, Ciberseguridad e IA",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090b",

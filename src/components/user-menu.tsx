@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogIn, LogOut, User, ChevronDown, Shield, Settings } from "lucide-react";
+import { LogIn, LogOut, User, ChevronDown, Shield, Settings, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export function UserMenu() {
-  const { user, isAuthenticated, isLoading, login, logout, isGuest, isAdmin } = useAuth();
+  const { user, isAuthenticated, isLoading, login, logout, isGuest, isAdmin, isTeacher } = useAuth();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -152,7 +152,20 @@ export function UserMenu() {
 
             {/* Menu items */}
             <div className="py-1">
-              {/* Admin link - only for teacher/admin */}
+              {/* Professor Panel link - only for teacher/admin */}
+              {isTeacher && (
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    router.push("/profesor");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/5 transition-colors"
+                >
+                  <GraduationCap className="w-4 h-4" />
+                  Mi Panel de Profesor
+                </button>
+              )}
+              {/* Admin link - only for admin */}
               {isAdmin && (
                 <button
                   onClick={() => {

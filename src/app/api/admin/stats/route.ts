@@ -15,6 +15,19 @@ export async function GET() {
       where: { role: "student" },
     });
 
+    // Total teachers
+    const totalTeachers = await prisma.user.count({
+      where: { role: "teacher" },
+    });
+
+    // Total courses
+    const totalCourses = await prisma.course.count();
+
+    // Pending reviews
+    const pendingReviews = await prisma.course.count({
+      where: { status: "pending_review" },
+    });
+
     // Active students (progress in the last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -141,14 +154,87 @@ export async function GET() {
       else scoreDistribution.below++;
     }
 
+    // Courses by Category breakdown
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        icon: true,
+        color: true,
+        courses: {
+          select: { id: true, status: true },
+        },
+      },
+      orderBy: { order: "asc" },
+    });
+
+    const coursesByCategory = categories.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      icon: cat.icon,
+      color: cat.color,
+      totalCourses: cat.courses.length,
+      publishedCourses: cat.courses.filter((c) => c.status === "published").length,
+      draftCourses: cat.courses.filter((c) => c.status === "draft").length,
+      pendingCourses: cat.courses.filter((c) => c.status === "pending_review").length,
+    }));
+
+    // Recent Activity - last 5 enrollments
+    const recentEnrollments = await prisma.enrollment.findMany({
+      take: 5,
+      orderBy: { enrolledAt: "desc" },
+      select: {
+        id: true,
+        enrolledAt: true,
+        user: { select: { id: true, name: true, email: true } },
+        course: { select: { id: true, title: true } },
+      },
+    });
+
+    // Recent Activity - last 5 course creations
+    const recentCourses = await prisma.course.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        status: true,
+        teacher: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    const recentActivity = {
+      enrollments: recentEnrollments.map((e) => ({
+        id: e.id,
+        type: "enrollment" as const,
+        userName: e.user.name,
+        courseTitle: e.course.title,
+        date: e.enrolledAt.toISOString(),
+      })),
+      courses: recentCourses.map((c) => ({
+        id: c.id,
+        type: "course_created" as const,
+        title: c.title,
+        teacherName: c.teacher?.name,
+        status: c.status,
+        date: c.createdAt.toISOString(),
+      })),
+    };
+
     return NextResponse.json({
       totalStudents,
+      totalTeachers,
+      totalCourses,
+      pendingReviews,
       activeStudents,
       completionRate,
       avgQuizScore,
       moduleStats,
       scoreDistribution,
       totalTopics,
+      coursesByCategory,
+      recentActivity,
     });
   } catch (error) {
     console.error("Error fetching admin stats:", error);

@@ -10,8 +10,11 @@ export async function GET() {
     const userId = session?.user?.id;
 
     // Fetch all published courses with module/topic counts
+    // Backward compat: show course if published: true OR status: "published"
     const courses = await prisma.course.findMany({
-      where: { published: true },
+      where: {
+        OR: [{ published: true }, { status: "published" }],
+      },
       select: {
         id: true,
         slug: true,
@@ -20,6 +23,27 @@ export async function GET() {
         image: true,
         icon: true,
         order: true,
+        level: true,
+        duration: true,
+        status: true,
+        categoryId: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true,
+            slug: true,
+          },
+        },
+        teacherId: true,
+        teacher: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
         modules: {
           select: {
             id: true,
@@ -82,6 +106,13 @@ export async function GET() {
           topicCount,
           progress,
           enrolled,
+          level: course.level,
+          duration: course.duration,
+          status: course.status,
+          categoryId: course.categoryId,
+          category: course.category,
+          teacherId: course.teacherId,
+          teacher: course.teacher,
         };
       })
     );

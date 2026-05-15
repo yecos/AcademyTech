@@ -706,7 +706,7 @@ export default function StudentDetailPage() {
             <div className="flex items-center justify-center gap-2 mb-1">
               <Sparkles className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
               <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                Render Academy
+                Academy Tech
               </span>
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500">

@@ -650,7 +650,7 @@ function BuscarContent() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Búsqueda — Render Academy —{" "}
+              Búsqueda — Academy Tech —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 60 temas · {glossaryTerms.length} términos · {troubleshootingItems.length} soluciones
               </span>

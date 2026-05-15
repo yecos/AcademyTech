@@ -217,7 +217,7 @@ export default function MarcadoresPage() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Marcadores — Render Academy —{" "}
+              Marcadores — Academy Tech —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 {bookmarkedTopics.length} tema{bookmarkedTopics.length !== 1 ? "s" : ""} guardado{bookmarkedTopics.length !== 1 ? "s" : ""}
               </span>

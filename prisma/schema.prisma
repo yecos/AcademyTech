@@ -68,6 +68,23 @@ model User {
   achievements UserAchievement[]
   streak       UserStreak?
   enrollments  Enrollment[]
+  courses      Course[] // courses created by this teacher
+}
+
+// ── Category ─────────────────────────────────────────────────
+
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  icon        String
+  description String?  @db.Text
+  color       String   @default("#10b981") // hex color for the category
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  courses Course[]
 }
 
 // ── Course Structure ─────────────────────────────────────────
@@ -83,15 +100,25 @@ model Course {
   published   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
+  // New fields
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+  teacherId  String?
+  teacher    User?     @relation(fields: [teacherId], references: [id])
+  level      String    @default("principiante") // "principiante" | "intermedio" | "avanzado"
+  duration   String?   // "10 horas", "2 semanas", etc.
+  status     String    @default("draft") // "draft" | "pending_review" | "published" | "rejected"
+
   modules     Module[]
   enrollments Enrollment[]
 }
 
 model Module {
-  id       String @id @default(cuid())
-  number   Int
-  title    String
-  courseId String
+  id          String  @id @default(cuid())
+  number      Int
+  title       String
+  courseId    String
+  description String? // Module description
 
   course Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   topics Topic[]
@@ -100,12 +127,15 @@ model Module {
 }
 
 model Topic {
-  id            String @id @default(cuid())
+  id            String  @id @default(cuid())
   name          String
   number        Int
-  difficulty    String @default("basico") // "basico" | "intermedio" | "avanzado"
-  estimatedTime String @default("30 min")
+  difficulty    String  @default("basico") // "basico" | "intermedio" | "avanzado"
+  estimatedTime String  @default("30 min")
   moduleId      String
+  videoUrl      String? // URL for video content (YouTube, Vimeo, or blob URL)
+  content       String? @db.Text // Rich text content for the topic (explanations, steps, etc.)
+  attachments   String? @db.Text // JSON string with array of {name, url, type} objects
 
   module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 

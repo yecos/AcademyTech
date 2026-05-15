@@ -412,7 +412,7 @@ export default function PerfilPage() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Perfil — Render Academy —{" "}
+              Perfil — Academy Tech —{" "}
               <span className="text-emerald-500/70 dark:text-emerald-400/70">
                 Tu progreso se guarda en la base de datos
               </span>
