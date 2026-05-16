@@ -51,10 +51,13 @@ import {
   ExternalLink,
   Menu,
   X,
+  Download,
+  Wand2,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { useAuth } from "@/hooks/use-auth";
+import { AIAssistant } from "@/components/AIAssistant";
 import { toast } from "sonner";
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -691,6 +694,17 @@ export default function CourseEditorPage() {
                   Vista Previa
                 </Button>
               )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  window.open(`/api/export/course/${courseId}`, '_blank');
+                }}
+                className="gap-1.5 h-8 text-xs"
+              >
+                <Download className="w-3 h-3" />
+                PDF
+              </Button>
               <UserMenu />
             </div>
           </div>
@@ -938,7 +952,19 @@ export default function CourseEditorPage() {
                     </div>
 
                     <div>
-                      <Label htmlFor="course-desc">Descripción</Label>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="course-desc">Descripción</Label>
+                        <button
+                          onClick={() => {
+                            const aiBtn = document.querySelector('[data-ai-trigger]') as HTMLElement;
+                            if (aiBtn) aiBtn.click();
+                          }}
+                          className="flex items-center gap-1 text-[10px] text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 transition-colors"
+                        >
+                          <Wand2 className="w-3 h-3" />
+                          Generar con IA
+                        </button>
+                      </div>
                       <Textarea
                         id="course-desc"
                         value={courseDescription}
@@ -1259,13 +1285,25 @@ export default function CourseEditorPage() {
 
                       {/* Content */}
                       <div>
-                        <Label
-                          htmlFor="topic-content"
-                          className="flex items-center gap-1.5"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          Contenido (Markdown)
-                        </Label>
+                        <div className="flex items-center justify-between">
+                          <Label
+                            htmlFor="topic-content"
+                            className="flex items-center gap-1.5"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            Contenido (Markdown)
+                          </Label>
+                          <button
+                            onClick={() => {
+                              const aiBtn = document.querySelector('[data-ai-trigger]') as HTMLElement;
+                              if (aiBtn) aiBtn.click();
+                            }}
+                            className="flex items-center gap-1 text-[10px] text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 transition-colors"
+                          >
+                            <Wand2 className="w-3 h-3" />
+                            Generar con IA
+                          </button>
+                        </div>
                         <Textarea
                           id="topic-content"
                           value={topicForm.content}
@@ -1424,6 +1462,18 @@ export default function CourseEditorPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* AI Assistant */}
+      <AIAssistant
+        onInsert={(content) => {
+          if (selectedTopicId) {
+            setTopicForm((f) => ({ ...f, content }));
+          } else {
+            setCourseDescription(content);
+          }
+        }}
+        context={course ? `Curso: ${course.title}\nNivel: ${levelLabels[course.level]}\nDescripción: ${course.description || 'Sin descripción'}\nMódulos: ${course.modules.map((m) => m.title).join(', ')}${selectedTopicId ? `\nTema actual: ${topicForm.name}\nContenido actual: ${topicForm.content || 'Vacío'}` : ''}` : ''}
+      />
     </div>
   );
 }

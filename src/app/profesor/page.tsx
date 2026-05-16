@@ -462,6 +462,15 @@ export default function ProfessorPage() {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => router.push("/profesor/ai-config")}
+              className="gap-1.5 h-8 text-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Config IA
+            </Button>
             <UserMenu />
             <ThemeToggle />
           </div>

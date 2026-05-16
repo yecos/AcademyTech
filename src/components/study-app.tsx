@@ -20,6 +20,7 @@ import {
   Trophy,
   Flame,
   ArrowLeft,
+  Download,
 } from "lucide-react";
 import { modules, Module } from "@/lib/curriculum";
 import { useCourse, useCourseSlug } from "@/hooks/use-course-context";
@@ -111,6 +112,27 @@ export function StudyApp() {
               </span>
             </Link>
             <div className="flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await fetch(`/api/course?slug=${courseSlug}`);
+                    if (res.ok) {
+                      const data = await res.json();
+                      if (data.id) {
+                        window.open(`/api/export/course/${data.id}`, '_blank');
+                      }
+                    }
+                  } catch {
+                    // ignore
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
+              >
+                <Download className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+                <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300">
+                  PDF
+                </span>
+              </button>
               <UserMenu />
               <ThemeToggle />
             </div>
