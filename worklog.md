@@ -71,3 +71,24 @@ Built a comprehensive AI Assistant system with BYOK (Bring Your Own Key) archite
 - PDF generation uses HTML-to-print approach with professional CSS styling
 - All text in Spanish
 - Lint and build pass successfully
+---
+Task ID: 2
+Agent: main
+Task: Create complete courses for Academy Tech app
+
+Work Log:
+- Created 4 comprehensive seed scripts for each category
+- prisma/seed-arquitectura.ts: Diseño Arquitectónico con BIM (6 modules, 26 topics with rich content)
+- prisma/seed-programacion.ts: Desarrollo Web Completo HTML/CSS/JS (6 modules, 24 topics with rich content)
+- prisma/seed-ciberseguridad.ts: Fundamentos de Ciberseguridad y Ethical Hacking (6 modules, 24 topics with rich content)
+- prisma/seed-ia.ts: Inteligencia Artificial Fundamentos a Práctica (6 modules, 25 topics with rich content)
+- Added npm scripts: seed:arquitectura, seed:programacion, seed:ciberseguridad, seed:ia, seed:all-courses
+- Created API endpoint POST /api/seed-courses (admin only) for seeding from production
+- Pushed each course as separate commit: 7484d5b, 6a1eee5, b6c8d43, d86bb1e, 5ce04e6
+
+Stage Summary:
+- 4 complete courses created with full educational content (99+ topics total)
+- Each topic has rich text content (not just names)
+- API endpoint allows seeding from production without CLI access
+- All pushed to GitHub on main branch
+- User needs to deploy and then call POST /api/seed-courses to populate the database
