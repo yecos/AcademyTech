@@ -31,7 +31,6 @@ import {
   Clock,
   Eye,
   EyeOff,
-  GripVertical,
   GraduationCap,
   Layers,
   UserPlus,
@@ -40,13 +39,23 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { useAuth } from "@/hooks/use-auth";
+import StatCard from "@/components/admin/StatCard";
+import UsersChart from "@/components/admin/UsersChart";
+import EnrollmentChart from "@/components/admin/EnrollmentChart";
+import CategoryBarChart from "@/components/admin/CategoryBarChart";
+import CompletionChart from "@/components/admin/CompletionChart";
+import ScoreDistribution from "@/components/admin/ScoreDistribution";
+import ActivityChart from "@/components/admin/ActivityChart";
 
 // ── Types ──────────────────────────────────────────────────────
 
 interface Stats {
+  totalUsers: number;
   totalStudents: number;
   totalTeachers: number;
+  totalAdmins: number;
   totalCourses: number;
+  totalEnrollments: number;
   pendingReviews: number;
   activeStudents: number;
   completionRate: number;
@@ -59,7 +68,12 @@ interface Stats {
     average: number;
     below: number;
   };
+  scoreHistogram: { range: string; min: number; max: number; count: number }[];
   coursesByCategory: CategoryBreakdown[];
+  enrollmentDistribution: EnrollmentDist[];
+  completionByCourse: CompletionData[];
+  newUsersPerDay: { date: string; count: number }[];
+  activeUsersPerDay: { date: string; count: number }[];
   recentActivity: {
     enrollments: RecentEnrollment[];
     courses: RecentCourse[];
@@ -85,6 +99,20 @@ interface CategoryBreakdown {
   publishedCourses: number;
   draftCourses: number;
   pendingCourses: number;
+}
+
+interface EnrollmentDist {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  enrollments: number;
+}
+
+interface CompletionData {
+  id: string;
+  title: string;
+  completionRate: number;
 }
 
 interface RecentEnrollment {
@@ -221,7 +249,6 @@ export default function AdminDashboard() {
 
   // ── Data Fetching ──────────────────────────────────────────
 
-  // Fetch stats
   useEffect(() => {
     async function loadStats() {
       try {
@@ -238,7 +265,6 @@ export default function AdminDashboard() {
     if (isAdmin) loadStats();
   }, [isAdmin]);
 
-  // Fetch students
   useEffect(() => {
     async function loadStudents() {
       try {
@@ -257,7 +283,6 @@ export default function AdminDashboard() {
     if (isAdmin) loadStudents();
   }, [isAdmin, studentSearch, sortField, sortOrder]);
 
-  // Fetch courses
   const loadCourses = useCallback(async () => {
     try {
       const url = courseStatusFilter === "all"
@@ -281,7 +306,6 @@ export default function AdminDashboard() {
     if (isAdmin) fetchCourses();
   }, [isAdmin, loadCourses]);
 
-  // Fetch categories
   const loadCategories = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/categories");
@@ -302,7 +326,6 @@ export default function AdminDashboard() {
     if (isAdmin) fetchCategories();
   }, [isAdmin, loadCategories]);
 
-  // Fetch users
   useEffect(() => {
     async function loadUsers() {
       try {
@@ -469,19 +492,6 @@ export default function AdminDashboard() {
       if (res.ok) loadCourses();
     } catch (error) {
       console.error("Error updating course status:", error);
-    }
-  };
-
-  const handleToggleCoursePublished = async (course: AdminCourse) => {
-    try {
-      const res = await fetch(`/api/admin/courses/${course.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ published: !course.published }),
-      });
-      if (res.ok) loadCourses();
-    } catch (error) {
-      console.error("Error toggling course published:", error);
     }
   };
 
@@ -664,7 +674,7 @@ export default function AdminDashboard() {
           </div>
         </motion.header>
 
-        {/* Tabs - scrollable on mobile */}
+        {/* Tabs */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -690,7 +700,7 @@ export default function AdminDashboard() {
         <AnimatePresence mode="wait">
 
           {/* ═══════════════════════════════════════════════════════
-              OVERVIEW TAB
+              OVERVIEW TAB — Professional Charts
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "overview" && (
             <motion.div
@@ -699,316 +709,216 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
+              className="space-y-6"
             >
-              {/* Top Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <StatsCard
+              {/* Row of 4 StatCards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard
                   icon={<Users className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />}
                   iconBg="bg-emerald-500/10 border border-emerald-500/20"
-                  label="Total Estudiantes"
-                  value={isLoadingStats ? null : stats?.totalStudents ?? 0}
+                  label="Usuarios"
+                  value={isLoadingStats ? null : stats?.totalUsers ?? 0}
                 />
-                <StatsCard
-                  icon={<GraduationCap className="w-5 h-5 text-amber-500 dark:text-amber-400" />}
-                  iconBg="bg-amber-500/10 border border-amber-500/20"
-                  label="Total Profesores"
-                  value={isLoadingStats ? null : stats?.totalTeachers ?? 0}
-                />
-                <StatsCard
+                <StatCard
                   icon={<BookOpen className="w-5 h-5 text-sky-500 dark:text-sky-400" />}
                   iconBg="bg-sky-500/10 border border-sky-500/20"
-                  label="Total Cursos"
+                  label="Cursos"
                   value={isLoadingStats ? null : stats?.totalCourses ?? 0}
                 />
-                <StatsCard
-                  icon={<AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400" />}
-                  iconBg="bg-red-500/10 border border-red-500/20"
-                  label="Revisiones Pendientes"
-                  value={isLoadingStats ? null : stats?.pendingReviews ?? 0}
-                />
-              </div>
-
-              {/* Second row stats */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <StatsCard
-                  icon={<Activity className="w-5 h-5 text-sky-500 dark:text-sky-400" />}
-                  iconBg="bg-sky-500/10 border border-sky-500/20"
-                  label="Activos (7d)"
-                  value={isLoadingStats ? null : stats?.activeStudents ?? 0}
-                />
-                <StatsCard
-                  icon={<TrendingUp className="w-5 h-5 text-amber-500 dark:text-amber-400" />}
+                <StatCard
+                  icon={<Layers className="w-5 h-5 text-amber-500 dark:text-amber-400" />}
                   iconBg="bg-amber-500/10 border border-amber-500/20"
-                  label="Completado"
-                  value={isLoadingStats ? null : `${stats?.completionRate ?? 0}%`}
+                  label="Inscripciones"
+                  value={isLoadingStats ? null : stats?.totalEnrollments ?? 0}
                 />
-                <StatsCard
+                <StatCard
                   icon={<Award className="w-5 h-5 text-violet-500 dark:text-violet-400" />}
                   iconBg="bg-violet-500/10 border border-violet-500/20"
                   label="Prom. Eval."
-                  value={isLoadingStats ? null : `${stats?.avgQuizScore ?? 0}%`}
-                />
-                <StatsCard
-                  icon={<Sparkles className="w-5 h-5 text-pink-500 dark:text-pink-400" />}
-                  iconBg="bg-pink-500/10 border border-pink-500/20"
-                  label="Temas Totales"
-                  value={isLoadingStats ? null : stats?.totalTopics ?? 0}
+                  value={isLoadingStats ? null : `${stats?.avgQuizScore ?? 0}`}
+                  suffix="%"
                 />
               </div>
 
-              {/* Courses by Category + Recent Activity */}
-              <div className="grid gap-6 lg:grid-cols-2 mb-8">
-                {/* Courses by Category */}
+              {/* Users Area Chart — full width */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+              >
+                {isLoadingStats ? (
+                  <div className="glass-card rounded-2xl p-6">
+                    <div className="h-4 w-48 rounded bg-gray-200 dark:bg-white/5 mb-4" />
+                    <div className="h-72 rounded bg-gray-100 dark:bg-white/3 animate-pulse" />
+                  </div>
+                ) : (
+                  <UsersChart data={stats?.newUsersPerDay ?? []} />
+                )}
+              </motion.div>
+
+              {/* Enrollment Pie + Category Bar side by side */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                >
+                  {isLoadingStats ? (
+                    <div className="glass-card rounded-2xl p-6">
+                      <div className="h-4 w-48 rounded bg-gray-200 dark:bg-white/5 mb-4" />
+                      <div className="h-72 rounded bg-gray-100 dark:bg-white/3 animate-pulse" />
+                    </div>
+                  ) : (
+                    <EnrollmentChart data={stats?.enrollmentDistribution ?? []} />
+                  )}
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.25 }}
+                >
+                  {isLoadingStats ? (
+                    <div className="glass-card rounded-2xl p-6">
+                      <div className="h-4 w-48 rounded bg-gray-200 dark:bg-white/5 mb-4" />
+                      <div className="h-72 rounded bg-gray-100 dark:bg-white/3 animate-pulse" />
+                    </div>
+                  ) : (
+                    <CategoryBarChart data={stats?.coursesByCategory ?? []} />
+                  )}
+                </motion.div>
+              </div>
+
+              {/* Completion Chart + Score Distribution side by side */}
+              <div className="grid gap-6 lg:grid-cols-2">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.3 }}
-                  className="glass-card rounded-2xl p-6"
                 >
-                  <div className="flex items-center gap-2 mb-4">
-                    <Layers className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                      Cursos por Categoría
-                    </h3>
-                  </div>
                   {isLoadingStats ? (
-                    <div className="space-y-3">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-10 rounded bg-gray-200 dark:bg-white/5 animate-pulse" />
-                      ))}
-                    </div>
-                  ) : stats?.coursesByCategory.length ? (
-                    <div className="space-y-3 max-h-72 overflow-y-auto custom-scrollbar">
-                      {stats.coursesByCategory.map((cat, idx) => (
-                        <motion.div
-                          key={cat.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: idx * 0.05 }}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-                        >
-                          <span className="text-xl shrink-0">{cat.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                {cat.name}
-                              </span>
-                              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 ml-2 shrink-0">
-                                {cat.totalCourses}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-emerald-600 dark:text-emerald-400">{cat.publishedCourses} pub.</span>
-                              <span className="text-xs text-amber-600 dark:text-amber-400">{cat.pendingCourses} pend.</span>
-                              <span className="text-xs text-gray-400">{cat.draftCourses} borr.</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
+                    <div className="glass-card rounded-2xl p-6">
+                      <div className="h-4 w-48 rounded bg-gray-200 dark:bg-white/5 mb-4" />
+                      <div className="h-72 rounded bg-gray-100 dark:bg-white/3 animate-pulse" />
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
-                      No hay categorías disponibles
-                    </p>
+                    <CompletionChart data={stats?.completionByCourse ?? []} />
                   )}
                 </motion.div>
 
-                {/* Recent Activity */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.35 }}
-                  className="glass-card rounded-2xl p-6"
                 >
-                  <div className="flex items-center gap-2 mb-4">
-                    <Clock className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                      Actividad Reciente
-                    </h3>
-                  </div>
                   {isLoadingStats ? (
-                    <div className="space-y-3">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-10 rounded bg-gray-200 dark:bg-white/5 animate-pulse" />
-                      ))}
+                    <div className="glass-card rounded-2xl p-6">
+                      <div className="h-4 w-48 rounded bg-gray-200 dark:bg-white/5 mb-4" />
+                      <div className="h-64 rounded bg-gray-100 dark:bg-white/3 animate-pulse" />
                     </div>
                   ) : (
-                    <div className="space-y-4 max-h-72 overflow-y-auto custom-scrollbar">
-                      {/* Recent enrollments */}
-                      {stats?.recentActivity.enrollments.map((enr, idx) => (
-                        <motion.div
-                          key={enr.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: idx * 0.05 }}
-                          className="flex items-center gap-3"
-                        >
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500/10 shrink-0">
-                            <UserPlus className="w-4 h-4 text-sky-500 dark:text-sky-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-700 dark:text-gray-300 truncate">
-                              <span className="font-medium">{enr.userName || "Usuario"}</span> se inscribió en{" "}
-                              <span className="font-medium">{enr.courseTitle}</span>
-                            </p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500">
-                              {formatRelativeDate(enr.date)}
-                            </p>
-                          </div>
-                        </motion.div>
-                      ))}
-
-                      {/* Recent course creations */}
-                      {stats?.recentActivity.courses.map((crs, idx) => (
-                        <motion.div
-                          key={crs.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: (idx + 5) * 0.05 }}
-                          className="flex items-center gap-3"
-                        >
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 shrink-0">
-                            <BookPlus className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-700 dark:text-gray-300 truncate">
-                              <span className="font-medium">{crs.teacherName || "Profesor"}</span> creó{" "}
-                              <span className="font-medium">{crs.title}</span>
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-xs text-gray-400 dark:text-gray-500">
-                                {formatRelativeDate(crs.date)}
-                              </p>
-                              {getStatusBadge(crs.status)}
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-
-                      {(!stats?.recentActivity.enrollments.length && !stats?.recentActivity.courses.length) && (
-                        <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
-                          No hay actividad reciente
-                        </p>
-                      )}
-                    </div>
+                    <ScoreDistribution data={stats?.scoreHistogram ?? []} />
                   )}
                 </motion.div>
               </div>
 
-              {/* Score Distribution + Drop-off Points */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                {/* Score Distribution */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
-                  className="glass-card rounded-2xl p-6"
-                >
-                  <div className="flex items-center gap-2 mb-4">
-                    <Target className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                      Distribución de Puntuaciones
-                    </h3>
+              {/* Activity Area Chart — full width */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.4 }}
+              >
+                {isLoadingStats ? (
+                  <div className="glass-card rounded-2xl p-6">
+                    <div className="h-4 w-48 rounded bg-gray-200 dark:bg-white/5 mb-4" />
+                    <div className="h-72 rounded bg-gray-100 dark:bg-white/3 animate-pulse" />
                   </div>
-                  {isLoadingStats ? (
-                    <div className="space-y-3">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="h-8 rounded bg-gray-200 dark:bg-white/5 animate-pulse" />
-                      ))}
-                    </div>
-                  ) : stats ? (
-                    <div className="space-y-3">
-                      {[
-                        { label: "Excelente (90-100%)", count: stats.scoreDistribution.excellent, color: "bg-emerald-500", textColor: "text-emerald-500 dark:text-emerald-400" },
-                        { label: "Bueno (70-89%)", count: stats.scoreDistribution.good, color: "bg-sky-500", textColor: "text-sky-500 dark:text-sky-400" },
-                        { label: "Regular (50-69%)", count: stats.scoreDistribution.average, color: "bg-amber-500", textColor: "text-amber-500 dark:text-amber-400" },
-                        { label: "Bajo (<50%)", count: stats.scoreDistribution.below, color: "bg-red-500", textColor: "text-red-500 dark:text-red-400" },
-                      ].map((item) => {
-                        const total = stats.scoreDistribution.excellent + stats.scoreDistribution.good + stats.scoreDistribution.average + stats.scoreDistribution.below;
-                        const pct = total > 0 ? (item.count / total) * 100 : 0;
-                        return (
-                          <div key={item.label}>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs text-gray-600 dark:text-gray-400">{item.label}</span>
-                              <span className={`text-xs font-bold ${item.textColor}`}>
-                                {item.count} ({Math.round(pct)}%)
-                              </span>
-                            </div>
-                            <div className="h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
-                              <motion.div
-                                className={`h-full ${item.color} rounded-full`}
-                                initial={{ width: 0 }}
-                                animate={{ width: `${pct}%` }}
-                                transition={{ duration: 0.8, ease: "easeOut" }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                </motion.div>
+                ) : (
+                  <ActivityChart data={stats?.activeUsersPerDay ?? []} />
+                )}
+              </motion.div>
 
-                {/* Drop-off Points */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.45 }}
-                  className="glass-card rounded-2xl p-6"
-                >
-                  <div className="flex items-center gap-2 mb-4">
-                    <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                      Puntos de Abandono
-                    </h3>
+              {/* Recent Activity */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.45 }}
+                className="glass-card rounded-2xl p-6"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Actividad Reciente
+                  </h3>
+                </div>
+                {isLoadingStats ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-10 rounded bg-gray-200 dark:bg-white/5 animate-pulse" />
+                    ))}
                   </div>
-                  {isLoadingStats ? (
-                    <div className="space-y-3">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-10 rounded bg-gray-200 dark:bg-white/5 animate-pulse" />
-                      ))}
-                    </div>
-                  ) : stats ? (
-                    <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-                      {[...stats.moduleStats]
-                        .sort((a, b) => a.completionRate - b.completionRate)
-                        .slice(0, 5)
-                        .map((mod) => (
-                          <div key={mod.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 text-xs font-bold text-gray-500 dark:text-gray-400 shrink-0">
-                              M{mod.number}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{mod.title}</span>
-                                <span className="text-xs font-bold text-amber-500 dark:text-amber-400 ml-2 shrink-0">{mod.completionRate}%</span>
-                              </div>
-                              <div className="h-1.5 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
-                                <motion.div
-                                  className="h-full rounded-full"
-                                  style={{ background: mod.completionRate < 20 ? "#ef4444" : mod.completionRate < 40 ? "#f59e0b" : "#10b981" }}
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${mod.completionRate}%` }}
-                                  transition={{ duration: 0.8, ease: "easeOut" }}
-                                />
-                              </div>
-                            </div>
+                ) : (
+                  <div className="space-y-4 max-h-72 overflow-y-auto custom-scrollbar">
+                    {stats?.recentActivity.enrollments.map((enr, idx) => (
+                      <motion.div
+                        key={enr.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: idx * 0.05 }}
+                        className="flex items-center gap-3"
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500/10 shrink-0">
+                          <UserPlus className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-700 dark:text-gray-300 truncate">
+                            <span className="font-medium">{enr.userName || "Usuario"}</span> se inscribió en{" "}
+                            <span className="font-medium">{enr.courseTitle}</span>
+                          </p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">
+                            {formatRelativeDate(enr.date)}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                    {stats?.recentActivity.courses.map((crs, idx) => (
+                      <motion.div
+                        key={crs.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: (idx + 5) * 0.05 }}
+                        className="flex items-center gap-3"
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 shrink-0">
+                          <BookPlus className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-700 dark:text-gray-300 truncate">
+                            <span className="font-medium">{crs.teacherName || "Profesor"}</span> creó{" "}
+                            <span className="font-medium">{crs.title}</span>
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                              {formatRelativeDate(crs.date)}
+                            </p>
+                            {getStatusBadge(crs.status)}
                           </div>
-                        ))}
-                      {stats.moduleStats.length === 0 && (
-                        <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
-                          No hay datos de módulos disponibles
-                        </p>
-                      )}
-                    </div>
-                  ) : null}
-                </motion.div>
-              </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                    {(!stats?.recentActivity.enrollments.length && !stats?.recentActivity.courses.length) && (
+                      <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
+                        No hay actividad reciente
+                      </p>
+                    )}
+                  </div>
+                )}
+              </motion.div>
             </motion.div>
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              STUDENTS TAB (unchanged from original)
+              STUDENTS TAB
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "students" && (
             <motion.div
@@ -1163,7 +1073,7 @@ export default function AdminDashboard() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              COURSES TAB (Enhanced)
+              COURSES TAB
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "courses" && (
             <motion.div
@@ -1201,17 +1111,18 @@ export default function AdminDashboard() {
                 ))}
               </motion.div>
 
-              {/* Courses list */}
-              <div className="space-y-4">
+              {/* Course cards grid */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {isLoadingCourses ? (
-                  Array.from({ length: 3 }).map((_, i) => (
+                  Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="glass-card rounded-2xl p-6 animate-pulse">
-                      <div className="h-5 w-48 rounded bg-gray-200 dark:bg-white/5 mb-3" />
-                      <div className="h-4 w-32 rounded bg-gray-200 dark:bg-white/5" />
+                      <div className="h-32 rounded-lg bg-gray-200 dark:bg-white/5 mb-4" />
+                      <div className="h-5 w-36 rounded bg-gray-200 dark:bg-white/5 mb-2" />
+                      <div className="h-4 w-24 rounded bg-gray-200 dark:bg-white/5" />
                     </div>
                   ))
                 ) : courses.length === 0 ? (
-                  <div className="glass-card rounded-2xl p-12 text-center">
+                  <div className="sm:col-span-2 lg:col-span-3 glass-card rounded-2xl p-12 text-center">
                     <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No se encontraron cursos</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
@@ -1225,60 +1136,66 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="glass-card rounded-2xl p-6"
+                      className="glass-card rounded-2xl overflow-hidden group"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-2">
-                            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
-                              {course.title}
-                            </h3>
-                            {getStatusBadge(course.status)}
-                            {getLevelBadge(course.level)}
-                          </div>
+                      {/* Course image/icon header */}
+                      <div className="relative h-32 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-white/5 dark:to-white/2 flex items-center justify-center">
+                        {course.image ? (
+                          <img
+                            src={course.image}
+                            alt={course.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-4xl">{course.icon || course.category?.icon || "📚"}</span>
+                        )}
+                        <div className="absolute top-3 left-3 flex gap-1.5">
+                          {getStatusBadge(course.status)}
+                        </div>
+                        <div className="absolute top-3 right-3">
+                          {getLevelBadge(course.level)}
+                        </div>
+                      </div>
 
-                          {course.description && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
-                              {course.description}
-                            </p>
+                      <div className="p-4">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
+                          {course.title}
+                        </h3>
+
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                          {course.teacher && (
+                            <span className="flex items-center gap-1">
+                              <GraduationCap className="w-3 h-3" />
+                              {course.teacher.name || "Sin profesor"}
+                            </span>
                           )}
+                          {course.category && (
+                            <span className="flex items-center gap-1">
+                              <Tag className="w-3 h-3" />
+                              {course.category.name}
+                            </span>
+                          )}
+                        </div>
 
-                          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                            {course.teacher && (
-                              <span className="flex items-center gap-1">
-                                <GraduationCap className="w-3 h-3" />
-                                {course.teacher.name || "Sin profesor"}
-                              </span>
-                            )}
-                            {course.category && (
-                              <span className="flex items-center gap-1">
-                                <Tag className="w-3 h-3" />
-                                {course.category.name}
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1">
-                              <BookOpen className="w-3 h-3" />
-                              {course.moduleCount} módulos
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Users className="w-3 h-3" />
-                              {course.enrollmentCount} inscritos
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {formatDate(course.createdAt)}
-                            </span>
-                          </div>
+                        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 mb-4">
+                          <span className="flex items-center gap-1">
+                            <BookOpen className="w-3 h-3" />
+                            {course.moduleCount} mód.
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {course.enrollmentCount} inscr.
+                          </span>
                         </div>
 
                         {/* Action buttons */}
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2">
                           {course.status === "pending_review" && (
                             <>
                               <Button
                                 size="sm"
                                 onClick={() => handleCourseStatus(course.id, "published")}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-8"
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-7 flex-1"
                               >
                                 <Check className="w-3 h-3 mr-1" />
                                 Aprobar
@@ -1287,10 +1204,9 @@ export default function AdminDashboard() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleCourseStatus(course.id, "rejected")}
-                                className="text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs h-8"
+                                className="text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs h-7"
                               >
-                                <X className="w-3 h-3 mr-1" />
-                                Rechazar
+                                <X className="w-3 h-3" />
                               </Button>
                             </>
                           )}
@@ -1299,7 +1215,7 @@ export default function AdminDashboard() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleCourseStatus(course.id, "draft")}
-                              className="text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20 hover:bg-amber-50 dark:hover:bg-amber-500/10 text-xs h-8"
+                              className="text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20 hover:bg-amber-50 dark:hover:bg-amber-500/10 text-xs h-7"
                             >
                               <EyeOff className="w-3 h-3 mr-1" />
                               Despublicar
@@ -1310,7 +1226,7 @@ export default function AdminDashboard() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleCourseStatus(course.id, "published")}
-                              className="text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-xs h-8"
+                              className="text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-xs h-7"
                             >
                               <Eye className="w-3 h-3 mr-1" />
                               Publicar
@@ -1320,7 +1236,7 @@ export default function AdminDashboard() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleDeleteCourse(course.id)}
-                            className="text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs h-8"
+                            className="text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs h-7 ml-auto"
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>
@@ -1334,7 +1250,7 @@ export default function AdminDashboard() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              CATEGORÍAS TAB (New)
+              CATEGORÍAS TAB
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "categories" && (
             <motion.div
@@ -1501,9 +1417,9 @@ export default function AdminDashboard() {
                 )}
               </AnimatePresence>
 
-              {/* Categories list */}
+              {/* Categories grid */}
               {isLoadingCategories ? (
-                <div className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="glass-card rounded-2xl p-6 animate-pulse">
                       <div className="h-5 w-40 rounded bg-gray-200 dark:bg-white/5 mb-3" />
@@ -1518,22 +1434,22 @@ export default function AdminDashboard() {
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Crea tu primera categoría</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {categories.map((cat, index) => (
                     <motion.div
                       key={cat.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="glass-card rounded-2xl p-5"
+                      className="glass-card rounded-2xl p-5 group"
                     >
-                      <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
                           <div
-                            className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0"
+                            className="flex items-center justify-center w-12 h-12 rounded-xl shrink-0"
                             style={{ backgroundColor: `${cat.color}20`, border: `1px solid ${cat.color}30` }}
                           >
-                            <span className="text-lg">{cat.icon}</span>
+                            <span className="text-xl">{cat.icon}</span>
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
@@ -1546,43 +1462,45 @@ export default function AdminDashboard() {
                                 </Badge>
                               )}
                             </div>
-                            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
                               <span>/{cat.slug}</span>
                               <span>{cat.courseCount} curso{cat.courseCount !== 1 ? "s" : ""}</span>
-                              {cat.description && (
-                                <span className="truncate max-w-[200px]">{cat.description}</span>
-                              )}
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleToggleCategoryPublished(cat)}
-                            className={`p-2 rounded-lg transition-colors ${
+                            className={`p-1.5 rounded-lg transition-colors ${
                               cat.published
                                 ? "text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
                                 : "text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5"
                             }`}
                             title={cat.published ? "Ocultar" : "Mostrar"}
                           >
-                            {cat.published ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                            {cat.published ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                           </button>
                           <button
                             onClick={() => startEditCategory(cat)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
                             title="Editar"
                           >
-                            <Pencil className="w-4 h-4" />
+                            <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteCategory(cat.id)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                             title="Eliminar"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
+                      {cat.description && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 line-clamp-2">
+                          {cat.description}
+                        </p>
+                      )}
                     </motion.div>
                   ))}
                 </div>
@@ -1591,7 +1509,7 @@ export default function AdminDashboard() {
           )}
 
           {/* ═══════════════════════════════════════════════════════
-              USUARIOS TAB (New)
+              USUARIOS TAB
               ═══════════════════════════════════════════════════════ */}
           {activeTab === "users" && (
             <motion.div
@@ -1753,7 +1671,7 @@ export default function AdminDashboard() {
                                 value={user.role}
                                 onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
                                 className="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-gray-700 dark:text-gray-300 focus:outline-none focus:border-emerald-500/50 cursor-pointer"
-                                disabled={user.id === ""} // Prevent self-demotion handled by API
+                                disabled={user.id === ""}
                               >
                                 <option value="student">Alumno</option>
                                 <option value="teacher">Profesor</option>
@@ -1795,44 +1713,5 @@ export default function AdminDashboard() {
         </AnimatePresence>
       </div>
     </div>
-  );
-}
-
-// ── Reusable StatsCard Component ───────────────────────────────
-
-function StatsCard({
-  icon,
-  iconBg,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  iconBg: string;
-  label: string;
-  value: string | number | null;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="glass-card rounded-2xl p-6"
-    >
-      <div className="flex items-center gap-3 mb-3">
-        <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${iconBg}`}>
-          {icon}
-        </div>
-        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-          {label}
-        </span>
-      </div>
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">
-        {value === null ? (
-          <div className="h-9 w-16 rounded bg-gray-200 dark:bg-white/5 animate-pulse" />
-        ) : (
-          value
-        )}
-      </div>
-    </motion.div>
   );
 }

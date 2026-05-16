@@ -19,68 +19,27 @@ import {
   Shield,
   Brain,
   Building2,
+  Code2,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { UserMenu } from "@/components/user-menu";
 import { useAuth } from "@/hooks/use-auth";
+import { getCategoryTheme, getCategoryThemeByColor, CategoryTheme } from "@/lib/category-themes";
+import { CategoryCardBackground } from "@/components/CategoryBackground";
 
-// Category color map
-const CATEGORY_COLORS: Record<string, string> = {
-  "#10b981": "emerald",
-  "#3b82f6": "blue",
-  "#ef4444": "red",
-  "#8b5cf6": "violet",
-};
-
-const CATEGORY_STYLE_MAP: Record<
-  string,
-  { bg: string; border: string; text: string; badge: string; iconBg: string; gradient: string }
-> = {
-  emerald: {
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-    text: "text-emerald-600 dark:text-emerald-400",
-    badge: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-    iconBg: "bg-emerald-500/15 border-emerald-500/20",
-    gradient: "from-emerald-500 to-emerald-400",
-  },
-  blue: {
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-    text: "text-blue-600 dark:text-blue-400",
-    badge: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/20",
-    iconBg: "bg-blue-500/15 border-blue-500/20",
-    gradient: "from-blue-500 to-blue-400",
-  },
-  red: {
-    bg: "bg-red-500/10",
-    border: "border-red-500/20",
-    text: "text-red-600 dark:text-red-400",
-    badge: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20",
-    iconBg: "bg-red-500/15 border-red-500/20",
-    gradient: "from-red-500 to-red-400",
-  },
-  violet: {
-    bg: "bg-violet-500/10",
-    border: "border-violet-500/20",
-    text: "text-violet-600 dark:text-violet-400",
-    badge: "bg-violet-500/15 text-violet-600 dark:text-violet-400 border-violet-500/20",
-    iconBg: "bg-violet-500/15 border-violet-500/20",
-    gradient: "from-violet-500 to-violet-400",
-  },
-};
-
-function getCategoryStyle(color: string) {
-  const name = CATEGORY_COLORS[color] || "emerald";
-  return CATEGORY_STYLE_MAP[name] || CATEGORY_STYLE_MAP.emerald;
+// Map icon names to components for category cards
+function CategoryIconComponent({ iconName, className }: { iconName: string; className?: string }) {
+  switch (iconName) {
+    case "Building2":
+      return <Building2 className={className} />;
+    case "Code2":
+      return <Code2 className={className} />;
+    case "Shield":
+      return <Shield className={className} />;
+    case "Brain":
+      return <Brain className={className} />;
+    default:
+      return <GraduationCap className={className} />;
+  }
 }
-
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  Arquitectura: <Building2 className="w-6 h-6" />,
-  Programación: <GraduationCap className="w-6 h-6" />,
-  Ciberseguridad: <Shield className="w-6 h-6" />,
-  "Inteligencia Artificial": <Brain className="w-6 h-6" />,
-};
 
 interface CategoryInfo {
   id: string;
@@ -166,34 +125,11 @@ export default function HomePage() {
   // Compute stats
   const totalCourses = courses.length;
   const totalTopics = courses.reduce((sum, c) => sum + c.topicCount, 0);
-  // We don't have student count from API, estimate from enrolled courses
   const activeStudents = courses.filter((c) => c.enrolled).length || totalCourses * 15;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300 flex flex-col">
-      {/* Background decorative elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-blue-500/3 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-violet-600/3 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative max-w-5xl mx-auto px-4 py-8 sm:px-6 w-full flex-1">
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-            <span className="text-sm font-semibold text-gray-900 dark:text-white tracking-tight">
-              Academy Tech
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <UserMenu />
-            <ThemeToggle />
-          </div>
-        </div>
-
-        {/* Hero Section */}
+    <div className="w-full flex flex-col">
+      {/* Hero Section */}
         <motion.section
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -306,7 +242,7 @@ export default function HomePage() {
           </div>
         </motion.section>
 
-        {/* Categories Section */}
+        {/* Categories Section - Enhanced with category themes */}
         <motion.section
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -333,8 +269,8 @@ export default function HomePage() {
           ) : (
             <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
               {categories.map((cat, index) => {
-                const style = getCategoryStyle(cat.color || "#10b981");
-                const iconEl = CATEGORY_ICONS[cat.name];
+                const theme = getCategoryTheme(cat.slug);
+                const tw = theme.tailwind;
                 return (
                   <motion.div
                     key={cat.id}
@@ -344,37 +280,41 @@ export default function HomePage() {
                     onClick={() => router.push(`/categoria/${cat.slug}`)}
                     className={`glass-card glass-card-hover rounded-2xl p-6 cursor-pointer transition-all duration-300 group relative overflow-hidden`}
                   >
-                    {/* Color accent top bar */}
+                    {/* Category-themed background with pattern on hover */}
+                    <CategoryCardBackground theme={theme} />
+
+                    {/* Gradient top accent bar */}
                     <div
-                      className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${style.gradient}`}
+                      className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${tw.gradient}`}
                     />
 
-                    <div
-                      className={`w-12 h-12 rounded-xl ${style.iconBg} border flex items-center justify-center mb-4`}
-                    >
-                      {iconEl ? (
-                        <span className={style.text}>{iconEl}</span>
-                      ) : (
-                        <span className="text-2xl">{cat.icon || "📚"}</span>
-                      )}
-                    </div>
-                    <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
-                      {cat.name}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
-                      {cat.description || "Explora los cursos de esta categoría"}
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      <Badge
-                        className={`${style.badge} text-[10px] px-2 border`}
+                    <div className="relative z-10">
+                      <div
+                        className={`w-12 h-12 rounded-xl ${tw.iconBg} ${tw.iconBgDark} border flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
                       >
-                        {cat.courseCount} curso{cat.courseCount !== 1 ? "s" : ""}
-                      </Badge>
+                        <CategoryIconComponent
+                          iconName={theme.icon}
+                          className={`w-6 h-6 ${tw.text} ${tw.textDark}`}
+                        />
+                      </div>
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
+                        {cat.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                        {cat.description || "Explora los cursos de esta categoría"}
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <Badge
+                          className={`${tw.badge} ${tw.badgeDark} text-[10px] px-2 border`}
+                        >
+                          {cat.courseCount} curso{cat.courseCount !== 1 ? "s" : ""}
+                        </Badge>
+                      </div>
                     </div>
 
                     {/* Hover arrow */}
-                    <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ArrowRight className={`w-4 h-4 ${style.text}`} />
+                    <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <ArrowRight className={`w-4 h-4 ${tw.text} ${tw.textDark}`} />
                     </div>
                   </motion.div>
                 );
@@ -422,8 +362,10 @@ export default function HomePage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {courses.map((course, index) => {
-                const catColor = course.category?.color || "#10b981";
-                const style = getCategoryStyle(catColor);
+                const catTheme = course.category?.slug
+                  ? getCategoryTheme(course.category.slug)
+                  : getCategoryThemeByColor(course.category?.color || "#10b981");
+                const tw = catTheme.tailwind;
                 const levelKey = course.level || "beginner";
                 const levelLabel = LEVEL_LABELS[levelKey] || "Principiante";
                 const levelBadge = LEVEL_BADGE_STYLES[levelKey] || LEVEL_BADGE_STYLES.beginner;
@@ -437,16 +379,19 @@ export default function HomePage() {
                     onClick={() => router.push(`/curso/${course.slug}`)}
                     className="glass-card glass-card-hover rounded-2xl p-6 cursor-pointer transition-all duration-300 group relative overflow-hidden"
                   >
-                    {/* Category color accent */}
+                    {/* Category-themed background with pattern on hover */}
+                    <CategoryCardBackground theme={catTheme} />
+
+                    {/* Category color accent bar */}
                     {course.category && (
                       <div
-                        className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${style.gradient}`}
+                        className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${tw.gradient}`}
                       />
                     )}
 
-                    <div className="flex items-start gap-4">
+                    <div className="relative z-10 flex items-start gap-4">
                       <div
-                        className={`flex items-center justify-center w-12 h-12 rounded-xl ${style.iconBg} border text-2xl shrink-0`}
+                        className={`flex items-center justify-center w-12 h-12 rounded-xl ${tw.iconBg} ${tw.iconBgDark} border text-2xl shrink-0`}
                       >
                         {course.icon || "📚"}
                       </div>
@@ -455,7 +400,7 @@ export default function HomePage() {
                         {course.category && (
                           <div className="flex items-center gap-2 mb-2">
                             <Badge
-                              className={`${style.badge} text-[10px] px-2 border`}
+                              className={`${tw.badge} ${tw.badgeDark} text-[10px] px-2 border`}
                             >
                               {course.category.name}
                             </Badge>
@@ -509,7 +454,7 @@ export default function HomePage() {
                                 className="h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
                               />
                               <motion.div
-                                className="absolute top-0 left-0 h-2 rounded-full progress-emerald"
+                                className={`absolute top-0 left-0 h-2 rounded-full progress-category`}
                                 initial={{ width: 0 }}
                                 animate={{ width: `${course.progress}%` }}
                                 transition={{
@@ -525,7 +470,7 @@ export default function HomePage() {
                                   ? "¡Curso completado!"
                                   : "Progreso del curso"}
                               </span>
-                              <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                              <span className={`text-[11px] font-medium ${tw.text} ${tw.textDark}`}>
                                 {course.progress}%
                               </span>
                             </div>
@@ -534,7 +479,7 @@ export default function HomePage() {
                           <div className="flex items-center gap-2 mt-1">
                             <Button
                               size="sm"
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5 h-8 text-xs"
+                              className={`${tw.button} text-white gap-1.5 h-8 text-xs`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 router.push(`/curso/${course.slug}`);
@@ -549,8 +494,8 @@ export default function HomePage() {
                     </div>
 
                     {/* Hover arrow */}
-                    <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ArrowRight className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                    <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <ArrowRight className={`w-4 h-4 ${tw.text} ${tw.textDark}`} />
                     </div>
                   </motion.div>
                 );
@@ -559,27 +504,6 @@ export default function HomePage() {
           )}
         </motion.section>
 
-        {/* Footer */}
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1.0 }}
-          className="pb-8 text-center"
-        >
-          <div className="glass-card rounded-xl p-5">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                Academy Tech
-              </span>
-            </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500 max-w-md mx-auto">
-              Tu plataforma de aprendizaje tecnológico: Arquitectura, Programación, Ciberseguridad e IA.
-              Nuevos cursos añadidos regularmente.
-            </p>
-          </div>
-        </motion.footer>
-      </div>
     </div>
   );
 }

@@ -11,9 +11,12 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { useCourse } from "@/hooks/use-course-context";
 import { modules } from "@/lib/curriculum";
+import { useCategoryTheme } from "@/components/CategoryThemeProvider";
 
 export function ProgressOverview() {
   const course = useCourse();
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
 
   const overallProgress = course.getOverallProgress();
   const completedTopics = course.getTotalCompletedTopics();
@@ -29,8 +32,8 @@ export function ProgressOverview() {
       icon: BookOpen,
       label: "Temas Completados",
       value: `${completedTopics}/${totalTopics}`,
-      color: "text-emerald-500 dark:text-emerald-400",
-      bgColor: "bg-emerald-500/10",
+      color: `${tw.text} ${tw.textDark}`,
+      bgColor: tw.bg,
     },
     {
       icon: Trophy,
@@ -66,8 +69,8 @@ export function ProgressOverview() {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-500/15">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <div className={`p-2 rounded-lg ${tw.iconBg} ${tw.iconBgDark}`}>
+              <CheckCircle2 className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -78,7 +81,7 @@ export function ProgressOverview() {
               </p>
             </div>
           </div>
-          <div className="text-3xl font-bold text-emerald-500 dark:text-emerald-400">
+          <div className={`text-3xl font-bold ${tw.text} ${tw.textDark}`}>
             {overallProgress}%
           </div>
         </div>
@@ -88,7 +91,7 @@ export function ProgressOverview() {
             className="h-3 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
           />
           <motion.div
-            className="absolute top-0 left-0 h-3 rounded-full progress-emerald"
+            className="absolute top-0 left-0 h-3 rounded-full progress-category"
             initial={{ width: 0 }}
             animate={{ width: `${overallProgress}%` }}
             transition={{ duration: 1, ease: "easeOut" }}

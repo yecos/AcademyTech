@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAchievementChecker } from "@/hooks/use-achievement-checker";
 import { UserMenu } from "@/components/user-menu";
 import { AuthBanner } from "@/components/auth-banner";
+import { useCategoryTheme } from "@/components/CategoryThemeProvider";
+import { CategoryBackground } from "@/components/CategoryBackground";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,6 +67,10 @@ export function StudyApp() {
   const courseName = courseNames[courseSlug] || courseSlug;
   const courseDescription = courseDescriptions[courseSlug] || "Sigue tu progreso y completa los temas del curso.";
 
+  // Get category theme
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
+
   // Initialize achievement checker (runs streak check + achievement checks + toasts)
   useAchievementChecker();
 
@@ -82,12 +88,8 @@ export function StudyApp() {
       {/* Auth banner for non-logged users */}
       <AuthBanner />
 
-      {/* Background decorative elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-emerald-600/3 rounded-full blur-3xl" />
-      </div>
+      {/* Category-themed background */}
+      <CategoryBackground />
 
       <div className="relative max-w-3xl mx-auto px-4 py-8 sm:px-6">
         {/* Header */}
@@ -101,7 +103,7 @@ export function StudyApp() {
           <div className="flex justify-between items-center mb-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 ${tw.hoverBorder} ${tw.hoverBorderDark} transition-all duration-200`}
             >
               <ArrowLeft className="w-3 h-3 text-gray-500 dark:text-gray-400" />
               <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400">
@@ -115,9 +117,9 @@ export function StudyApp() {
           </div>
 
           <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${tw.bg} ${tw.bgDark} border ${tw.border} ${tw.borderDark}`}>
+              <Sparkles className={`w-3.5 h-3.5 ${tw.text} ${tw.textDark}`} />
+              <span className={`text-xs font-medium ${tw.text} ${tw.textDark}`}>
                 Plan de Estudio Interactivo
               </span>
             </div>
@@ -159,10 +161,10 @@ export function StudyApp() {
             </Link>
             <Link
               href="/buscar"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 hover:border-emerald-500/30 transition-all duration-200"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ${tw.bg} ${tw.bgDark} border ${tw.border} ${tw.borderDark} hover:opacity-90 transition-all duration-200`}
             >
-              <Search className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
-              <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+              <Search className={`w-3 h-3 ${tw.text} ${tw.textDark}`} />
+              <span className={`text-[11px] font-medium ${tw.text} ${tw.textDark}`}>
                 Buscar
               </span>
             </Link>
@@ -179,12 +181,12 @@ export function StudyApp() {
               href="/certificado"
               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-200 ${
                 overallProgress === 100
-                  ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15 hover:border-emerald-500/30"
-                  : "bg-gray-100 dark:bg-white/3 border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 opacity-50"
+                  ? `${tw.bg} ${tw.bgDark} ${tw.border} ${tw.borderDark}`
+                  : "bg-gray-100 dark:bg-white/3 border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 opacity-50"
               }`}
             >
-              <Award className={`w-3 h-3 ${overallProgress === 100 ? "text-emerald-500 dark:text-emerald-400" : "text-gray-400"}`} />
-              <span className={`text-[11px] font-medium ${overallProgress === 100 ? "text-emerald-600 dark:text-emerald-400" : "text-gray-400"}`}>
+              <Award className={`w-3 h-3 ${overallProgress === 100 ? `${tw.text} ${tw.textDark}` : "text-gray-400"}`} />
+              <span className={`text-[11px] font-medium ${overallProgress === 100 ? `${tw.text} ${tw.textDark}` : "text-gray-400"}`}>
                 Certificado
               </span>
             </Link>
@@ -205,7 +207,7 @@ export function StudyApp() {
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight flex items-center justify-center gap-3">
             Academia{" "}
-            <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
+            <span className={`bg-gradient-to-r ${tw.gradient} bg-clip-text text-transparent`}>
               {courseName}
             </span>
             {currentStreak > 0 && (
@@ -232,7 +234,7 @@ export function StudyApp() {
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+              <Layers className={`w-4 h-4 ${tw.text} ${tw.textDark}`} />
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
                 Módulos del Curso
               </h2>
@@ -297,7 +299,7 @@ export function StudyApp() {
           <div className="glass-card rounded-xl p-5">
             {overallProgress === 100 ? (
               <div className="space-y-3">
-                <GraduationCap className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mx-auto" />
+                <GraduationCap className={`w-8 h-8 ${tw.text} ${tw.textDark} mx-auto`} />
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   ¡Felicidades! 🎉
                 </h3>
@@ -306,7 +308,7 @@ export function StudyApp() {
                   ¡Ahora eres un experto!
                 </p>
                 <Link href="/certificado">
-                  <Button className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2 mt-2">
+                  <Button className={`${tw.button} text-white gap-2 mt-2`}>
                     <Award className="w-4 h-4" />
                     Obtener Certificado
                   </Button>
@@ -314,7 +316,7 @@ export function StudyApp() {
               </div>
             ) : (
               <div className="space-y-2">
-                <BookOpen className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mx-auto" />
+                <BookOpen className={`w-8 h-8 ${tw.text} ${tw.textDark} mx-auto`} />
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                   Continúa aprendiendo
                 </h3>

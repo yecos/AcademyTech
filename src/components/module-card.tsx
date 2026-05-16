@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Module, TopicInfo } from "@/lib/curriculum";
 import { useCourse } from "@/hooks/use-course-context";
+import { useCategoryTheme } from "@/components/CategoryThemeProvider";
 
 interface ModuleCardProps {
   module: Module;
@@ -35,6 +36,8 @@ interface ModuleCardProps {
 export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
   const router = useRouter();
   const course = useCourse();
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
 
   const completedTopics = course.getModuleCompletedCount(module.id);
   const totalTopics = module.topics.length;
@@ -69,6 +72,8 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
             sizes="(max-width: 768px) 100vw, 600px"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/60 to-gray-50/30 dark:from-zinc-950 dark:via-zinc-950/60 dark:to-zinc-950/30" />
+          {/* Category-colored bottom border */}
+          <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${tw.gradient}`} />
         </div>
 
         <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-transparent -mt-6 relative z-10">
@@ -77,7 +82,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
             <div
               className={`flex items-center justify-center w-10 h-10 rounded-lg text-sm font-bold shrink-0 ${
                 isComplete
-                  ? "bg-emerald-500/20 text-emerald-500 dark:text-emerald-400"
+                  ? `${tw.iconBg} ${tw.iconBgDark} ${tw.text} ${tw.textDark}`
                   : "bg-gray-100 dark:bg-white/5 text-gray-400"
               }`}
             >
@@ -95,15 +100,15 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                   Módulo {module.number}: {module.title}
                 </h3>
                 {isComplete && (
-                  <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] px-1.5">
+                  <Badge className={`${tw.badge} ${tw.badgeDark} text-[10px] px-1.5 border`}>
                     Completo
                   </Badge>
                 )}
                 {hasQuiz && (
                   <Badge
-                    className={`text-[10px] px-1.5 ${
+                    className={`text-[10px] px-1.5 border ${
                       quizScore >= 80
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                        ? `${tw.badge} ${tw.badgeDark}`
                         : quizScore >= 60
                           ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20"
                           : "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20"
@@ -121,7 +126,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                     className="h-1.5 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
                   />
                 </div>
-                <span className="text-[11px] text-gray-400 dark:text-gray-500 shrink-0">
+                <span className={`text-[11px] ${progress === 100 ? `${tw.text} ${tw.textDark} font-medium` : "text-gray-400 dark:text-gray-500"} shrink-0`}>
                   {completedTopics}/{totalTopics} temas
                 </span>
               </div>
@@ -131,13 +136,13 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
 
         <AccordionContent className="px-5 pb-4">
           <div className="space-y-4">
-            {/* Topics list - now clickable */}
+            {/* Topics list */}
             <div className="space-y-1">
               {module.topics.map((topic, topicIndex) => {
                 const key = `${module.id}-${topicIndex}`;
                 const checked = isTopicCompleted(module.id, topicIndex);
                 const diffColors = {
-                  basico: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                  basico: `${tw.badge} ${tw.badgeDark}`,
                   intermedio: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20',
                   avanzado: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20',
                 };
@@ -160,7 +165,11 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                         course.toggleProgress(module.id, topicIndex)
                       }
                       onClick={(e) => e.stopPropagation()}
-                      className="border-gray-300 dark:border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                      className="border-gray-300 dark:border-white/20"
+                      style={checked ? {
+                        backgroundColor: theme.primaryColor,
+                        borderColor: theme.primaryColor,
+                      } : undefined}
                     />
                     <button
                       onClick={() =>
@@ -176,7 +185,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                         {topicIndex + 1}.
                       </span>
                       <span className="flex-1 text-sm">{topic.name}</span>
-                      <Badge className={`text-[9px] px-1.5 py-0 ${diffColors[topic.difficulty]} shrink-0`}>
+                      <Badge className={`text-[9px] px-1.5 py-0 ${diffColors[topic.difficulty]} shrink-0 border`}>
                         {diffLabels[topic.difficulty]}
                       </Badge>
                       <span className="text-[10px] text-gray-400 dark:text-gray-500 shrink-0 flex items-center gap-0.5">
@@ -184,9 +193,9 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                         {topic.estimatedTime}
                       </span>
                       {isBookmarked(module.id, topicIndex) && (
-                        <Bookmark className="w-3 h-3 text-emerald-500 dark:text-emerald-400 fill-emerald-500 dark:fill-emerald-400 shrink-0" />
+                        <Bookmark className={`w-3 h-3 ${tw.text} ${tw.textDark} shrink-0`} style={{ fill: theme.primaryColor }} />
                       )}
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors shrink-0" />
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors shrink-0" />
                     </button>
                   </motion.div>
                 );
@@ -203,7 +212,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
               <Button
                 size="sm"
                 onClick={() => onEvaluar(module)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5"
+                className={`${tw.button} text-white gap-1.5`}
               >
                 <ClipboardCheck className="w-3.5 h-3.5" />
                 {hasQuiz ? "Revaluar" : "Evaluar"}

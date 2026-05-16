@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth-provider";
 import { CourseDataProvider } from "@/hooks/use-course-context";
 import { ServiceWorkerRegistration } from "@/components/sw-registration";
+import { AppLayout } from "@/components/AppLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -62,7 +63,9 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <CourseDataProvider>
-              {children}
+              <AppLayout>
+                {children}
+              </AppLayout>
               <Toaster />
               <ServiceWorkerRegistration />
             </CourseDataProvider>

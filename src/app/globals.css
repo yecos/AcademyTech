@@ -41,6 +41,15 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  /* Category theme colors registered as Tailwind tokens */
+  --color-cat-primary: var(--category-primary);
+  --color-cat-gradient-from: var(--category-gradient-from);
+  --color-cat-gradient-via: var(--category-gradient-via);
+  --color-cat-gradient-to: var(--category-gradient-to);
+  --color-cat-text: var(--category-text-accent);
+  --color-cat-bg: var(--category-bg-accent);
+  --color-cat-border: var(--category-border-accent);
+  --color-cat-glow: var(--category-glow-color);
 }
 
 :root {
@@ -77,6 +86,16 @@
   --sidebar-accent-foreground: oklch(0.25 0 0);
   --sidebar-border: oklch(0.9 0 0);
   --sidebar-ring: oklch(0.696 0.17 162.48);
+  /* Category theme defaults (Arquitectura/Emerald) */
+  --category-primary: #10b981;
+  --category-gradient-from: #10b981;
+  --category-gradient-via: #14b8a6;
+  --category-gradient-to: #0d9488;
+  --category-text-accent: #059669;
+  --category-bg-accent: rgba(16, 185, 129, 0.10);
+  --category-border-accent: rgba(16, 185, 129, 0.20);
+  --category-glow-color: rgba(16, 185, 129, 0.15);
+  --category-pattern-opacity: 0.06;
 }
 
 .dark {
@@ -163,18 +182,24 @@
 
 .glass-card-hover:hover {
   background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: var(--category-border-accent);
 }
 
 .dark .glass-card-hover:hover {
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: var(--category-border-accent);
 }
 
 /* Emerald glow */
 .emerald-glow {
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.15),
     0 0 60px rgba(16, 185, 129, 0.05);
+}
+
+/* Category-aware glow */
+.category-glow {
+  box-shadow: 0 0 20px var(--category-glow-color),
+    0 0 60px var(--category-glow-color);
 }
 
 /* Animated gradient background */
@@ -184,6 +209,18 @@
     rgba(16, 185, 129, 0.08) 0%,
     rgba(5, 150, 105, 0.04) 50%,
     rgba(16, 185, 129, 0.08) 100%
+  );
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Category-aware animated gradient */
+.category-animated-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--category-bg-accent) 0%,
+    transparent 50%,
+    var(--category-bg-accent) 100%
   );
   background-size: 200% 200%;
   animation: gradientShift 8s ease infinite;
@@ -206,6 +243,11 @@
   background: linear-gradient(90deg, #059669, #10b981, #34d399);
 }
 
+/* Category-aware progress bar */
+.progress-category {
+  background: linear-gradient(90deg, var(--category-gradient-from), var(--category-primary), var(--category-gradient-to));
+}
+
 /* Pulse animation for completed modules */
 @keyframes pulse-emerald {
   0%,
@@ -219,4 +261,38 @@
 
 .pulse-emerald {
   animation: pulse-emerald 2s ease-in-out infinite;
+}
+
+/* Category-aware pulse */
+@keyframes pulse-category {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--category-glow-color);
+  }
+  50% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+.pulse-category {
+  animation: pulse-category 2s ease-in-out infinite;
+}
+
+/* Category gradient text utility */
+.category-gradient-text {
+  background: linear-gradient(135deg, var(--category-gradient-from), var(--category-primary), var(--category-gradient-to));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Category button with theme color */
+.category-button {
+  background-color: var(--category-primary);
+  color: white;
+  transition: all 0.2s;
+}
+
+.category-button:hover {
+  filter: brightness(1.1);
 }

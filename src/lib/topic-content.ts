@@ -303,7 +303,130 @@ La gestión de assets es otro aspecto fundamental. En Preferencias > Assets, pue
 
 La configuración de auto-guardado es vital para evitar pérdidas de trabajo. Activa el auto-guardado y configúralo para que guarde cada 5-10 minutos. Los archivos de escena de D5 (.drs) pueden ser grandes, así que asegúrate de tener suficiente espacio en disco.
 
-Finalmente, familiarízate con los atajos de teclado. D5 Render incluye atajos predeterminados que puedes personalizar. Los más importantes son: W (mover), E (rotar), R (escalar), F (enfocar objeto), G (agregar objeto), Ctrl+Z (deshacer), Ctrl+S (guardar). Personalizar los atajos a tu flujo de trabajo puede acelerar significativamente tu productividad.`,
+Finalmente, familiarízate con los atajos de teclado. D5 Render incluye atajos predeterminados que puedes personalizar. Los más importantes son: W (mover), E (rotar), R (escalar), F (enfocar objeto), G (agregar objeto), Ctrl+Z (deshacer), Ctrl+S (guardar). Personalizar los atajos a tu flujo de trabajo puede acelerar significativamente tu productividad.
+
+Puedes practicar con código HTML y CSS para crear interfaces que simulen paneles de configuración. Aquí tienes un ejemplo interactivo:
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Configuración</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .panel {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 24px;
+      width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    h2 { color: #10b981; margin-bottom: 16px; font-size: 1.2rem; }
+    .setting {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .setting:last-child { border: none; }
+    .label { font-size: 0.9rem; }
+    .value { color: #10b981; font-size: 0.85rem; }
+    .toggle {
+      width: 44px; height: 24px;
+      background: #333;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle.active { background: #10b981; }
+    .toggle::after {
+      content: '';
+      width: 20px; height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px; left: 2px;
+      transition: transform 0.3s;
+    }
+    .toggle.active::after { transform: translateX(20px); }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h2>⚙️ Configuración</h2>
+    <div class="setting">
+      <span class="label">Calidad del Viewport</span>
+      <span class="value">Alta</span>
+    </div>
+    <div class="setting">
+      <span class="label">Auto-guardado</span>
+      <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+    </div>
+    <div class="setting">
+      <span class="label">Denoiser</span>
+      <div class="toggle" onclick="this.classList.toggle('active')"></div>
+    </div>
+    <div class="setting">
+      <span class="label">Idioma</span>
+      <span class="value">Español</span>
+    </div>
+  </div>
+</body>
+</html>
+\`\`\`
+
+También puedes experimentar con JavaScript para simular la lógica de configuración:
+
+\`\`\`javascript
+// Simulación de configuración de D5 Render
+const config = {
+  language: "Español",
+  viewportQuality: "Alta",
+  autoSave: true,
+  autoSaveInterval: 5,
+  denoiser: false,
+  gpuIndex: 0,
+  assetPath: "D:/D5_Render/Assets"
+};
+
+console.log("📋 Configuración actual:");
+console.log("Idioma:", config.language);
+console.log("Calidad viewport:", config.viewportQuality);
+console.log("Auto-guardado:", config.autoSave ? "Activado" : "Desactivado");
+console.log("Intervalo:", config.autoSaveInterval, "minutos");
+console.log("Denoiser:", config.denoiser ? "Activado" : "Desactivado");
+console.log("GPU:", config.gpuIndex);
+console.log("Ruta assets:", config.assetPath);
+
+// Función para actualizar configuración
+function updateConfig(key, value) {
+  if (config.hasOwnProperty(key)) {
+    config[key] = value;
+    console.log("✅ Actualizado:", key, "→", value);
+  } else {
+    console.log("❌ Clave no encontrada:", key);
+  }
+}
+
+updateConfig("denoiser", true);
+updateConfig("autoSaveInterval", 10);
+updateConfig("language", "English");
+
+console.log("\n📋 Configuración actualizada:");
+console.log(JSON.stringify(config, null, 2));
+\`\`\``,
   keyPoints: [
     "Cambiar idioma en Editar > Preferencias > General (requiere reinicio)",
     "Seleccionar GPU correcta si tienes múltiples tarjetas gráficas",

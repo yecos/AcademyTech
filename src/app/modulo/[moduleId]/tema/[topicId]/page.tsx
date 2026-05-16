@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -23,16 +23,100 @@ import {
   PenLine,
   Target,
   ExternalLink,
+  Code2,
 } from "lucide-react";
 import { modules } from "@/lib/curriculum";
 import { getTopicContent } from "@/lib/topic-content";
 import { useCourse, useCourseSlug } from "@/hooks/use-course-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
+import {
+  CodeSandbox,
+  CodeBlockWithSandbox,
+} from "@/components/CodeSandbox";
+import {
+  parseCodeBlocks,
+  hasCodeBlocks,
+  type ContentSegment,
+  type CodeBlock,
+} from "@/lib/code-block-parser";
 
-function TopicNotes({ moduleId, topicIndex }: { moduleId: string; topicIndex: number }) {
+// Component to render parsed content segments (text + code blocks)
+function ContentWithCodeBlocks({ content }: { content: string }) {
+  const parsed = useMemo(() => parseCodeBlocks(content), [content]);
+
+  if (parsed.codeBlocks.length === 0) {
+    // No code blocks - render as plain text paragraphs
+    return (
+      <div className="prose prose-invert max-w-none">
+        {content.split("\n\n").map((paragraph, i) => (
+          <p
+            key={i}
+            className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-sm sm:text-base"
+          >
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  // Has code blocks - render segments
+  return (
+    <div className="space-y-4">
+      {parsed.segments.map((segment: ContentSegment, i: number) => {
+        if (segment.type === "text") {
+          return (
+            <div key={`text-${i}`} className="prose prose-invert max-w-none">
+              {segment.content.split("\n\n").map((paragraph, j) => (
+                <p
+                  key={j}
+                  className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-sm sm:text-base"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          );
+        }
+
+        if (segment.type === "code") {
+          const block = segment.block;
+          const filename =
+            block.filename ||
+            (block.language === "html"
+              ? "index.html"
+              : block.language === "css"
+                ? "styles.css"
+                : "script.js");
+
+          return (
+            <CodeBlockWithSandbox
+              key={`code-${block.index}`}
+              code={block.code}
+              language={block.language as "html" | "css" | "javascript"}
+              filename={filename}
+            />
+          );
+        }
+
+        return null;
+      })}
+    </div>
+  );
+}
+
+function TopicNotes({
+  moduleId,
+  topicIndex,
+}: {
+  moduleId: string;
+  topicIndex: number;
+}) {
   const course = useCourse();
-  const [noteText, setNoteText] = useState(() => course.getTopicNote(moduleId, topicIndex));
+  const [noteText, setNoteText] = useState(() =>
+    course.getTopicNote(moduleId, topicIndex)
+  );
   const [savedIndicator, setSavedIndicator] = useState(false);
 
   // Debounced auto-save for notes
@@ -59,7 +143,9 @@ function TopicNotes({ moduleId, topicIndex }: { moduleId: string; topicIndex: nu
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <PenLine className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Mis Notas</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Mis Notas
+          </h2>
         </div>
         {savedIndicator && (
           <motion.span
@@ -83,6 +169,49 @@ function TopicNotes({ moduleId, topicIndex }: { moduleId: string; topicIndex: nu
   );
 }
 
+// Interactive Code Sandbox Section
+function CodeSandboxSection() {
+  const [showSandbox, setShowSandbox] = useState(false);
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.28 }}
+      className="glass-card rounded-xl overflow-hidden border-emerald-500/15"
+    >
+      {!showSandbox ? (
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Code2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Sandbox de Código
+            </h2>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 leading-relaxed">
+            Practica escribiendo HTML, CSS y JavaScript directamente en el
+            navegador. Escribe código y ejecútalo para ver los resultados al
+            instante.
+          </p>
+          <Button
+            onClick={() => setShowSandbox(true)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+          >
+            <Code2 className="w-4 h-4" />
+            Abrir Sandbox
+          </Button>
+        </div>
+      ) : (
+        <CodeSandbox
+          title="Sandbox de Código"
+          isExpanded={true}
+          onClose={() => setShowSandbox(false)}
+        />
+      )}
+    </motion.section>
+  );
+}
+
 export default function TopicPage() {
   const params = useParams();
   const router = useRouter();
@@ -102,13 +231,24 @@ export default function TopicPage() {
   const toggleBookmark = course.toggleBookmark;
   const bookmarked = course.isBookmarked(moduleId, topicIndex);
 
-  if (!moduleData || topicIndex < 0 || topicIndex >= moduleData.topics.length) {
+  if (
+    !moduleData ||
+    topicIndex < 0 ||
+    topicIndex >= moduleData.topics.length
+  ) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tema no encontrado</h2>
-          <p className="text-gray-500 dark:text-gray-400">El tema que buscas no existe.</p>
-          <Button onClick={() => router.push("/")} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Tema no encontrado
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400">
+            El tema que buscas no existe.
+          </p>
+          <Button
+            onClick={() => router.push("/")}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white"
+          >
             <Home className="w-4 h-4 mr-2" />
             Volver al inicio
           </Button>
@@ -123,10 +263,19 @@ export default function TopicPage() {
   const hasPrev = topicIndex > 0;
   const hasNext = topicIndex < totalTopics - 1;
 
-  const prevPath = hasPrev ? `/modulo/${moduleId}/tema/${topicIndex - 1}` : null;
-  const nextPath = hasNext ? `/modulo/${moduleId}/tema/${topicIndex + 1}` : null;
+  const prevPath = hasPrev
+    ? `/modulo/${moduleId}/tema/${topicIndex - 1}`
+    : null;
+  const nextPath = hasNext
+    ? `/modulo/${moduleId}/tema/${topicIndex + 1}`
+    : null;
 
   const notesKey = `${moduleId}-${topicIndex}`;
+
+  // Check if explanation has code blocks
+  const explanationHasCode = content
+    ? hasCodeBlocks(content.explanation)
+    : false;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
@@ -155,11 +304,17 @@ export default function TopicPage() {
               {courseSlug === "d5-render" ? "D5 Render" : courseSlug}
             </button>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-gray-400 dark:text-gray-500">Módulo {moduleData.number}</span>
+            <span className="text-gray-400 dark:text-gray-500">
+              Módulo {moduleData.number}
+            </span>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-gray-400 dark:text-gray-500">{moduleData.title}</span>
+            <span className="text-gray-400 dark:text-gray-500">
+              {moduleData.title}
+            </span>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-emerald-500 dark:text-emerald-400">Tema {topicIndex + 1}</span>
+            <span className="text-emerald-500 dark:text-emerald-400">
+              Tema {topicIndex + 1}
+            </span>
           </nav>
           <div className="flex items-center gap-2">
             <UserMenu />
@@ -201,14 +356,20 @@ export default function TopicPage() {
                 <Badge className="bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/10 text-xs">
                   Tema {topicIndex + 1} de {totalTopics}
                 </Badge>
-                <Badge className={`text-xs ${
-                  topicInfo.difficulty === 'basico'
-                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                    : topicInfo.difficulty === 'intermedio'
-                      ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                      : 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20'
-                }`}>
-                  {topicInfo.difficulty === 'basico' ? 'Básico' : topicInfo.difficulty === 'intermedio' ? 'Intermedio' : 'Avanzado'}
+                <Badge
+                  className={`text-xs ${
+                    topicInfo.difficulty === "basico"
+                      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                      : topicInfo.difficulty === "intermedio"
+                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                        : "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20"
+                  }`}
+                >
+                  {topicInfo.difficulty === "basico"
+                    ? "Básico"
+                    : topicInfo.difficulty === "intermedio"
+                      ? "Intermedio"
+                      : "Avanzado"}
                 </Badge>
                 <Badge className="bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/10 text-xs flex items-center gap-1">
                   <Clock className="w-3 h-3" />
@@ -267,7 +428,7 @@ export default function TopicPage() {
         {/* Content */}
         {content ? (
           <div className="space-y-8">
-            {/* Explanation */}
+            {/* Explanation - with code block support */}
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -276,15 +437,17 @@ export default function TopicPage() {
             >
               <div className="flex items-center gap-2 mb-4">
                 <BookOpen className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Explicación</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Explicación
+                </h2>
+                {explanationHasCode && (
+                  <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs ml-2">
+                    <Code2 className="w-3 h-3 mr-1" />
+                    Código interactivo
+                  </Badge>
+                )}
               </div>
-              <div className="prose prose-invert max-w-none">
-                {content.explanation.split("\n\n").map((paragraph, i) => (
-                  <p key={i} className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-sm sm:text-base">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+              <ContentWithCodeBlocks content={content.explanation} />
             </motion.section>
 
             {/* Key Points */}
@@ -296,7 +459,9 @@ export default function TopicPage() {
             >
               <div className="flex items-center gap-2 mb-4">
                 <Lightbulb className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Puntos Clave</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Puntos Clave
+                </h2>
               </div>
               <ul className="space-y-3">
                 {content.keyPoints.map((point, i) => (
@@ -304,7 +469,9 @@ export default function TopicPage() {
                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0 mt-0.5">
                       {i + 1}
                     </span>
-                    <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">{point}</span>
+                    <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                      {point}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -319,7 +486,9 @@ export default function TopicPage() {
             >
               <div className="flex items-center gap-2 mb-4">
                 <ListChecks className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Tutorial Paso a Paso</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Tutorial Paso a Paso
+                </h2>
               </div>
               <div className="space-y-6">
                 {content.steps.map((step, i) => (
@@ -332,12 +501,18 @@ export default function TopicPage() {
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{step.title}</h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{step.description}</p>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                          {step.title}
+                        </h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                          {step.description}
+                        </p>
                         {step.tip && (
                           <div className="mt-2 flex items-start gap-2 bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
                             <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-                            <span className="text-amber-600/80 dark:text-amber-300/80 text-xs">{step.tip}</span>
+                            <span className="text-amber-600/80 dark:text-amber-300/80 text-xs">
+                              {step.tip}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -356,13 +531,24 @@ export default function TopicPage() {
             >
               <div className="flex items-center gap-2 mb-4">
                 <Eye className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Práctica</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Práctica
+                </h2>
               </div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">{content.practice}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
+                {content.practice}
+              </p>
             </motion.section>
 
+            {/* Interactive Code Sandbox Section */}
+            <CodeSandboxSection />
+
             {/* Personal Notes */}
-            <TopicNotes key={notesKey} moduleId={moduleId} topicIndex={topicIndex} />
+            <TopicNotes
+              key={notesKey}
+              moduleId={moduleId}
+              topicIndex={topicIndex}
+            />
 
             {/* Extra Resources */}
             {content.extraResources.length > 0 && (
@@ -374,7 +560,9 @@ export default function TopicPage() {
               >
                 <div className="flex items-center gap-2 mb-4">
                   <ExternalLink className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recursos Adicionales</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Recursos Adicionales
+                  </h2>
                 </div>
                 <div className="space-y-2">
                   {content.extraResources.map((res, i) => (
@@ -401,15 +589,25 @@ export default function TopicPage() {
           >
             <div className="glass-card rounded-xl p-8 text-center">
               <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Contenido en desarrollo</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Contenido en desarrollo
+              </h2>
               <p className="text-gray-500 dark:text-gray-400">
-                El contenido detallado para este tema aún no está disponible. Mientras tanto,
-                puedes marcar el tema como completado si ya lo has estudiado.
+                El contenido detallado para este tema aún no está disponible.
+                Mientras tanto, puedes marcar el tema como completado si ya lo
+                has estudiado.
               </p>
             </div>
 
+            {/* Still show sandbox even when content is not available */}
+            <CodeSandboxSection />
+
             {/* Personal Notes (shown even when content is not available) */}
-            <TopicNotes key={notesKey} moduleId={moduleId} topicIndex={topicIndex} />
+            <TopicNotes
+              key={notesKey}
+              moduleId={moduleId}
+              topicIndex={topicIndex}
+            />
           </motion.div>
         )}
 
@@ -445,7 +643,9 @@ export default function TopicPage() {
             {moduleData.topics.map((_, i) => (
               <button
                 key={i}
-                onClick={() => router.push(`/modulo/${moduleId}/tema/${i}`)}
+                onClick={() =>
+                  router.push(`/modulo/${moduleId}/tema/${i}`)
+                }
                 className={`w-2.5 h-2.5 rounded-full transition-all ${
                   i === topicIndex
                     ? "bg-emerald-500 dark:bg-emerald-400 w-6"
@@ -462,7 +662,9 @@ export default function TopicPage() {
               onClick={() => router.push(nextPath)}
               className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
             >
-              <span className="hidden sm:inline">Tema {topicIndex + 2}</span>
+              <span className="hidden sm:inline">
+                Tema {topicIndex + 2}
+              </span>
               <span className="sm:hidden">Siguiente</span>
               <ArrowRight className="w-4 h-4" />
             </Button>

@@ -11,7 +11,32 @@ export async function GET(request: Request) {
 
     const course = await prisma.course.findUnique({
       where: { slug },
-      select: { id: true, title: true, slug: true },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        icon: true,
+        image: true,
+        level: true,
+        duration: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            color: true,
+            slug: true,
+          },
+        },
+        teacher: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
     });
 
     if (!course) {
