@@ -11,7 +11,12 @@
     "seed:admin": "tsx prisma/seed-admin.ts",
     "db:migrate": "prisma migrate dev --name init",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma migrate reset --force"
+    "db:reset": "prisma migrate reset --force",
+    "seed:arquitectura": "tsx prisma/seed-arquitectura.ts",
+    "seed:programacion": "tsx prisma/seed-programacion.ts",
+    "seed:ciberseguridad": "tsx prisma/seed-ciberseguridad.ts",
+    "seed:ia": "tsx prisma/seed-ia.ts",
+    "seed:all-courses": "tsx prisma/seed-arquitectura.ts && tsx prisma/seed-programacion.ts && tsx prisma/seed-ciberseguridad.ts && tsx prisma/seed-ia.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.6.0",
