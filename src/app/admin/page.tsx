@@ -247,6 +247,11 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState<string>("all");
 
+  // Seed courses
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState<Record<string, { modules: number; topics: number; course: string }> | null>(null);
+  const [seedError, setSeedError] = useState<string | null>(null);
+
   // ── Data Fetching ──────────────────────────────────────────
 
   useEffect(() => {
@@ -521,6 +526,34 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error updating user role:", error);
     }
+  };
+
+  // ── Seed courses handler ─────────────────────────────────
+
+  const handleSeedCourses = async (category?: string) => {
+    setIsSeeding(true);
+    setSeedError(null);
+    setSeedResult(null);
+    try {
+      const res = await fetch("/api/seed-courses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(category ? { category } : {}),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSeedResult(data.results);
+        loadCourses();
+        // Reload stats too
+        const statsRes = await fetch("/api/admin/stats");
+        if (statsRes.ok) setStats(await statsRes.json());
+      } else {
+        setSeedError(data.error || "Error al sembrar cursos");
+      }
+    } catch (err) {
+      setSeedError("Error de conexión al sembrar cursos");
+    }
+    setIsSeeding(false);
   };
 
   // ── Computed values ────────────────────────────────────────
@@ -1083,6 +1116,84 @@ export default function AdminDashboard() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
+              {/* Seed Courses Banner */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-6 glass-card rounded-2xl p-5 border-2 border-dashed border-emerald-500/30 dark:border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/5"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/20 shrink-0 mt-0.5">
+                      <BookPlus className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Sembrar Cursos en la Base de Datos
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Inserta los 4 cursos completos (Arquitectura, Programación, Ciberseguridad, IA) con todos sus módulos y temas en tu base de datos Neon.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      onClick={() => handleSeedCourses()}
+                      disabled={isSeeding}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm gap-2"
+                    >
+                      {isSeeding ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Sembrando...
+                        </>
+                      ) : (
+                        <>
+                          <BookPlus className="w-4 h-4" />
+                          Sembrar Todos
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Seed result */}
+                {seedResult && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
+                  >
+                    <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-2">
+                      Cursos sembrados exitosamente:
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {Object.entries(seedResult).map(([key, val]) => (
+                        <div key={key} className="text-xs text-gray-700 dark:text-gray-300">
+                          <span className="font-medium">{val.course}</span>
+                          <br />
+                          <span className="text-gray-400 dark:text-gray-500">{val.modules} mód. · {val.topics} temas</span>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Seed error */}
+                {seedError && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20"
+                  >
+                    <p className="text-xs text-red-600 dark:text-red-400">
+                      {seedError}
+                    </p>
+                  </motion.div>
+                )}
+              </motion.div>
+
               {/* Filter bar */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
