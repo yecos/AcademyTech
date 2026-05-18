@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import {
   Flame,
   ArrowLeft,
   Download,
+  MessageSquare,
 } from "lucide-react";
 import { Module } from "@/lib/curriculum";
 import { useCurriculum } from "@/hooks/use-curriculum";
@@ -34,6 +36,7 @@ import { UserMenu } from "@/components/user-menu";
 import { AuthBanner } from "@/components/auth-banner";
 import { useCategoryTheme } from "@/components/CategoryThemeProvider";
 import { CategoryBackground } from "@/components/CategoryBackground";
+import { CourseReviews } from "@/components/course-reviews";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,6 +70,7 @@ const courseDescriptions: Record<string, string> = {
 export function StudyApp() {
   const [quizModule, setQuizModule] = useState<Module | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [courseId, setCourseId] = useState<string | null>(null);
   const course = useCourse();
   const courseSlug = useCourseSlug();
   const { modules, isLoading: curriculumLoading, courseTitle, courseDescription: curriculumDescription } = useCurriculum();
@@ -81,6 +85,69 @@ export function StudyApp() {
 
   // Initialize achievement checker (runs streak check + achievement checks + toasts)
   useAchievementChecker();
+
+  // Fetch courseId from slug (needed for reviews component)
+  const courseIdRef = useRef(false);
+  useEffect(() => {
+    if (courseIdRef.current || courseId) return;
+    courseIdRef.current = true;
+
+    async function fetchCourseId() {
+      try {
+        const courseRes = await fetch(`/api/course?slug=${courseSlug}`);
+        if (!courseRes.ok) return;
+        const courseData = await courseRes.json();
+        if (courseData.id) {
+          setCourseId(courseData.id);
+        }
+      } catch {
+        // Silently fail
+      }
+    }
+    fetchCourseId();
+  }, [courseSlug, courseId]);
+
+  // Auto-enrollment logic
+  const { status: authStatus } = useSession();
+  const autoEnrollRef = useRef(false);
+
+  useEffect(() => {
+    // Wait until auth status is resolved and user is authenticated
+    if (authStatus !== "authenticated" || autoEnrollRef.current) return;
+
+    async function autoEnroll() {
+      try {
+        // Step 1: Get courseId from slug
+        const courseRes = await fetch(`/api/course?slug=${courseSlug}`);
+        if (!courseRes.ok) return;
+        const courseData = await courseRes.json();
+        if (!courseData.id) return;
+
+        // Store courseId for reviews component
+        setCourseId(courseData.id);
+
+        // Step 2: Check if already enrolled
+        const enrollRes = await fetch(`/api/enrollment?courseId=${courseData.id}`);
+        if (!enrollRes.ok) return;
+        const enrollData = await enrollRes.json();
+
+        // Step 3: If not enrolled, auto-enroll
+        if (!enrollData.enrolled) {
+          await fetch("/api/enrollment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ courseId: courseData.id }),
+          });
+        }
+      } catch (error) {
+        // Silently fail - enrollment is not critical for viewing the course
+        console.error("Auto-enrollment failed:", error);
+      }
+    }
+
+    autoEnrollRef.current = true;
+    autoEnroll();
+  }, [authStatus, courseSlug]);
 
   const courseName = courseTitle || courseNames[courseSlug] || courseSlug;
   const courseDescription = curriculumDescription || courseDescriptions[courseSlug] || "Sigue tu progreso y completa los temas del curso.";
@@ -381,6 +448,24 @@ export function StudyApp() {
             ))}
           </Accordion>
         </motion.div>
+
+        {/* Course Reviews */}
+        {courseId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="mt-8"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <MessageSquare className={`w-4 h-4 ${tw.text} ${tw.textDark}`} />
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+                Reseñas del Curso
+              </h2>
+            </div>
+            <CourseReviews courseId={courseId} />
+          </motion.div>
+        )}
 
         {/* Footer */}
         <motion.footer

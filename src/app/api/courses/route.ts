@@ -82,6 +82,9 @@ export async function GET() {
 
         let progress = 0;
         let enrolled = false;
+        let enrolledAt: string | null = null;
+        let completedTopics = 0;
+        let lastStudyDate: string | null = null;
 
         if (userId) {
           // Check enrollment
@@ -89,8 +92,10 @@ export async function GET() {
             where: {
               userId_courseId: { userId, courseId: course.id },
             },
+            select: { enrolledAt: true },
           });
           enrolled = !!enrollment;
+          enrolledAt = enrollment?.enrolledAt?.toISOString() || null;
 
           // Calculate progress
           if (topicCount > 0) {
@@ -98,15 +103,23 @@ export async function GET() {
               mod.topics.map((t) => t.id)
             );
 
-            const completedCount = await prisma.userProgress.count({
+            const completedRecords = await prisma.userProgress.findMany({
               where: {
                 userId,
                 topicId: { in: allTopicIds },
                 completed: true,
               },
+              select: { completedAt: true },
+              orderBy: { completedAt: "desc" },
             });
 
-            progress = Math.round((completedCount / topicCount) * 100);
+            completedTopics = completedRecords.length;
+            progress = Math.round((completedTopics / topicCount) * 100);
+
+            // Last study date = most recent completedAt
+            if (completedRecords.length > 0 && completedRecords[0].completedAt) {
+              lastStudyDate = completedRecords[0].completedAt.toISOString();
+            }
           }
         }
 
@@ -123,6 +136,9 @@ export async function GET() {
           topicCount,
           progress,
           enrolled,
+          enrolledAt,
+          completedTopics,
+          lastStudyDate,
           level: extra.level || "principiante",
           duration: extra.duration || null,
           status: extra.status || "published",

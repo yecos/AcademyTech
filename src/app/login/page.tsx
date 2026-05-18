@@ -3,15 +3,26 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
-import { motion } from "framer-motion";
-import { Sparkles, User } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, User, Mail, Lock, Eye, EyeOff, UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+type AuthMode = "login" | "register";
 
 export default function LoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [hasGoogleCredentials, setHasGoogleCredentials] = useState(true);
+  const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Form fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   useEffect(() => {
     fetch("/api/auth-config")
@@ -32,6 +43,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsLoading("google");
+    setError(null);
     try {
       await signIn("google", { callbackUrl: "/" });
     } catch {
@@ -41,11 +53,97 @@ export default function LoginPage() {
 
   const handleGuestLogin = async () => {
     setIsLoading("guest");
+    setError(null);
     try {
       await signIn("guest", { callbackUrl: "/" });
     } catch {
       setIsLoading(null);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      setError("Ingresa un email válido");
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    if (authMode === "register") {
+      if (!name.trim()) {
+        setError("El nombre es requerido");
+        return;
+      }
+
+      setIsLoading("register");
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, name: name.trim() }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error || "Error al crear la cuenta");
+          setIsLoading(null);
+          return;
+        }
+
+        // Registration successful, now sign in
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setError(result.error);
+          setIsLoading(null);
+          return;
+        }
+
+        router.push("/");
+      } catch {
+        setError("Error de conexión. Intenta de nuevo.");
+        setIsLoading(null);
+      }
+    } else {
+      // Login mode
+      setIsLoading("credentials");
+      try {
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setError(result.error);
+          setIsLoading(null);
+          return;
+        }
+
+        router.push("/");
+      } catch {
+        setError("Error de conexión. Intenta de nuevo.");
+        setIsLoading(null);
+      }
+    }
+  };
+
+  const switchMode = (mode: AuthMode) => {
+    setAuthMode(mode);
+    setError(null);
   };
 
   // Don't render anything while checking auth status
@@ -94,7 +192,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center mb-8"
+            className="text-center mb-6"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
@@ -110,19 +208,164 @@ export default function LoginPage() {
               </span>
             </h1>
             <p className="text-sm text-gray-400 max-w-xs mx-auto leading-relaxed">
-              Inicia sesión para guardar tu progreso, notas y evaluaciones
-              en todos tus cursos.
+              {authMode === "login"
+                ? "Inicia sesión para guardar tu progreso, notas y evaluaciones en todos tus cursos."
+                : "Crea tu cuenta para acceder a todos los cursos y guardar tu progreso."}
             </p>
             <p className="text-[11px] text-gray-500 mt-2 tracking-wider">
               Arquitectura • Programación • Ciberseguridad • IA
             </p>
           </motion.div>
 
-          {/* Login Buttons */}
+          {/* Mode Toggle */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex rounded-xl bg-white/5 border border-white/10 p-1 mb-6"
+          >
+            <button
+              onClick={() => switchMode("login")}
+              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                authMode === "login"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "text-gray-400 hover:text-gray-300 border border-transparent"
+              }`}
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              onClick={() => switchMode("register")}
+              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                authMode === "register"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "text-gray-400 hover:text-gray-300 border border-transparent"
+              }`}
+            >
+              Crear Cuenta
+            </button>
+          </motion.div>
+
+          {/* Error Message */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4"
+              >
+                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+                  {error}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Email/Password Form */}
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="space-y-4"
+          >
+            {/* Name field - only in register mode */}
+            <AnimatePresence>
+              {authMode === "register" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="relative">
+                    <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <Input
+                      type="text"
+                      placeholder="Tu nombre completo"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="h-11 pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Email field */}
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Input
+                type="email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-11 pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
+              />
+            </div>
+
+            {/* Password field */}
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Submit button */}
+            <Button
+              type="submit"
+              disabled={isLoading !== null}
+              className="w-full h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl gap-2 transition-all duration-200 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 disabled:opacity-50"
+            >
+              {(isLoading === "credentials" || isLoading === "register") ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {authMode === "register" ? "Creando cuenta..." : "Iniciando sesión..."}
+                </>
+              ) : (
+                <>
+                  {authMode === "register" ? "Crear Cuenta" : "Iniciar Sesión"}
+                </>
+              )}
+            </Button>
+          </motion.form>
+
+          {/* Divider with text */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            className="flex items-center gap-3 my-6"
+          >
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider">
+              o continuar con
+            </span>
+            <div className="flex-1 h-px bg-white/10" />
+          </motion.div>
+
+          {/* Social / Guest Login Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
             className="space-y-3"
           >
             {/* Google Login */}
@@ -130,7 +373,7 @@ export default function LoginPage() {
               <Button
                 onClick={handleGoogleLogin}
                 disabled={isLoading !== null}
-                className="w-full h-12 bg-white hover:bg-gray-100 text-gray-800 font-medium rounded-xl gap-3 transition-all duration-200 hover:shadow-lg hover:shadow-white/5"
+                className="w-full h-11 bg-white hover:bg-gray-100 text-gray-800 font-medium rounded-xl gap-3 transition-all duration-200 hover:shadow-lg hover:shadow-white/5 disabled:opacity-50"
               >
                 {isLoading === "google" ? (
                   <div className="animate-spin w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full" />
@@ -154,7 +397,7 @@ export default function LoginPage() {
                     />
                   </svg>
                 )}
-                Iniciar sesión con Google
+                Google
               </Button>
             )}
 
@@ -162,10 +405,10 @@ export default function LoginPage() {
             <Button
               onClick={handleGuestLogin}
               disabled={isLoading !== null}
-              className={`w-full h-12 font-medium rounded-xl gap-3 transition-all duration-200 ${
+              className={`w-full h-11 font-medium rounded-xl gap-3 transition-all duration-200 disabled:opacity-50 ${
                 hasGoogleCredentials
                   ? "bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20"
-                  : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30"
+                  : "bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20"
               }`}
             >
               {isLoading === "guest" ? (
@@ -173,25 +416,9 @@ export default function LoginPage() {
               ) : (
                 <User className="w-5 h-5" />
               )}
-              Continuar como invitado
+              Invitado
             </Button>
           </motion.div>
-
-          {/* Divider with text */}
-          {hasGoogleCredentials && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="flex items-center gap-3 my-6"
-            >
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-[10px] text-gray-500 uppercase tracking-wider">
-                o
-              </span>
-              <div className="flex-1 h-px bg-white/10" />
-            </motion.div>
-          )}
 
           {/* Info text */}
           <motion.div
@@ -201,11 +428,23 @@ export default function LoginPage() {
             className="mt-6 text-center"
           >
             <p className="text-[11px] text-gray-500 leading-relaxed">
-              Al continuar como invitado, se creará una cuenta temporal.
-              Tu progreso se guardará localmente.{" "}
-              <span className="text-emerald-400/70">
-                Inicia sesión con Google para guardar tu progreso en la nube.
-              </span>
+              {authMode === "login" ? (
+                <>
+                  Al continuar como invitado, se creará una cuenta temporal.
+                  Tu progreso se guardará localmente.{" "}
+                  <span className="text-emerald-400/70">
+                    Inicia sesión para guardar tu progreso en la nube.
+                  </span>
+                </>
+              ) : (
+                <>
+                  Al crear una cuenta, podrás guardar tu progreso y acceder
+                  a él desde cualquier dispositivo.{" "}
+                  <span className="text-emerald-400/70">
+                    Tu contraseña está protegida con cifrado seguro.
+                  </span>
+                </>
+              )}
             </p>
           </motion.div>
         </div>

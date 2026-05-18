@@ -1,94 +1,640 @@
 "use client";
 
-import { Suspense, useState, useRef, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Award,
   BookOpen,
+  Calendar,
   Download,
+  Eye,
   GraduationCap,
+  Loader2,
+  Shield,
   Sparkles,
   Star,
-  Shield,
+  CheckCircle2,
+  FileCheck,
 } from "lucide-react";
-import { useCourse } from "@/hooks/use-course-context";
-import { useStudyStore } from "@/lib/store";
-import { useSession } from "next-auth/react";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { UserMenu } from "@/components/user-menu";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
-function CertificadoContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const courseSlug = searchParams.get("course");
-  const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+// ── Types ──────────────────────────────────────────────────
 
-  const certificateRef = useRef<HTMLDivElement>(null);
+interface CategoryInfo {
+  name: string;
+  slug: string;
+  color: string;
+}
+
+interface CertificateData {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  courseSlug: string;
+  issuedAt: string;
+  certificateUrl: string | null;
+  category: CategoryInfo | null;
+}
+
+interface EligibleCourse {
+  courseId: string;
+  courseTitle: string;
+  courseSlug: string;
+  totalTopics: number;
+  category: CategoryInfo | null;
+}
+
+interface CertificateDetail {
+  id: string;
+  studentName: string;
+  courseTitle: string;
+  courseDescription: string | null;
+  courseLevel: string;
+  courseDuration: string | null;
+  courseSlug: string;
+  totalModules: number;
+  totalTopics: number;
+  completionDate: string;
+  certificateUrl: string | null;
+  category: CategoryInfo | null;
+}
+
+// ── Helpers ────────────────────────────────────────────────
+
+function formatDateES(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function formatShortDate(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getCategoryColor(color: string): string {
+  return color || "#10b981";
+}
+
+// ── Certificate Preview Component ──────────────────────────
+
+function CertificatePreview({
+  detail,
+  onClose,
+}: {
+  detail: CertificateDetail;
+  onClose: () => void;
+}) {
+  const certRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const course = useCourse();
-  const { status } = useSession();
-  const store = useStudyStore();
-
-  const overallProgress = course.getOverallProgress();
-  const isComplete = overallProgress === 100;
-
-  // For student name and completion date, use store (local) for now
-  // These are display-only fields not stored in DB
-  const studentName = store.studentName;
-  const setStudentName = store.setStudentName;
-  const completionDate = store.completionDate;
-  const setCompletionDate = store.setCompletionDate;
-
-  const displayName = studentName || "Nombre del Estudiante";
-
-  const formattedDate = completionDate
-    ? new Date(completionDate).toLocaleDateString("es-ES", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : new Date().toLocaleDateString("es-ES", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-
   const handleDownload = useCallback(async () => {
-    if (!certificateRef.current) return;
-
+    if (!certRef.current) return;
     setIsDownloading(true);
-
     try {
-      // Use html2canvas dynamically imported
       const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(certificateRef.current, {
+      const canvas = await html2canvas(certRef.current, {
         scale: 2,
         backgroundColor: "#09090b",
         useCORS: true,
         logging: false,
       });
-
       const link = document.createElement("a");
-      link.download = `certificado-${courseSlug || "curso"}-${displayName.replace(/\s+/g, "-").toLowerCase()}.png`;
+      link.download = `certificado-${detail.courseSlug}-${detail.studentName.replace(/\s+/g, "-").toLowerCase()}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch {
-      // Fallback: use window.print()
       window.print();
     } finally {
       setIsDownloading(false);
     }
-  }, [displayName, courseSlug]);
+  }, [detail.courseSlug, detail.studentName]);
 
-  // Auto-set completion date if 100% but no date
-  if (isComplete && !completionDate) {
-    setCompletionDate(new Date().toISOString());
+  const accentColor = detail.category
+    ? getCategoryColor(detail.category.color)
+    : "#10b981";
+
+  const levelLabel: Record<string, string> = {
+    principiante: "Principiante",
+    intermedio: "Intermedio",
+    avanzado: "Avanzado",
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Action buttons */}
+      <div className="flex items-center justify-between">
+        <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+          Vista Previa del Certificado
+        </DialogTitle>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+            size="sm"
+          >
+            {isDownloading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            {isDownloading ? "Generando..." : "Descargar PNG"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Certificate */}
+      <div ref={certRef} className="print-only-cert">
+        <div
+          className="relative rounded-2xl overflow-hidden p-8 sm:p-12"
+          style={{
+            background: "#09090b",
+            border: `2px solid ${accentColor}40`,
+          }}
+        >
+          {/* Outer decorative borders */}
+          <div
+            className="absolute inset-3 sm:inset-5 rounded-xl pointer-events-none"
+            style={{ border: `1px solid ${accentColor}30` }}
+          />
+          <div
+            className="absolute inset-5 sm:inset-8 rounded-lg pointer-events-none"
+            style={{ border: `1px solid ${accentColor}18` }}
+          />
+
+          {/* Corner decorations */}
+          <div
+            className="absolute top-3 left-3 sm:top-5 sm:left-5 w-8 h-8 rounded-tl-lg"
+            style={{ borderTop: `2px solid ${accentColor}80`, borderLeft: `2px solid ${accentColor}80` }}
+          />
+          <div
+            className="absolute top-3 right-3 sm:top-5 sm:right-5 w-8 h-8 rounded-tr-lg"
+            style={{ borderTop: `2px solid ${accentColor}80`, borderRight: `2px solid ${accentColor}80` }}
+          />
+          <div
+            className="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 w-8 h-8 rounded-bl-lg"
+            style={{ borderBottom: `2px solid ${accentColor}80`, borderLeft: `2px solid ${accentColor}80` }}
+          />
+          <div
+            className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 w-8 h-8 rounded-br-lg"
+            style={{ borderBottom: `2px solid ${accentColor}80`, borderRight: `2px solid ${accentColor}80` }}
+          />
+
+          {/* Background glow */}
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl pointer-events-none"
+            style={{ background: `${accentColor}0D` }}
+          />
+
+          <div className="relative text-center space-y-6">
+            {/* Seal */}
+            <div className="flex justify-center">
+              <div className="relative">
+                <div
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center"
+                  style={{
+                    background: `linear-gradient(135deg, ${accentColor}33, ${accentColor}1A)`,
+                    border: `2px solid ${accentColor}66`,
+                  }}
+                >
+                  <Shield className="w-10 h-10 sm:w-12 sm:h-12" style={{ color: accentColor }} />
+                </div>
+                <div className="absolute -top-1 -right-1">
+                  <Star className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 fill-amber-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Academy name */}
+            <div>
+              <p
+                className="text-xs sm:text-sm font-medium uppercase tracking-[0.3em] mb-2"
+                style={{ color: `${accentColor}B3` }}
+              >
+                Academy Tech
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                Certificado de Finalización
+              </h2>
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-px w-16 sm:w-24" style={{ background: `linear-gradient(to right, transparent, ${accentColor}80)` }} />
+              <Sparkles className="w-4 h-4" style={{ color: accentColor }} />
+              <div className="h-px w-16 sm:w-24" style={{ background: `linear-gradient(to left, transparent, ${accentColor}80)` }} />
+            </div>
+
+            {/* Description */}
+            <p className="text-sm sm:text-base text-gray-300 max-w-xl mx-auto leading-relaxed">
+              Se otorga el presente certificado a
+            </p>
+
+            {/* Student Name */}
+            <div className="py-4">
+              <p
+                className="text-3xl sm:text-4xl font-bold"
+                style={{
+                  background: `linear-gradient(to right, ${accentColor}CC, ${accentColor})`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                {detail.studentName}
+              </p>
+              <div
+                className="mt-3 h-0.5 w-48 sm:w-64 mx-auto"
+                style={{ background: `linear-gradient(to right, transparent, ${accentColor}80, transparent)` }}
+              />
+            </div>
+
+            {/* Course details */}
+            <p className="text-sm sm:text-base text-gray-400 max-w-xl mx-auto leading-relaxed">
+              Ha completado satisfactoriamente el curso{" "}
+              <span className="text-white font-medium">
+                {detail.courseTitle}
+              </span>
+              {detail.totalModules > 0 && (
+                <>
+                  , abarcando{" "}
+                  <span className="font-medium" style={{ color: accentColor }}>
+                    {detail.totalModules} módulo{detail.totalModules !== 1 ? "s" : ""}
+                  </span>{" "}
+                  y{" "}
+                  <span className="font-medium" style={{ color: accentColor }}>
+                    {detail.totalTopics} tema{detail.totalTopics !== 1 ? "s" : ""}
+                  </span>
+                </>
+              )}
+              {detail.courseLevel && (
+                <>
+                  {" "}de nivel{" "}
+                  <span className="font-medium" style={{ color: accentColor }}>
+                    {levelLabel[detail.courseLevel] || detail.courseLevel}
+                  </span>
+                </>
+              )}
+              .
+            </p>
+
+            {/* Date */}
+            <div className="pt-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                Fecha de finalización
+              </p>
+              <p className="text-sm text-gray-300 font-medium">
+                {formatDateES(detail.completionDate)}
+              </p>
+            </div>
+
+            {/* Bottom decoration */}
+            <div className="flex items-center justify-center gap-3 pt-4">
+              <div className="h-px w-20" style={{ background: `linear-gradient(to right, transparent, ${accentColor}50)` }} />
+              <div className="w-2 h-2 rounded-full" style={{ background: `${accentColor}66` }} />
+              <div className="h-px w-20" style={{ background: `linear-gradient(to left, transparent, ${accentColor}50)` }} />
+            </div>
+
+            {/* Footer */}
+            <div className="pt-2">
+              <p className="text-xs text-gray-500">
+                Academy Tech — Plataforma de Aprendizaje Tecnológico
+              </p>
+              <p className="text-[10px] text-gray-600 mt-1">
+                ID: {detail.id}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Certificate Card Component ─────────────────────────────
+
+function CertificateCard({
+  cert,
+  onView,
+  index,
+}: {
+  cert: CertificateData;
+  onView: (certId: string) => void;
+  index: number;
+}) {
+  const accentColor = cert.category
+    ? getCategoryColor(cert.category.color)
+    : "#10b981";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.08 }}
+      className="glass-card glass-card-hover rounded-xl p-5 transition-all duration-300 group"
+      style={{ borderLeft: `3px solid ${accentColor}` }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-2">
+            <div
+              className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
+              style={{ background: `${accentColor}1A` }}
+            >
+              <Award className="w-4 h-4" style={{ color: accentColor }} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                {cert.courseTitle}
+              </h3>
+              {cert.category && (
+                <Badge
+                  className="text-[10px] px-1.5 py-0 mt-0.5 border"
+                  style={{
+                    background: `${accentColor}1A`,
+                    color: accentColor,
+                    borderColor: `${accentColor}33`,
+                  }}
+                >
+                  {cert.category.name}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-3">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              {formatShortDate(cert.issuedAt)}
+            </span>
+            <span className="flex items-center gap-1">
+              <FileCheck className="w-3 h-3" />
+              Completado
+            </span>
+          </div>
+        </div>
+
+        <Button
+          onClick={() => onView(cert.id)}
+          variant="ghost"
+          size="sm"
+          className="shrink-0 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/10 gap-1.5 transition-colors"
+        >
+          <Eye className="w-4 h-4" />
+          <span className="hidden sm:inline">Ver Certificado</span>
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Eligible Course Card ───────────────────────────────────
+
+function EligibleCourseCard({
+  course,
+  onGenerate,
+  isGenerating,
+  index,
+}: {
+  course: EligibleCourse;
+  onGenerate: (courseId: string) => void;
+  isGenerating: boolean;
+  index: number;
+}) {
+  const accentColor = course.category
+    ? getCategoryColor(course.category.color)
+    : "#10b981";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.08 }}
+      className="glass-card rounded-xl p-5 transition-all duration-300 border border-dashed"
+      style={{ borderColor: `${accentColor}40` }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-2">
+            <div
+              className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
+              style={{ background: `${accentColor}1A` }}
+            >
+              <CheckCircle2 className="w-4 h-4" style={{ color: accentColor }} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                {course.courseTitle}
+              </h3>
+              {course.category && (
+                <Badge
+                  className="text-[10px] px-1.5 py-0 mt-0.5 border"
+                  style={{
+                    background: `${accentColor}1A`,
+                    color: accentColor,
+                    borderColor: `${accentColor}33`,
+                  }}
+                >
+                  {course.category.name}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Curso completado — {course.totalTopics} temas finalizados
+          </p>
+        </div>
+
+        <Button
+          onClick={() => onGenerate(course.courseId)}
+          disabled={isGenerating}
+          size="sm"
+          className="shrink-0 gap-1.5 text-white"
+          style={{ backgroundColor: accentColor }}
+        >
+          {isGenerating ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Award className="w-3.5 h-3.5" />
+          )}
+          Generar
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Empty State Component ──────────────────────────────────
+
+function EmptyState({ hasAccount }: { hasAccount: boolean }) {
+  const router = useRouter();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+    >
+      <div className="glass-card rounded-2xl p-8 sm:p-12 text-center max-w-lg mx-auto">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+          <GraduationCap className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
+        </div>
+
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          {hasAccount ? "Aún no tienes certificados" : "Inicia sesión para ver tus certificados"}
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
+          {hasAccount
+            ? "Completa cursos al 100% para obtener tus certificados de finalización. ¡Cada logro cuenta!"
+            : "Inicia sesión para ver tus certificados y generar nuevos al completar tus cursos."}
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Button
+            onClick={() => router.push("/")}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+          >
+            <BookOpen className="w-4 h-4" />
+            Explorar Cursos
+          </Button>
+        </div>
+
+        {/* Decorative elements */}
+        <div className="mt-8 flex items-center justify-center gap-4 text-gray-300 dark:text-gray-700">
+          <Award className="w-5 h-5" />
+          <Star className="w-4 h-4" />
+          <Shield className="w-5 h-5" />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Main Page Component ────────────────────────────────────
+
+export default function CertificadoPage() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  const [certificates, setCertificates] = useState<CertificateData[]>([]);
+  const [eligibleCourses, setEligibleCourses] = useState<EligibleCourse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCertDetail, setSelectedCertDetail] = useState<CertificateDetail | null>(null);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Fetch certificates
+  const fetchCertificates = useCallback(async () => {
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/certificates");
+      if (!res.ok) throw new Error("Error fetching certificates");
+
+      const data = await res.json();
+      setCertificates(data.certificates || []);
+      setEligibleCourses(data.eligibleCourses || []);
+    } catch (err) {
+      console.error("Error fetching certificates:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      fetchCertificates();
+    }
+  }, [authLoading, fetchCertificates]);
+
+  // View certificate detail
+  const handleViewCertificate = async (certId: string) => {
+    setIsDetailLoading(true);
+    setPreviewOpen(true);
+
+    try {
+      const res = await fetch(`/api/certificates/${certId}`);
+      if (!res.ok) throw new Error("Error fetching certificate detail");
+
+      const data = await res.json();
+      setSelectedCertDetail(data);
+    } catch (err) {
+      console.error("Error fetching certificate detail:", err);
+      setPreviewOpen(false);
+    } finally {
+      setIsDetailLoading(false);
+    }
+  };
+
+  // Generate certificate
+  const handleGenerateCertificate = async (courseId: string) => {
+    setIsGenerating(courseId);
+
+    try {
+      const res = await fetch("/api/certificates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error generating certificate:", errorData);
+        return;
+      }
+
+      // Refresh the list
+      await fetchCertificates();
+    } catch (err) {
+      console.error("Error generating certificate:", err);
+    } finally {
+      setIsGenerating(null);
+    }
+  };
+
+  // Loading state
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
+          <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-emerald-600/3 rounded-full blur-3xl" />
+        </div>
+        <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-pulse flex items-center gap-2 text-gray-400">
+              <Award className="w-5 h-5" />
+              <span className="text-sm">Cargando certificados...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
+
+  const hasCertificates = certificates.length > 0;
+  const hasEligible = eligibleCourses.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
@@ -100,23 +646,6 @@ function CertificadoContent() {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push(backUrl)}
-            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver al inicio
-          </Button>
-          <div className="flex items-center gap-2">
-            <UserMenu />
-            <ThemeToggle />
-          </div>
-        </div>
-
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -130,246 +659,166 @@ function CertificadoContent() {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                Certificado de{" "}
+                Mis{" "}
                 <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
-                  Finalización
+                  Certificados
                 </span>
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Completa el 100% del curso para obtener tu certificado
+                Tus certificados de finalización de cursos
               </p>
             </div>
           </div>
         </motion.header>
 
-        {!isComplete ? (
-          /* Not complete - motivational message */
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <div className="glass-card rounded-2xl p-8 text-center max-w-lg mx-auto">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
-                <GraduationCap className="w-8 h-8 text-emerald-500 dark:text-emerald-400" />
-              </div>
+        {/* Not authenticated */}
+        {!isAuthenticated && <EmptyState hasAccount={false} />}
 
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                ¡Sigue avanzando!
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Completa todos los temas del curso para desbloquear tu
-                certificado de finalización. Estás muy cerca de lograrlo.
-              </p>
-
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Progreso del curso
-                  </span>
-                  <span className="text-lg font-bold text-emerald-500 dark:text-emerald-400">
-                    {overallProgress}%
-                  </span>
-                </div>
-                <div className="relative">
-                  <Progress
-                    value={overallProgress}
-                    className="h-3 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
-                  />
-                  <motion.div
-                    className="absolute top-0 left-0 h-3 rounded-full progress-emerald"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${overallProgress}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-
-              <Button
-                onClick={() => router.push(backUrl)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
-              >
-                <BookOpen className="w-4 h-4" />
-                Seguir aprendiendo
-              </Button>
-            </div>
-          </motion.div>
-        ) : (
-          /* Complete - show certificate */
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="space-y-6"
-          >
-            {/* Name input */}
-            <div className="glass-card rounded-xl p-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-                <div className="flex-1 w-full">
-                  <label
-                    htmlFor="studentName"
-                    className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"
-                  >
-                    Nombre del estudiante
-                  </label>
-                  <input
-                    id="studentName"
-                    type="text"
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                    placeholder="Ingresa tu nombre completo"
-                    className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
-                  />
-                </div>
-                <Button
-                  onClick={handleDownload}
-                  disabled={isDownloading || !studentName.trim()}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2 w-full sm:w-auto"
-                >
-                  <Download className="w-4 h-4" />
-                  {isDownloading ? "Generando..." : "Descargar Certificado"}
-                </Button>
-              </div>
-              {!studentName.trim() && (
-                <p className="text-xs text-amber-500/80 dark:text-amber-400/80 mt-2">
-                  Ingresa tu nombre para poder descargar el certificado
-                </p>
-              )}
-            </div>
-
-            {/* Certificate Preview */}
-            <div ref={certificateRef} className="print-only-cert">
-              <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500/30 bg-zinc-950 p-8 sm:p-12">
-                {/* Outer decorative border */}
-                <div className="absolute inset-3 sm:inset-5 rounded-xl border border-emerald-500/20 pointer-events-none" />
-                <div className="absolute inset-5 sm:inset-8 rounded-lg border border-emerald-500/10 pointer-events-none" />
-
-                {/* Corner decorations */}
-                <div className="absolute top-3 left-3 sm:top-5 sm:left-5 w-8 h-8 border-t-2 border-l-2 border-emerald-400/50 rounded-tl-lg" />
-                <div className="absolute top-3 right-3 sm:top-5 sm:right-5 w-8 h-8 border-t-2 border-r-2 border-emerald-400/50 rounded-tr-lg" />
-                <div className="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 w-8 h-8 border-b-2 border-l-2 border-emerald-400/50 rounded-bl-lg" />
-                <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 w-8 h-8 border-b-2 border-r-2 border-emerald-400/50 rounded-br-lg" />
-
-                {/* Background decorative glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="relative text-center space-y-6">
-                  {/* Seal / Badge */}
-                  <div className="flex justify-center">
-                    <div className="relative">
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-700/20 border-2 border-emerald-400/40 flex items-center justify-center">
-                        <Shield className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-400" />
-                      </div>
-                      <div className="absolute -top-1 -right-1">
-                        <Star className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 fill-amber-400" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <div>
-                    <p className="text-xs sm:text-sm font-medium text-emerald-400/70 uppercase tracking-[0.3em] mb-2">
-                      Academia
-                    </p>
-                    <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                      Certificado de Finalización
-                    </h2>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="h-px w-16 sm:w-24 bg-gradient-to-r from-transparent to-emerald-500/50" />
-                    <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <div className="h-px w-16 sm:w-24 bg-gradient-to-l from-transparent to-emerald-500/50" />
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-sm sm:text-base text-gray-300 max-w-xl mx-auto leading-relaxed">
-                    Se otorga el presente certificado a
-                  </p>
-
-                  {/* Student Name */}
-                  <div className="py-4">
-                    <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-300 to-emerald-400 bg-clip-text text-transparent">
-                      {displayName}
-                    </p>
-                    <div className="mt-3 h-0.5 w-48 sm:w-64 mx-auto bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
-                  </div>
-
-                  {/* Description body */}
-                  <p className="text-sm sm:text-base text-gray-400 max-w-xl mx-auto leading-relaxed">
-                    Ha completado satisfactoriamente el{" "}
-                    <span className="text-white font-medium">
-                      Plan de Estudio Completo de D5 Render
-                    </span>
-                    , abarcando{" "}
-                    <span className="text-emerald-400 font-medium">
-                      10 módulos
-                    </span>{" "}
-                    y{" "}
-                    <span className="text-emerald-400 font-medium">
-                      60 temas
-                    </span>{" "}
-                    sobre visualización arquitectónica en tiempo real.
-                  </p>
-
-                  {/* Date */}
-                  <div className="pt-4">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-                      Fecha de finalización
-                    </p>
-                    <p className="text-sm text-gray-300 font-medium">
-                      {formattedDate}
-                    </p>
-                  </div>
-
-                  {/* Bottom decoration */}
-                  <div className="flex items-center justify-center gap-3 pt-4">
-                    <div className="h-px w-20 bg-gradient-to-r from-transparent to-emerald-500/30" />
-                    <div className="w-2 h-2 rounded-full bg-emerald-500/40" />
-                    <div className="h-px w-20 bg-gradient-to-l from-transparent to-emerald-500/30" />
-                  </div>
-
-                  {/* Signature line */}
-                  <div className="pt-2">
-                    <p className="text-xs text-gray-500">
-                      Academia 3D — Programa de Formación en
-                      Visualización Arquitectónica
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+        {/* Authenticated but no content */}
+        {isAuthenticated && !hasCertificates && !hasEligible && (
+          <EmptyState hasAccount={true} />
         )}
-      </div>
-    </div>
-  );
-}
 
-function CertificadoFallback() {
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-      </div>
-      <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-pulse flex items-center gap-2 text-gray-400">
-            <Award className="w-5 h-5" />
-            <span className="text-sm">Cargando certificado...</span>
+        {/* Content */}
+        {isAuthenticated && (hasCertificates || hasEligible) && (
+          <div className="space-y-8">
+            {/* Stats summary */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="grid grid-cols-2 gap-3"
+            >
+              <div className="glass-card rounded-xl p-4 text-center">
+                <div className="inline-flex p-2 rounded-lg bg-emerald-500/10 mb-2">
+                  <Award className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                </div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {certificates.length}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Certificado{certificates.length !== 1 ? "s" : ""} Obtenido{certificates.length !== 1 ? "s" : ""}
+                </div>
+              </div>
+              <div className="glass-card rounded-xl p-4 text-center">
+                <div className="inline-flex p-2 rounded-lg bg-amber-500/10 mb-2">
+                  <Star className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                </div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {eligibleCourses.length}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Disponible{eligibleCourses.length !== 1 ? "s" : ""} para Generar
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Eligible courses section */}
+            {hasEligible && (
+              <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.15 }}
+                  className="flex items-center gap-2 mb-4"
+                >
+                  <Star className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Cursos Completados
+                  </h2>
+                  <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[10px]">
+                    {eligibleCourses.length} pendiente{eligibleCourses.length !== 1 ? "s" : ""}
+                  </Badge>
+                </motion.div>
+
+                <div className="space-y-3">
+                  {eligibleCourses.map((course, i) => (
+                    <EligibleCourseCard
+                      key={course.courseId}
+                      course={course}
+                      onGenerate={handleGenerateCertificate}
+                      isGenerating={isGenerating === course.courseId}
+                      index={i}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Earned certificates section */}
+            {hasCertificates && (
+              <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  className="flex items-center gap-2 mb-4"
+                >
+                  <Award className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Certificados Obtenidos
+                  </h2>
+                  <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px]">
+                    {certificates.length}
+                  </Badge>
+                </motion.div>
+
+                <div className="space-y-3">
+                  {certificates.map((cert, i) => (
+                    <CertificateCard
+                      key={cert.id}
+                      cert={cert}
+                      onView={handleViewCertificate}
+                      index={i}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+        )}
 
-export default function CertificadoPage() {
-  return (
-    <Suspense fallback={<CertificadoFallback />}>
-      <CertificadoContent />
-    </Suspense>
+        {/* Footer */}
+        <motion.footer
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-12 pb-8 text-center"
+        >
+          <div className="glass-card rounded-xl p-4">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              Certificados — Academy Tech —{" "}
+              <span className="text-emerald-500/70 dark:text-emerald-400/70">
+                {certificates.length} certificado{certificates.length !== 1 ? "s" : ""} emitido{certificates.length !== 1 ? "s" : ""}
+              </span>
+            </p>
+          </div>
+        </motion.footer>
+      </div>
+
+      {/* Certificate Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent
+          className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-950 border-gray-200 dark:border-white/10"
+          showCloseButton={true}
+        >
+          {isDetailLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Cargando certificado...
+                </p>
+              </div>
+            </div>
+          ) : selectedCertDetail ? (
+            <CertificatePreview
+              detail={selectedCertDetail}
+              onClose={() => setPreviewOpen(false)}
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

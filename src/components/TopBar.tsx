@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // ============================================================
@@ -102,8 +103,9 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
           </div>
         </div>
 
-        {/* Right side: ThemeToggle + UserMenu */}
+        {/* Right side: Notifications + ThemeToggle + UserMenu */}
         <div className="flex items-center gap-2">
+          <NotificationsDropdown />
           <ThemeToggle />
           <UserMenu />
         </div>

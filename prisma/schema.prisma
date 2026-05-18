@@ -54,6 +54,7 @@ model User {
   emailVerified DateTime?
   image         String?
   role          String    @default("student") // "student" | "teacher" | "admin"
+  bio           String?   @db.Text
   createdAt     DateTime  @default(now())
 
   // NextAuth relations
@@ -61,14 +62,17 @@ model User {
   sessions Session[]
 
   // Course platform relations
-  progress     UserProgress[]
-  quizResults  QuizResult[]
-  notes        UserNote[]
-  bookmarks    Bookmark[]
-  achievements UserAchievement[]
-  streak       UserStreak?
-  enrollments  Enrollment[]
-  courses      Course[] // courses created by this teacher
+  progress      UserProgress[]
+  quizResults   QuizResult[]
+  notes         UserNote[]
+  bookmarks     Bookmark[]
+  achievements  UserAchievement[]
+  streak        UserStreak?
+  enrollments   Enrollment[]
+  courses       Course[] // courses created by this teacher
+  reviews       Review[]
+  notifications Notification[]
+  certificates  Certificate[]
 }
 
 // ── Category ─────────────────────────────────────────────────
@@ -108,9 +112,13 @@ model Course {
   level      String    @default("principiante") // "principiante" | "intermedio" | "avanzado"
   duration   String?   // "10 horas", "2 semanas", etc.
   status     String    @default("draft") // "draft" | "pending_review" | "published" | "rejected"
+  price      Float     @default(0) // for future Stripe integration
+  currency   String    @default("USD")
 
-  modules     Module[]
-  enrollments Enrollment[]
+  modules      Module[]
+  enrollments  Enrollment[]
+  reviews      Review[]
+  certificates Certificate[]
 }
 
 model Module {
@@ -155,8 +163,12 @@ model Enrollment {
   courseId   String
   enrolledAt DateTime @default(now())
 
+  completedAt DateTime?
+
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  certificate Certificate?
 
   @@unique([userId, courseId])
 }
@@ -232,4 +244,52 @@ model UserStreak {
   lastStudyDate String? // "YYYY-MM-DD" format
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ── Review ──────────────────────────────────────────────────
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  rating    Int      // 1-5
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+// ── Notification ────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "achievement" | "course_completed" | "enrollment" | "system"
+  title     String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ── Certificate ─────────────────────────────────────────────
+
+model Certificate {
+  id             String    @id @default(cuid())
+  userId         String
+  courseId       String
+  certificateUrl String?
+  issuedAt       DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  enrollment Enrollment? @relation(fields: [enrollmentId], references: [id])
+  enrollmentId String?  @unique
+
+  @@unique([userId, courseId])
 }

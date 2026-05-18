@@ -25,6 +25,7 @@ import {
   UserCog,
   Plus,
   Pencil,
+  Save,
   Trash2,
   Check,
   X,
@@ -171,6 +172,7 @@ interface AdminCourse {
   published: boolean;
   level: string;
   duration: string | null;
+  price: number;
   createdAt: string;
   category: {
     id: string;
@@ -227,6 +229,23 @@ export default function AdminDashboard() {
   const [courses, setCourses] = useState<AdminCourse[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
   const [courseStatusFilter, setCourseStatusFilter] = useState<string>("all");
+  const [showCourseForm, setShowCourseForm] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
+  const [isSavingCourse, setIsSavingCourse] = useState(false);
+  const [courseFormError, setCourseFormError] = useState<string | null>(null);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [courseForm, setCourseForm] = useState({
+    title: "",
+    slug: "",
+    description: "",
+    icon: "📚",
+    categoryId: "",
+    level: "principiante",
+    duration: "",
+    price: 0,
+    published: false,
+    status: "draft" as string,
+  });
 
   // Categories
   const [categories, setCategories] = useState<AdminCategory[]>([]);
@@ -484,6 +503,106 @@ export default function AdminDashboard() {
       description: cat.description || "",
       color: cat.color,
     });
+  };
+
+  // Course CRUD
+  const handleCreateCourse = async () => {
+    setIsSavingCourse(true);
+    setCourseFormError(null);
+    try {
+      const res = await fetch("/api/admin/courses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: courseForm.title,
+          slug: courseForm.slug || generateSlug(courseForm.title),
+          description: courseForm.description,
+          icon: courseForm.icon || null,
+          categoryId: courseForm.categoryId || null,
+          level: courseForm.level,
+          duration: courseForm.duration || null,
+          price: courseForm.price,
+          published: courseForm.published,
+          status: courseForm.status,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setShowCourseForm(false);
+        setSlugManuallyEdited(false);
+        setCourseForm({ title: "", slug: "", description: "", icon: "📚", categoryId: "", level: "principiante", duration: "", price: 0, published: false, status: "draft" });
+        loadCourses();
+      } else {
+        setCourseFormError(data.error || "Error al crear curso");
+      }
+    } catch (error) {
+      console.error("Error creating course:", error);
+      setCourseFormError("Error de conexión");
+    }
+    setIsSavingCourse(false);
+  };
+
+  const handleUpdateCourse = async () => {
+    if (!editingCourse) return;
+    setIsSavingCourse(true);
+    setCourseFormError(null);
+    try {
+      const res = await fetch(`/api/admin/courses/${editingCourse.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: courseForm.title,
+          slug: courseForm.slug || generateSlug(courseForm.title),
+          description: courseForm.description,
+          icon: courseForm.icon || null,
+          categoryId: courseForm.categoryId || null,
+          level: courseForm.level,
+          duration: courseForm.duration || null,
+          price: courseForm.price,
+          published: courseForm.published,
+          status: courseForm.status,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEditingCourse(null);
+        setSlugManuallyEdited(false);
+        setCourseForm({ title: "", slug: "", description: "", icon: "📚", categoryId: "", level: "principiante", duration: "", price: 0, published: false, status: "draft" });
+        loadCourses();
+      } else {
+        setCourseFormError(data.error || "Error al actualizar curso");
+      }
+    } catch (error) {
+      console.error("Error updating course:", error);
+      setCourseFormError("Error de conexión");
+    }
+    setIsSavingCourse(false);
+  };
+
+  const startEditCourse = (course: AdminCourse) => {
+    setEditingCourse(course);
+    setSlugManuallyEdited(true);
+    setCourseForm({
+      title: course.title,
+      slug: course.slug,
+      description: course.description || "",
+      icon: course.icon || "📚",
+      categoryId: course.category?.id || "",
+      level: course.level,
+      duration: course.duration || "",
+      price: course.price,
+      published: course.published,
+      status: course.status,
+    });
+    setShowCourseForm(false);
+  };
+
+  const cancelCourseForm = () => {
+    setShowCourseForm(false);
+    setEditingCourse(null);
+    setCourseFormError(null);
+    setSlugManuallyEdited(false);
+    setCourseForm({ title: "", slug: "", description: "", icon: "📚", categoryId: "", level: "principiante", duration: "", price: 0, published: false, status: "draft" });
   };
 
   // Course status management
@@ -1116,6 +1235,251 @@ export default function AdminDashboard() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
+              {/* Header + Nuevo Curso button */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {courses.length} cursos
+                  </span>
+                </div>
+                <Button
+                  onClick={() => {
+                    setShowCourseForm(true);
+                    setEditingCourse(null);
+                    setCourseFormError(null);
+                    setSlugManuallyEdited(false);
+                    setCourseForm({ title: "", slug: "", description: "", icon: "📚", categoryId: "", level: "principiante", duration: "", price: 0, published: false, status: "draft" });
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-9"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Nuevo Curso
+                </Button>
+              </div>
+
+              {/* Create/Edit Course Form */}
+              <AnimatePresence>
+                {(showCourseForm || editingCourse) && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="glass-card rounded-2xl p-6 mb-6 overflow-hidden"
+                  >
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                      {editingCourse ? "Editar Curso" : "Nuevo Curso"}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Título *
+                        </label>
+                        <input
+                          type="text"
+                          value={courseForm.title}
+                          onChange={(e) => {
+                            const title = e.target.value;
+                            setCourseForm((prev) => ({
+                              ...prev,
+                              title,
+                              slug: slugManuallyEdited ? prev.slug : generateSlug(title),
+                            }));
+                          }}
+                          placeholder="Ej: Introducción a la Inteligencia Artificial"
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/25 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Slug *
+                        </label>
+                        <input
+                          type="text"
+                          value={courseForm.slug}
+                          onChange={(e) => {
+                            setSlugManuallyEdited(true);
+                            setCourseForm((prev) => ({ ...prev, slug: e.target.value }));
+                          }}
+                          placeholder="Ej: introduccion-inteligencia-artificial"
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/25 transition-all"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Descripción *
+                        </label>
+                        <textarea
+                          value={courseForm.description}
+                          onChange={(e) => setCourseForm((prev) => ({ ...prev, description: e.target.value }))}
+                          placeholder="Descripción del curso..."
+                          rows={3}
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/25 transition-all resize-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Icono (emoji)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{courseForm.icon}</span>
+                          <input
+                            type="text"
+                            value={courseForm.icon}
+                            onChange={(e) => setCourseForm((prev) => ({ ...prev, icon: e.target.value }))}
+                            className="w-20 px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all"
+                          />
+                          <div className="flex gap-1 flex-wrap">
+                            {["📚", "💻", "🔒", "🤖", "🎨", "📐", "📊", "🌐", "🧪", "🎬", "⚡", "🚀"].map((emoji) => (
+                              <button
+                                key={emoji}
+                                onClick={() => setCourseForm((prev) => ({ ...prev, icon: emoji }))}
+                                className="text-lg hover:scale-125 transition-transform"
+                                type="button"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Categoría
+                        </label>
+                        <select
+                          value={courseForm.categoryId}
+                          onChange={(e) => setCourseForm((prev) => ({ ...prev, categoryId: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/25 transition-all"
+                        >
+                          <option value="">Sin categoría</option>
+                          {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.icon} {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Nivel
+                        </label>
+                        <select
+                          value={courseForm.level}
+                          onChange={(e) => setCourseForm((prev) => ({ ...prev, level: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/25 transition-all"
+                        >
+                          <option value="principiante">Principiante</option>
+                          <option value="intermedio">Intermedio</option>
+                          <option value="avanzado">Avanzado</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Duración
+                        </label>
+                        <input
+                          type="text"
+                          value={courseForm.duration}
+                          onChange={(e) => setCourseForm((prev) => ({ ...prev, duration: e.target.value }))}
+                          placeholder="Ej: 10 horas, 2 semanas"
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/25 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Precio (USD)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={courseForm.price}
+                          onChange={(e) => setCourseForm((prev) => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/25 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Estado
+                        </label>
+                        <select
+                          value={courseForm.status}
+                          onChange={(e) => {
+                            const status = e.target.value;
+                            setCourseForm((prev) => ({
+                              ...prev,
+                              status,
+                              published: status === "published" ? true : status === "draft" || status === "rejected" ? false : prev.published,
+                            }));
+                          }}
+                          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/25 transition-all"
+                        >
+                          <option value="draft">Borrador</option>
+                          <option value="pending_review">Pendiente de revisión</option>
+                          <option value="published">Publicado</option>
+                          <option value="rejected">Rechazado</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center gap-2 pt-5">
+                        <input
+                          type="checkbox"
+                          id="coursePublished"
+                          checked={courseForm.published}
+                          onChange={(e) => setCourseForm((prev) => ({ ...prev, published: e.target.checked }))}
+                          className="w-4 h-4 rounded border-gray-300 dark:border-white/20 text-emerald-500 focus:ring-emerald-500/25"
+                        />
+                        <label htmlFor="coursePublished" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                          Publicado
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Error message */}
+                    {courseFormError && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20"
+                      >
+                        <p className="text-xs text-red-600 dark:text-red-400">
+                          {courseFormError}
+                        </p>
+                      </motion.div>
+                    )}
+
+                    <div className="flex items-center gap-2 mt-4">
+                      <Button
+                        onClick={editingCourse ? handleUpdateCourse : handleCreateCourse}
+                        disabled={isSavingCourse}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm h-9"
+                      >
+                        {isSavingCourse ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-1" />
+                            {editingCourse ? "Guardar Cambios" : "Crear Curso"}
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={cancelCourseForm}
+                        disabled={isSavingCourse}
+                        className="text-sm h-9"
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Seed Courses Banner */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -1297,10 +1661,24 @@ export default function AdminDashboard() {
                             <Users className="w-3 h-3" />
                             {course.enrollmentCount} inscr.
                           </span>
+                          {course.price > 0 && (
+                            <span className="flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
+                              ${course.price}
+                            </span>
+                          )}
                         </div>
 
                         {/* Action buttons */}
                         <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => startEditCourse(course)}
+                            className="text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 text-xs h-7"
+                          >
+                            <Pencil className="w-3 h-3 mr-1" />
+                            Editar
+                          </Button>
                           {course.status === "pending_review" && (
                             <>
                               <Button
@@ -1347,7 +1725,7 @@ export default function AdminDashboard() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleDeleteCourse(course.id)}
-                            className="text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs h-7 ml-auto"
+                            className="text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs h-7"
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>

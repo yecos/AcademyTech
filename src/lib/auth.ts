@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
 export const authOptions: NextAuthOptions = {
@@ -10,6 +11,52 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email y contraseña son requeridos");
+        }
+
+        // Find user by email
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
+
+        if (!user) {
+          throw new Error("No existe una cuenta con este email");
+        }
+
+        // Find the credentials account for this user
+        const account = await prisma.account.findFirst({
+          where: {
+            userId: user.id,
+            provider: "credentials",
+            providerAccountId: credentials.email,
+          },
+        });
+
+        if (!account || !account.access_token) {
+          throw new Error("Esta cuenta no tiene contraseña configurada. Intenta iniciar sesión con Google.");
+        }
+
+        // Verify password
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          account.access_token
+        );
+
+        if (!isValid) {
+          throw new Error("Contraseña incorrecta");
+        }
+
+        return user;
+      },
     }),
     CredentialsProvider({
       name: "guest",
