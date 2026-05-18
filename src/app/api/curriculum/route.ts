@@ -7,7 +7,14 @@ import { modules as d5Modules } from "@/lib/curriculum";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const slug = searchParams.get("slug") || "d5-render";
+    const slug = searchParams.get("slug");
+
+    if (!slug) {
+      return NextResponse.json(
+        { error: "Slug del curso requerido" },
+        { status: 400 }
+      );
+    }
 
     const course = await prisma.course.findUnique({
       where: { slug },
@@ -97,7 +104,7 @@ export async function GET(request: Request) {
         content: dbTopic.content || null,
         number: dbTopic.number,
         videoUrl: dbTopic.videoUrl || null,
-        attachments: dbTopic.attachments ? JSON.parse(dbTopic.attachments) : null,
+        attachments: dbTopic.attachments ? (() => { try { return JSON.parse(dbTopic.attachments); } catch { return null; } })() : null,
       })),
       quiz: [], // No quiz data for non-D5 courses yet
     }));

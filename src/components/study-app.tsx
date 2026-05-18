@@ -49,11 +49,19 @@ import {
 // Map slugs to display names
 const courseNames: Record<string, string> = {
   "d5-render": "D5 Render",
+  "diseno-arquitectonico-bim": "Diseño Arquitectónico BIM",
+  "desarrollo-web-completo": "Desarrollo Web Completo",
+  "fundamentos-ciberseguridad": "Ciberseguridad y Ethical Hacking",
+  "introduccion-inteligencia-artificial": "Inteligencia Artificial",
 };
 
 // Map slugs to descriptions
 const courseDescriptions: Record<string, string> = {
   "d5-render": "Sigue tu progreso a través del curso completo de D5 Render. Completa los temas y evalúa tus conocimientos con las evaluaciones de cada módulo.",
+  "diseno-arquitectonico-bim": "Domina la metodología BIM desde los fundamentos hasta la práctica profesional con Revit.",
+  "desarrollo-web-completo": "Aprende a crear sitios web profesionales con HTML5, CSS3 y JavaScript ES6+.",
+  "fundamentos-ciberseguridad": "Aprende cómo proteger sistemas y realizar auditorías de seguridad éticas.",
+  "introduccion-inteligencia-artificial": "Desde machine learning hasta deep learning y modelos generativos.",
 };
 
 export function StudyApp() {
@@ -77,6 +85,9 @@ export function StudyApp() {
   const courseName = courseTitle || courseNames[courseSlug] || courseSlug;
   const courseDescription = curriculumDescription || courseDescriptions[courseSlug] || "Sigue tu progreso y completa los temas del curso.";
 
+  // Get error from curriculum
+  const { error: curriculumError } = useCurriculum();
+
   // Show loading state while curriculum is being fetched
   if (curriculumLoading) {
     return (
@@ -84,6 +95,52 @@ export function StudyApp() {
         <div className="text-center space-y-4">
           <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-gray-500 dark:text-gray-400">Cargando curso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if curriculum failed to load
+  if (curriculumError) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center transition-colors duration-300">
+        <div className="text-center space-y-4 max-w-md px-4">
+          <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Error al cargar el curso
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {curriculumError}
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+          >
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if no modules loaded
+  if (modules.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center transition-colors duration-300">
+        <div className="text-center space-y-4 max-w-md px-4">
+          <BookOpen className="w-12 h-12 text-gray-400 mx-auto" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Curso sin contenido
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Este curso aún no tiene módulos disponibles. Vuelve más tarde.
+          </p>
+          <Link href="/">
+            <Button className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Volver a cursos
+            </Button>
+          </Link>
         </div>
       </div>
     );

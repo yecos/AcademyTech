@@ -65,14 +65,18 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
       >
         {/* Module image banner */}
         <div className="relative w-full h-24 overflow-hidden">
+          <div className={`absolute inset-0 bg-gradient-to-br ${tw.gradient} opacity-20`} />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/60 to-gray-50/30 dark:from-zinc-950 dark:via-zinc-950/60 dark:to-zinc-950/30" />
           <Image
             src={`/images/modules/modulo-${module.number}.png`}
             alt={`Módulo ${module.number}: ${module.title}`}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 600px"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/60 to-gray-50/30 dark:from-zinc-950 dark:via-zinc-950/60 dark:to-zinc-950/30" />
           {/* Category-colored bottom border */}
           <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${tw.gradient}`} />
         </div>

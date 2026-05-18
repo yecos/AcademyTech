@@ -247,6 +247,54 @@ export const CATEGORY_THEMES: Record<string, CategoryTheme> = {
       shadow: "shadow-violet-500/20 hover:shadow-violet-500/30",
     },
   },
+
+  // Alias for backward compatibility
+  "inteligencia-artificial": {
+    slug: "ia",
+    name: "IA",
+    primaryColor: "#8b5cf6",
+    gradientFrom: "#8b5cf6",
+    gradientVia: "#a855f7",
+    gradientTo: "#7c3aed",
+    textAccent: "#7c3aed",
+    textAccentDark: "#a78bfa",
+    bgAccent: "rgba(139, 92, 246, 0.10)",
+    bgAccentDark: "rgba(139, 92, 246, 0.15)",
+    borderAccent: "rgba(139, 92, 246, 0.20)",
+    borderAccentDark: "rgba(139, 92, 246, 0.25)",
+    icon: "Brain",
+    pattern: "neural",
+    cssVars: {
+      primary: "#8b5cf6",
+      "gradient-from": "#8b5cf6",
+      "gradient-via": "#a855f7",
+      "gradient-to": "#7c3aed",
+      "text-accent": "#7c3aed",
+      "bg-accent": "rgba(139, 92, 246, 0.10)",
+      "border-accent": "rgba(139, 92, 246, 0.20)",
+      "glow-color": "rgba(139, 92, 246, 0.15)",
+      "pattern-opacity": "0.06",
+    },
+    tailwind: {
+      text: "text-violet-600",
+      textDark: "dark:text-violet-400",
+      bg: "bg-violet-500/10",
+      bgDark: "dark:bg-violet-500/15",
+      border: "border-violet-500/20",
+      borderDark: "dark:border-violet-500/25",
+      gradient: "from-violet-500 to-purple-700",
+      iconBg: "bg-violet-500/15 border-violet-500/20",
+      iconBgDark: "dark:bg-violet-500/20 dark:border-violet-500/30",
+      badge: "bg-violet-500/15 text-violet-600 border-violet-500/20",
+      badgeDark: "dark:text-violet-400 dark:border-violet-500/25",
+      hoverBorder: "hover:border-violet-500/30",
+      hoverBorderDark: "dark:hover:border-violet-500/30",
+      progress: "bg-gradient-to-r from-violet-600 via-violet-500 to-purple-400",
+      button: "bg-violet-600 hover:bg-violet-500",
+      buttonHover: "hover:bg-violet-500",
+      shadow: "shadow-violet-500/20 hover:shadow-violet-500/30",
+    },
+  },
 };
 
 // Default theme (Arquitectura / Emerald)
@@ -287,6 +335,7 @@ export function getCategoryThemeByName(name: string): CategoryTheme {
     Programacion: "programacion",
     Ciberseguridad: "ciberseguridad",
     "Inteligencia Artificial": "ia",
+    "inteligencia-artificial": "ia",
     IA: "ia",
   };
   const slug = nameMap[name] || "arquitectura";

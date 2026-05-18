@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   BookOpen,
@@ -247,7 +248,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
   const topicIndex = parseInt(params.topicId as string, 10);
 
   // Use the course slug from the query param to get the right curriculum
-  const { modules, getTopicContentFromDB, isLoading: curriculumLoading, courseTitle } = useCurriculum();
+  const { modules, getTopicContentFromDB, isLoading: curriculumLoading, courseTitle, error: curriculumError } = useCurriculum();
 
   // Build course URL prefix based on slug
   const courseUrl = `/curso/${courseSlug}`;
@@ -268,6 +269,39 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
         <div className="text-center space-y-4">
           <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-gray-500 dark:text-gray-400">Cargando tema...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if curriculum failed to load
+  if (curriculumError) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center transition-colors duration-300">
+        <div className="text-center space-y-4 max-w-md px-4">
+          <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Error al cargar el tema
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {curriculumError}
+          </p>
+          <div className="flex gap-2 justify-center">
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+            >
+              Reintentar
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/")}
+              className="border-gray-200 dark:border-white/10"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Inicio
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -371,6 +405,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
           transition={{ duration: 0.5 }}
           className="relative w-full h-52 rounded-xl overflow-hidden mb-8"
         >
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-cyan-500/20 dark:from-emerald-500/10 dark:via-teal-500/5 dark:to-cyan-500/10" />
           <Image
             src={`/images/modules/modulo-${moduleData.number}.png`}
             alt={`Módulo ${moduleData.number}: ${moduleData.title}`}
@@ -496,95 +531,101 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
               <ContentWithCodeBlocks content={content.explanation} />
             </motion.section>
 
-            {/* Key Points */}
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.15 }}
-              className="glass-card rounded-xl p-6"
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <Lightbulb className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Puntos Clave
-                </h2>
-              </div>
-              <ul className="space-y-3">
-                {content.keyPoints.map((point, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0 mt-0.5">
-                      {i + 1}
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
-                      {point}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </motion.section>
-
-            {/* Steps / Tutorial */}
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="glass-card rounded-xl p-6"
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <ListChecks className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Tutorial Paso a Paso
-                </h2>
-              </div>
-              <div className="space-y-6">
-                {content.steps.map((step, i) => (
-                  <div key={i} className="relative">
-                    {i < content.steps.length - 1 && (
-                      <div className="absolute left-5 top-12 bottom-0 w-px bg-emerald-500/20" />
-                    )}
-                    <div className="flex items-start gap-4">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-sm border border-emerald-500/20">
+            {/* Key Points - only show if there are key points */}
+            {content.keyPoints.length > 0 && (
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.15 }}
+                className="glass-card rounded-xl p-6"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Lightbulb className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Puntos Clave
+                  </h2>
+                </div>
+                <ul className="space-y-3">
+                  {content.keyPoints.map((point, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0 mt-0.5">
                         {i + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                          {step.title}
-                        </h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                          {step.description}
-                        </p>
-                        {step.tip && (
-                          <div className="mt-2 flex items-start gap-2 bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
-                            <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-                            <span className="text-amber-600/80 dark:text-amber-300/80 text-xs">
-                              {step.tip}
-                            </span>
-                          </div>
-                        )}
+                      </span>
+                      <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                        {point}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.section>
+            )}
+
+            {/* Steps / Tutorial - only show if there are steps */}
+            {content.steps.length > 0 && (
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="glass-card rounded-xl p-6"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <ListChecks className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Tutorial Paso a Paso
+                  </h2>
+                </div>
+                <div className="space-y-6">
+                  {content.steps.map((step, i) => (
+                    <div key={i} className="relative">
+                      {i < content.steps.length - 1 && (
+                        <div className="absolute left-5 top-12 bottom-0 w-px bg-emerald-500/20" />
+                      )}
+                      <div className="flex items-start gap-4">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-sm border border-emerald-500/20">
+                          {i + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                            {step.title}
+                          </h3>
+                          <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                            {step.description}
+                          </p>
+                          {step.tip && (
+                            <div className="mt-2 flex items-start gap-2 bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
+                              <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
+                              <span className="text-amber-600/80 dark:text-amber-300/80 text-xs">
+                                {step.tip}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </motion.section>
+                  ))}
+                </div>
+              </motion.section>
+            )}
 
-            {/* Practice */}
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.25 }}
-              className="glass-card rounded-xl p-6 border-emerald-500/10"
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <Eye className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Práctica
-                </h2>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
-                {content.practice}
-              </p>
-            </motion.section>
+            {/* Practice - only show if there is practice content */}
+            {content.practice && content.practice.trim() && (
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.25 }}
+                className="glass-card rounded-xl p-6 border-emerald-500/10"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Eye className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Práctica
+                  </h2>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
+                  {content.practice}
+                </p>
+              </motion.section>
+            )}
 
             {/* Interactive Code Sandbox Section */}
             <CodeSandboxSection />

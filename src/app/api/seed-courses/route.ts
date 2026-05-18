@@ -220,7 +220,7 @@ const coursesMap: Record<string, { course: CourseSeed; categorySlug: string }> =
   arquitectura: { course: arquitecturaCourse, categorySlug: "arquitectura" },
   programacion: { course: programacionCourse, categorySlug: "programacion" },
   ciberseguridad: { course: ciberseguridadCourse, categorySlug: "ciberseguridad" },
-  ia: { course: iaCourse, categorySlug: "inteligencia-artificial" },
+  ia: { course: iaCourse, categorySlug: "ia" },
 };
 
 export async function POST(request: Request) {

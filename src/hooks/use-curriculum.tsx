@@ -165,15 +165,21 @@ export function CurriculumProvider({
       }
 
       // Plain text content - wrap it in a TopicContent structure
+      // Auto-generate keyPoints and practice from the content
+      const sentences = topic.content
+        .split(/\.\s+/)
+        .filter((s: string) => s.trim().length > 15);
+      const autoKeyPoints = sentences.slice(0, 5).map((s: string) => s.trim() + (s.trim().endsWith('.') ? '' : '.'));
+
       return {
         moduleId,
         topicIndex,
         title: topic.name,
-        objective: "Aprender los conceptos presentados en este tema.",
+        objective: `Comprender y aplicar los conceptos de: ${topic.name}`,
         explanation: topic.content,
-        keyPoints: [],
+        keyPoints: autoKeyPoints,
         steps: [],
-        practice: "",
+        practice: `Practica los conceptos aprendidos en este tema. Revisa los puntos clave e intenta explicarlos con tus propias palabras. Si es posible, implementa un pequeño ejemplo práctico relacionado con ${topic.name}.`,
         extraResources: [],
       };
     },
