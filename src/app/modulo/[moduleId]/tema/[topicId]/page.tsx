@@ -172,11 +172,19 @@ function TopicNotes({
   );
 }
 
-// Interactive Code Sandbox Section
-function CodeSandboxSection() {
+// Interactive Code Sandbox Section - Only shown for programming courses
+function CodeSandboxSection({ courseSlug }: { courseSlug: string }) {
   const [showSandbox, setShowSandbox] = useState(false);
   const { theme } = useCategoryTheme();
   const tw = theme.tailwind;
+
+  // Only show sandbox for programming/development courses
+  const isProgrammingCourse =
+    courseSlug === "desarrollo-web-completo" ||
+    theme.slug === "programacion" ||
+    theme.pattern === "code";
+
+  if (!isProgrammingCourse) return null;
 
   return (
     <motion.section
@@ -665,8 +673,8 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
               </motion.section>
             )}
 
-            {/* Interactive Code Sandbox Section */}
-            <CodeSandboxSection />
+            {/* Interactive Code Sandbox Section - only for programming courses */}
+            <CodeSandboxSection courseSlug={courseSlug} />
 
             {/* Personal Notes */}
             <TopicNotes
@@ -724,8 +732,8 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
               </p>
             </div>
 
-            {/* Still show sandbox even when content is not available */}
-            <CodeSandboxSection />
+            {/* Still show sandbox even when content is not available - only for programming courses */}
+            <CodeSandboxSection courseSlug={courseSlug} />
 
             {/* Personal Notes (shown even when content is not available) */}
             <TopicNotes
