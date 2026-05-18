@@ -182,3 +182,38 @@ Refactored the "Academy Tech" learning platform so that courses load dynamically
 - `bun run lint` passes (only pre-existing errors remain)
 - `next build` succeeds with no new errors
 - All existing functionality preserved for D5 Render
+
+---
+
+Task ID: AT-012
+Agent: main
+Task: Fix "temas no encontrados" errors and improve non-D5 course experience
+
+Work Log:
+- Investigated `/api/topic/0` 400 error - NO `/api/topic` route exists, errors come from topic page
+- Verified database: 164 topics, 34 modules, 5 courses, all published
+- Found duplicate category: `ia` and `inteligencia-artificial` both mapping to "Inteligencia Artificial"
+- Fixed StudyApp: added error state (instead of infinite loading) when curriculum fetch fails
+- Fixed StudyApp: added empty state when course has no modules
+- Fixed StudyApp: added course names/descriptions for all 5 courses (was only D5 Render)
+- Fixed Topic page: hide empty sections (keyPoints, steps, practice) instead of showing blank cards
+- Fixed Topic page: added error state when curriculum fails
+- Fixed Topic page: added gradient fallback for module hero images
+- Fixed Module card: added gradient fallback when module images don't exist
+- Fixed Curriculum API: require slug parameter (was defaulting to "d5-render" silently)
+- Fixed Curriculum API: safe JSON.parse for attachments field
+- Fixed Curriculum hook: auto-generate keyPoints from content sentences + auto-generate practice text
+- Fixed Category themes: added `inteligencia-artificial` as alias for `ia`
+- Fixed Category themes: added slug mapping for name lookup
+- Fixed Seed courses: changed categorySlug from `inteligencia-artificial` to `ia`
+- Deleted duplicate `inteligencia-artificial` category from database
+- Build passes successfully
+- Pushed to GitHub: commit a31a9ee
+
+Stage Summary:
+- 6 bugs fixed in 7 files
+- Non-D5 courses now show rich content with auto-generated keyPoints and practice exercises
+- Error states prevent infinite loading when API fails
+- Module images gracefully degrade to category-themed gradients
+- Duplicate category cleaned up in database
+- User still needs to configure DATABASE_URL in Vercel environment variables
