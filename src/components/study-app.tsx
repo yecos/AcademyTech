@@ -93,7 +93,7 @@ export function StudyApp() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center transition-colors duration-300">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 rounded-full animate-spin mx-auto" style={{ borderColor: theme.primaryColor, borderTopColor: 'transparent' }} />
           <p className="text-sm text-gray-500 dark:text-gray-400">Cargando curso...</p>
         </div>
       </div>
@@ -114,7 +114,7 @@ export function StudyApp() {
           </p>
           <Button
             onClick={() => window.location.reload()}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+            className={`${tw.button} text-white gap-2`}
           >
             Reintentar
           </Button>
@@ -136,7 +136,7 @@ export function StudyApp() {
             Este curso aún no tiene módulos disponibles. Vuelve más tarde.
           </p>
           <Link href="/">
-            <Button className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2">
+            <Button className={`${tw.button} text-white gap-2`}>
               <ArrowLeft className="w-4 h-4" />
               Volver a cursos
             </Button>
