@@ -1,8 +1,7 @@
 "use client";
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useRef, useMemo, Suspense } from "react";
-import Image from "next/image";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +39,8 @@ import {
   type ContentSegment,
   type CodeBlock,
 } from "@/lib/code-block-parser";
+import { useCategoryTheme, CategoryThemeProvider } from "@/components/CategoryThemeProvider";
+import { CategoryBackground } from "@/components/CategoryBackground";
 
 // Component to render parsed content segments (text + code blocks)
 function ContentWithCodeBlocks({ content }: { content: string }) {
@@ -114,6 +115,8 @@ function TopicNotes({
   topicIndex: number;
 }) {
   const course = useCourse();
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
   const [noteText, setNoteText] = useState(() =>
     course.getTopicNote(moduleId, topicIndex)
   );
@@ -142,7 +145,7 @@ function TopicNotes({
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <PenLine className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+          <PenLine className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Mis Notas
           </h2>
@@ -152,7 +155,7 @@ function TopicNotes({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="text-xs text-emerald-500/70 dark:text-emerald-400/70"
+            className={`text-xs ${tw.text} ${tw.textDark} opacity-70`}
           >
             Guardado
           </motion.span>
@@ -163,7 +166,7 @@ function TopicNotes({
         onChange={(e) => setNoteText(e.target.value)}
         placeholder="Escribe tus notas personales sobre este tema aquí..."
         rows={5}
-        className="w-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 rounded-lg px-4 py-3 text-gray-600 dark:text-gray-300 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:border-emerald-500/30 focus:ring-1 focus:ring-emerald-500/15 resize-y transition-colors"
+        className={`w-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 rounded-lg px-4 py-3 text-gray-600 dark:text-gray-300 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none ${tw.border} ${tw.borderDark} focus:ring-1 ${tw.bg} ${tw.bgDark} resize-y transition-colors`}
       />
     </motion.section>
   );
@@ -172,18 +175,20 @@ function TopicNotes({
 // Interactive Code Sandbox Section
 function CodeSandboxSection() {
   const [showSandbox, setShowSandbox] = useState(false);
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
 
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.28 }}
-      className="glass-card rounded-xl overflow-hidden border-emerald-500/15"
+      className={`glass-card rounded-xl overflow-hidden ${tw.border} ${tw.borderDark}`}
     >
       {!showSandbox ? (
         <div className="p-6">
           <div className="flex items-center gap-2 mb-3">
-            <Code2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <Code2 className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Sandbox de Código
             </h2>
@@ -195,7 +200,7 @@ function CodeSandboxSection() {
           </p>
           <Button
             onClick={() => setShowSandbox(true)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+            className={`${tw.button} text-white gap-2`}
           >
             <Code2 className="w-4 h-4" />
             Abrir Sandbox
@@ -217,7 +222,7 @@ export default function TopicPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-gray-500 dark:text-gray-400">Cargando tema...</p>
         </div>
       </div>
@@ -232,12 +237,33 @@ function TopicPageWithProvider() {
   const searchParams = useSearchParams();
   const courseSlug = searchParams.get("course") || "d5-render";
 
+  const [categorySlug, setCategorySlug] = useState<string>("arquitectura");
+
+  useEffect(() => {
+    async function fetchCourseCategory() {
+      try {
+        const res = await fetch(`/api/course?slug=${courseSlug}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.category?.slug) {
+            setCategorySlug(data.category.slug);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch course category:", error);
+      }
+    }
+    fetchCourseCategory();
+  }, [courseSlug]);
+
   return (
-    <CurriculumProvider courseSlug={courseSlug}>
-      <CourseDataProvider courseSlug={courseSlug}>
-        <TopicPageContent courseSlug={courseSlug} />
-      </CourseDataProvider>
-    </CurriculumProvider>
+    <CategoryThemeProvider slug={categorySlug} animated={true}>
+      <CurriculumProvider courseSlug={courseSlug}>
+        <CourseDataProvider courseSlug={courseSlug}>
+          <TopicPageContent courseSlug={courseSlug} />
+        </CourseDataProvider>
+      </CurriculumProvider>
+    </CategoryThemeProvider>
   );
 }
 
@@ -246,6 +272,9 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
   const router = useRouter();
   const moduleId = params.moduleId as string;
   const topicIndex = parseInt(params.topicId as string, 10);
+
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
 
   // Use the course slug from the query param to get the right curriculum
   const { modules, getTopicContentFromDB, isLoading: curriculumLoading, courseTitle, error: curriculumError } = useCurriculum();
@@ -266,8 +295,12 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
   if (curriculumLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center transition-colors duration-300">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+        <CategoryBackground showPattern={false} />
+        <div className="text-center space-y-4 relative z-10">
+          <div
+            className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto"
+            style={{ borderColor: theme.primaryColor, borderTopColor: 'transparent' }}
+          />
           <p className="text-sm text-gray-500 dark:text-gray-400">Cargando tema...</p>
         </div>
       </div>
@@ -278,7 +311,8 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
   if (curriculumError) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center transition-colors duration-300">
-        <div className="text-center space-y-4 max-w-md px-4">
+        <CategoryBackground showPattern={false} />
+        <div className="text-center space-y-4 max-w-md px-4 relative z-10">
           <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             Error al cargar el tema
@@ -289,7 +323,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
           <div className="flex gap-2 justify-center">
             <Button
               onClick={() => window.location.reload()}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+              className={`${tw.button} text-white gap-2`}
             >
               Reintentar
             </Button>
@@ -314,7 +348,8 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
   ) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
-        <div className="text-center space-y-4">
+        <CategoryBackground showPattern={false} />
+        <div className="text-center space-y-4 relative z-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Tema no encontrado
           </h2>
@@ -323,7 +358,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
           </p>
           <Button
             onClick={() => router.push("/")}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white"
+            className={`${tw.button} text-white`}
           >
             <Home className="w-4 h-4 mr-2" />
             Volver al inicio
@@ -355,19 +390,16 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
-      {/* Background decorative */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-      </div>
+      {/* Category-themed background */}
+      <CategoryBackground />
 
-      <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
+      <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6 z-10">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-2">
           <nav className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-400 flex-wrap">
             <button
               onClick={() => router.push("/")}
-              className="hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors flex items-center gap-1"
+              className={`${tw.text} ${tw.textDark} transition-colors flex items-center gap-1 hover:opacity-80`}
             >
               <Home className="w-3.5 h-3.5" />
               Inicio
@@ -375,7 +407,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
             <ChevronRight className="w-3 h-3" />
             <button
               onClick={() => router.push(courseUrl)}
-              className="hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
+              className={`${tw.text} ${tw.textDark} transition-colors hover:opacity-80`}
             >
               {courseTitle || (courseSlug === "d5-render" ? "D5 Render" : courseSlug)}
             </button>
@@ -388,7 +420,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
               {moduleData.title}
             </span>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-emerald-500 dark:text-emerald-400">
+            <span className={`${tw.text} ${tw.textDark}`}>
               Tema {topicIndex + 1}
             </span>
           </nav>
@@ -405,20 +437,22 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
           transition={{ duration: 0.5 }}
           className="relative w-full h-52 rounded-xl overflow-hidden mb-8"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-cyan-500/20 dark:from-emerald-500/10 dark:via-teal-500/5 dark:to-cyan-500/10" />
-          <Image
-            src={`/images/modules/modulo-${moduleData.number}.png`}
-            alt={`Módulo ${moduleData.number}: ${moduleData.title}`}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 896px"
-            priority
-            onError={(e) => {
-              // Fallback: hide image if not found, show gradient only
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
+          <div className={`absolute inset-0 bg-gradient-to-br ${tw.gradient} opacity-30`} />
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-6 left-8 w-24 h-24 rounded-full border-2 border-white/30" />
+            <div className="absolute bottom-4 right-12 w-16 h-16 rounded-full border border-white/20" />
+            <div className="absolute top-3 right-1/4 w-10 h-10 rounded-full bg-white/10" />
+            <div className="absolute bottom-8 left-1/3 w-12 h-12 rounded-full border border-white/15" />
+          </div>
+          {/* Module number overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-8xl font-black text-white/15">{String(moduleData.number).padStart(2, '0')}</span>
+          </div>
+          {/* Bottom gradient fade */}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/40 to-transparent dark:from-zinc-950 dark:via-zinc-950/40 dark:to-transparent" />
+          {/* Category-colored bottom border */}
+          <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${tw.gradient}`} />
         </motion.div>
 
         {/* Header */}
@@ -431,7 +465,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-3 flex-wrap">
-                <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs">
+                <Badge className={`${tw.badge} ${tw.badgeDark} text-xs border`}>
                   Módulo {moduleData.number}
                 </Badge>
                 <Badge className="bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/10 text-xs">
@@ -440,7 +474,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 <Badge
                   className={`text-xs ${
                     topicInfo.difficulty === "basico"
-                      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                      ? `${tw.badge} ${tw.badgeDark} border`
                       : topicInfo.difficulty === "intermedio"
                         ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20"
                         : "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20"
@@ -457,7 +491,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                   {topicInfo.estimatedTime}
                 </Badge>
                 {isCompleted && (
-                  <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/30 text-xs">
+                  <Badge className={`${tw.iconBg} ${tw.iconBgDark} ${tw.text} ${tw.textDark} text-xs border`}>
                     <CheckCircle2 className="w-3 h-3 mr-1" />
                     Completado
                   </Badge>
@@ -467,7 +501,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 {topicTitle}
               </h1>
               {content && (
-                <div className="flex items-center gap-2 text-sm text-emerald-600/80 dark:text-emerald-400/80">
+                <div className={`flex items-center gap-2 text-sm ${tw.text} ${tw.textDark} opacity-80`}>
                   <Target className="w-4 h-4" />
                   <span>{content.objective}</span>
                 </div>
@@ -483,7 +517,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 title={bookmarked ? "Quitar marcador" : "Añadir marcador"}
               >
                 {bookmarked ? (
-                  <BookmarkCheck className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <BookmarkCheck className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
                 ) : (
                   <Bookmark className="w-5 h-5 text-gray-400" />
                 )}
@@ -493,7 +527,11 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                   id="topic-complete"
                   checked={isCompleted}
                   onCheckedChange={() => toggleTopic(moduleId, topicIndex)}
-                  className="border-gray-300 dark:border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                  className="border-gray-300 dark:border-white/20"
+                  style={isCompleted ? {
+                    backgroundColor: theme.primaryColor,
+                    borderColor: theme.primaryColor,
+                  } : undefined}
                 />
                 <label
                   htmlFor="topic-complete"
@@ -517,12 +555,12 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
               className="glass-card rounded-xl p-6"
             >
               <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                <BookOpen className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Explicación
                 </h2>
                 {explanationHasCode && (
-                  <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs ml-2">
+                  <Badge className={`${tw.badge} ${tw.badgeDark} text-xs ml-2 border`}>
                     <Code2 className="w-3 h-3 mr-1" />
                     Código interactivo
                   </Badge>
@@ -540,7 +578,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 className="glass-card rounded-xl p-6"
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <Lightbulb className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <Lightbulb className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Puntos Clave
                   </h2>
@@ -548,7 +586,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 <ul className="space-y-3">
                   {content.keyPoints.map((point, i) => (
                     <li key={i} className="flex items-start gap-3">
-                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0 mt-0.5">
+                      <span className={`flex items-center justify-center w-6 h-6 rounded-full ${tw.bg} ${tw.bgDark} ${tw.text} ${tw.textDark} text-xs font-bold shrink-0 mt-0.5`}>
                         {i + 1}
                       </span>
                       <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
@@ -569,7 +607,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 className="glass-card rounded-xl p-6"
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <ListChecks className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <ListChecks className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Tutorial Paso a Paso
                   </h2>
@@ -578,10 +616,10 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                   {content.steps.map((step, i) => (
                     <div key={i} className="relative">
                       {i < content.steps.length - 1 && (
-                        <div className="absolute left-5 top-12 bottom-0 w-px bg-emerald-500/20" />
+                        <div className={`absolute left-5 top-12 bottom-0 w-px ${tw.border} ${tw.borderDark}`} />
                       )}
                       <div className="flex items-start gap-4">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-sm border border-emerald-500/20">
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${tw.iconBg} ${tw.iconBgDark} ${tw.text} ${tw.textDark} font-bold shrink-0 text-sm`}>
                           {i + 1}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -613,10 +651,10 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.25 }}
-                className="glass-card rounded-xl p-6 border-emerald-500/10"
+                className={`glass-card rounded-xl p-6 ${tw.border} ${tw.borderDark}`}
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <Eye className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <Eye className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Práctica
                   </h2>
@@ -646,7 +684,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 className="glass-card rounded-xl p-6"
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <ExternalLink className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                  <ExternalLink className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Recursos Adicionales
                   </h2>
@@ -658,7 +696,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                       href={res.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors group"
+                      className={`flex items-center gap-2 text-sm ${tw.text} ${tw.textDark} transition-colors group hover:opacity-80`}
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span className="group-hover:underline">{res.label}</span>
@@ -735,9 +773,9 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
                 }
                 className={`w-2.5 h-2.5 rounded-full transition-all ${
                   i === topicIndex
-                    ? "bg-emerald-500 dark:bg-emerald-400 w-6"
+                    ? `${tw.button} text-white w-6`
                     : course.isTopicCompleted(moduleId, i)
-                      ? "bg-emerald-500/50"
+                      ? `${tw.bg} ${tw.bgDark}`
                       : "bg-gray-300 dark:bg-white/10 hover:bg-gray-400 dark:hover:bg-white/20"
                 }`}
               />
@@ -747,7 +785,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
           {nextPath ? (
             <Button
               onClick={() => router.push(nextPath)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+              className={`${tw.button} text-white gap-2`}
             >
               <span className="hidden sm:inline">
                 Tema {topicIndex + 2}
@@ -758,7 +796,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
           ) : (
             <Button
               onClick={() => router.push(courseUrl)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+              className={`${tw.button} text-white gap-2`}
             >
               Finalizar
               <CheckCircle2 className="w-4 h-4" />

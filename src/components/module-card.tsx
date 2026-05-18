@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -63,20 +61,20 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
         value={module.id}
         className="glass-card glass-card-hover rounded-xl border-0 mb-3 overflow-hidden transition-all duration-300"
       >
-        {/* Module image banner */}
-        <div className="relative w-full h-24 overflow-hidden">
-          <div className={`absolute inset-0 bg-gradient-to-br ${tw.gradient} opacity-20`} />
+        {/* Module banner with category gradient */}
+        <div className={`relative w-full h-24 overflow-hidden bg-gradient-to-br ${tw.gradient}`}>
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-2 left-4 w-16 h-16 rounded-full border-2 border-white/30" />
+            <div className="absolute bottom-2 right-8 w-12 h-12 rounded-full border border-white/20" />
+            <div className="absolute top-1 right-1/3 w-8 h-8 rounded-full bg-white/10" />
+          </div>
+          {/* Module number overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-5xl font-black text-white/20">{String(module.number).padStart(2, '0')}</span>
+          </div>
+          {/* Bottom gradient fade */}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/60 to-gray-50/30 dark:from-zinc-950 dark:via-zinc-950/60 dark:to-zinc-950/30" />
-          <Image
-            src={`/images/modules/modulo-${module.number}.png`}
-            alt={`Módulo ${module.number}: ${module.title}`}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 600px"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
           {/* Category-colored bottom border */}
           <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${tw.gradient}`} />
         </div>

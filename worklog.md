@@ -1,219 +1,149 @@
-# Worklog - Task 7: AI Assistant (BYOK) + Course PDF Export
+# Worklog: UI Improvements - Module Cards & Topic Page Theme
 
-## Summary
-Built a comprehensive AI Assistant system with BYOK (Bring Your Own Key) architecture and professional PDF export for course content.
+## Date: 2025-03-04
 
-## Files Created
+## Task 1: Fix Module Card Images
 
-### PART A: AI Assistant (BYOK)
+**File:** `/home/z/my-project/src/components/module-card.tsx`
 
-1. **`/src/app/profesor/ai-config/page.tsx`** - AI Settings page
-   - Provider selector (OpenAI, Anthropic, Google Gemini)
-   - Model selector (dynamic based on provider)
-   - API key input with show/hide toggle (password masked)
-   - Test connection button
-   - Save/clear config to localStorage (NOT database - security)
-   - Status indicator (configured / not configured)
-   - BYOK explanation section
-   - All text in Spanish
+**Problem:** Module card tried to load images from `/images/modules/modulo-${module.number}.png` which only exist for D5 Render course (modulo-1 through modulo-10). For other courses, broken images would flash before the `onError` handler hid them.
 
-2. **`/src/app/api/ai/chat/route.ts`** - Streaming chat completion API
-   - Accepts: messages, provider, apiKey, model
-   - Routes to OpenAI, Anthropic, or Google Gemini APIs
-   - Returns streaming SSE response
-   - Never stores API key server-side
-   - Validates requests (max messages, valid providers/models)
-   - Error handling for invalid keys, rate limits, etc.
+**Changes:**
+1. Removed `import Image from "next/image"` (no longer needed)
+2. Removed unused `import { useState } from "react"`
+3. Replaced the image banner section (lines 67-82) with a category-themed gradient approach:
+   - Uses `bg-gradient-to-br ${tw.gradient}` from the category theme for the background
+   - Decorative circular border pattern overlay with `opacity-20`
+   - Large module number overlay using `String(module.number).padStart(2, '0')` in `text-white/20`
+   - Bottom gradient fade from the page background color
+   - Category-colored bottom border line using the theme gradient
 
-3. **`/src/components/AIAssistant.tsx`** - Floating chat panel component
-   - Floating action button (bottom-right) with pulse animation
-   - Slide-up glassmorphism chat panel
-   - Chat interface with message bubbles
-   - System prompt for course creation assistance
-   - Pre-built prompt buttons (4 Spanish quick actions)
-   - Streaming typewriter effect for AI responses
-   - Copy to clipboard button
-   - Insert into course editor button
-   - Setup prompt if no API key configured
-   - Expand/collapse, clear conversation
-   - Dark mode fully compatible
+**Result:** Module cards now always look good regardless of whether course images exist. The gradient, decorative elements, and module number adapt to the category theme (emerald for arquitectura, blue for programación, red for ciberseguridad, violet for IA).
 
-4. **Modified `/src/app/profesor/curso/[id]/editar/page.tsx`** - Course Editor Integration
-   - Added AIAssistant component with context-aware integration
-   - "Generar con IA" buttons next to course description and topic content
-   - PDF export button in top bar
-   - Insert from AI goes into the active content field
+## Task 2: Fix Topic Page Hardcoded Emerald Colors
 
-5. **Modified `/src/app/profesor/page.tsx`** - Professor Dashboard
-   - Added "Config IA" button linking to AI settings page
+**File:** `/home/z/my-project/src/app/modulo/[moduleId]/tema/[topicId]/page.tsx`
 
-### PART B: Course PDF Export
+**Problem:** The topic page used hardcoded emerald colors throughout (37+ instances), making it only look correct for the arquitectura/emerald category. Other categories would show wrong colors.
 
-6. **`/src/app/api/export/course/[courseId]/route.ts`** - PDF Export API
-   - Fetches course with all modules, topics, and metadata
-   - Generates professional HTML with print-to-PDF capability
-   - Cover page with course branding
-   - Table of contents
-   - Module sections with topic content
-   - Markdown-to-HTML rendering
-   - Academy Tech branding
-   - Professional layout with emerald color scheme
-   - Print button (hidden during print)
+**Changes:**
 
-7. **Modified `/src/components/study-app.tsx`** - Student Course Page
-   - Added PDF download button in header
+### Imports
+1. Removed `import Image from "next/image"` (no longer needed)
+2. Removed `useRef` from React imports (unused)
+3. Added `import { useCategoryTheme, CategoryThemeProvider } from "@/components/CategoryThemeProvider"`
+4. Added `import { CategoryBackground } from "@/components/CategoryBackground"`
 
-## Technical Details
+### TopicPageWithProvider (wrapper)
+1. Added `useState` and `useEffect` to fetch the category slug from `/api/course?slug=${courseSlug}`
+2. Wrapped the entire content tree in `<CategoryThemeProvider slug={categorySlug} animated={true}>` so all child components can access the theme context
 
-- AI API key stored ONLY in localStorage (browser-only), never sent to server or database
-- Streaming SSE for real-time AI response display
-- Provider routing: OpenAI (gpt-4o, gpt-4o-mini, gpt-4-turbo), Anthropic (claude-sonnet-4, claude-3-haiku), Google (gemini-2.0-flash, gemini-1.5-pro)
-- PDF generation uses HTML-to-print approach with professional CSS styling
-- All text in Spanish
-- Lint and build pass successfully
----
-Task ID: 2
-Agent: main
-Task: Create complete courses for Academy Tech app
+### TopicNotes component
+1. Added `const { theme } = useCategoryTheme(); const tw = theme.tailwind;`
+2. Replaced `text-emerald-500 dark:text-emerald-400` on PenLine icon with `${tw.text} ${tw.textDark}`
+3. Replaced `text-emerald-500/70 dark:text-emerald-400/70` on saved indicator with `${tw.text} ${tw.textDark} opacity-70`
+4. Replaced `focus:border-emerald-500/30 focus:ring-1 focus:ring-emerald-500/15` on textarea with `${tw.border} ${tw.borderDark} focus:ring-1 ${tw.bg} ${tw.bgDark}`
 
-Work Log:
-- Created 4 comprehensive seed scripts for each category
-- prisma/seed-arquitectura.ts: Diseño Arquitectónico con BIM (6 modules, 26 topics with rich content)
-- prisma/seed-programacion.ts: Desarrollo Web Completo HTML/CSS/JS (6 modules, 24 topics with rich content)
-- prisma/seed-ciberseguridad.ts: Fundamentos de Ciberseguridad y Ethical Hacking (6 modules, 24 topics with rich content)
-- prisma/seed-ia.ts: Inteligencia Artificial Fundamentos a Práctica (6 modules, 25 topics with rich content)
-- Added npm scripts: seed:arquitectura, seed:programacion, seed:ciberseguridad, seed:ia, seed:all-courses
-- Created API endpoint POST /api/seed-courses (admin only) for seeding from production
-- Pushed each course as separate commit: 7484d5b, 6a1eee5, b6c8d43, d86bb1e, 5ce04e6
+### CodeSandboxSection component
+1. Added `const { theme } = useCategoryTheme(); const tw = theme.tailwind;`
+2. Replaced `border-emerald-500/15` with `${tw.border} ${tw.borderDark}`
+3. Replaced `text-emerald-500 dark:text-emerald-400` on Code2 icon with `${tw.text} ${tw.textDark}`
+4. Replaced `bg-emerald-600 hover:bg-emerald-500` button with `${tw.button}`
 
-Stage Summary:
-- 4 complete courses created with full educational content (99+ topics total)
-- Each topic has rich text content (not just names)
-- API endpoint allows seeding from production without CLI access
-- All pushed to GitHub on main branch
-- User needs to deploy and then call POST /api/seed-courses to populate the database
+### Suspense fallback
+1. Replaced `border-emerald-500` spinner with `border-gray-400` (neutral, since no theme context is available yet)
 
----
+### TopicPageContent - All emerald replacements
+1. Added `const { theme } = useCategoryTheme(); const tw = theme.tailwind;`
+2. Added `<CategoryBackground />` component to the page layout
+3. Loading spinner: replaced `border-emerald-500` with `style={{ borderColor: theme.primaryColor, borderTopColor: 'transparent' }}`
+4. Error state button: replaced `bg-emerald-600 hover:bg-emerald-500` with `${tw.button}`
+5. Not-found state button: replaced `bg-emerald-600 hover:bg-emerald-500` with `${tw.button}`
+6. Replaced background decorative circles (`bg-emerald-500/5`, `bg-emerald-500/3`) with `<CategoryBackground />` component
+7. Breadcrumb nav: replaced `hover:text-emerald-500 dark:hover:text-emerald-400` with `${tw.text} ${tw.textDark} hover:opacity-80`
+8. Breadcrumb current item: replaced `text-emerald-500 dark:text-emerald-400` with `${tw.text} ${tw.textDark}`
+9. Hero banner: replaced Image component + emerald gradient with category-themed gradient approach (decorative circles, module number overlay, gradient fade, themed bottom border)
+10. Module badge: replaced `bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20` with `${tw.badge} ${tw.badgeDark} border`
+11. Difficulty badge (basico): replaced emerald with `${tw.badge} ${tw.badgeDark} border`
+12. Completed badge: replaced `bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/30` with `${tw.iconBg} ${tw.iconBgDark} ${tw.text} ${tw.textDark} border`
+13. Objective text: replaced `text-emerald-600/80 dark:text-emerald-400/80` with `${tw.text} ${tw.textDark} opacity-80`
+14. BookmarkCheck icon: replaced `text-emerald-500 dark:text-emerald-400` with `${tw.text} ${tw.textDark}`
+15. Checkbox: replaced `data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500` with conditional `style` prop using `theme.primaryColor`
+16. All section icons (BookOpen, Lightbulb, ListChecks, Eye, ExternalLink): replaced emerald colors with `${tw.text} ${tw.textDark}`
+17. Code badge: replaced emerald with `${tw.badge} ${tw.badgeDark} border`
+18. Key points numbering: replaced `bg-emerald-500/15 text-emerald-600 dark:text-emerald-400` with `${tw.bg} ${tw.bgDark} ${tw.text} ${tw.textDark}`
+19. Steps timeline line: replaced `bg-emerald-500/20` with `${tw.border} ${tw.borderDark}`
+20. Steps numbering: replaced `bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20` with `${tw.iconBg} ${tw.iconBgDark} ${tw.text} ${tw.textDark}`
+21. Practice section border: replaced `border-emerald-500/10` with `${tw.border} ${tw.borderDark}`
+22. Resources links: replaced `text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300` with `${tw.text} ${tw.textDark} hover:opacity-80`
+23. Navigation dots: replaced `bg-emerald-500 dark:bg-emerald-400` (current) with `${tw.button} text-white`, replaced `bg-emerald-500/50` (completed) with `${tw.bg} ${tw.bgDark}`
+24. Navigation buttons: replaced `bg-emerald-600 hover:bg-emerald-500` with `${tw.button}`
 
-Task ID: 1
-Agent: main
-Task: Refactor Academy Tech learning platform to make courses dynamic instead of hardcoded
-
-## Summary
-Refactored the "Academy Tech" learning platform so that courses load dynamically from the database instead of using hardcoded D5 Render curriculum data. Previously, only the D5 Render course worked because curriculum data was hardcoded in `src/lib/curriculum.ts`. Now all courses (BIM, Web Dev, Ciberseguridad, IA) can load their modules and topics from the database via a new API endpoint and React context.
-
-## Files Created
-
-1. **`/src/app/api/curriculum/route.ts`** - New API endpoint
-   - GET `/api/curriculum?slug=<course-slug>` returns full curriculum for any course
-   - For D5 Render: uses hardcoded `curriculum.ts` data (with quiz) + merges DB content
-   - For other courses: builds curriculum from DB (Course -> Module -> Topic)
-   - Module IDs follow `modulo-{number}` pattern for compatibility with existing key system
-   - Public endpoint (no auth required)
-
-2. **`/src/hooks/use-curriculum.tsx`** - React context + hook
-   - `CurriculumProvider` component wraps app sections with curriculum data
-   - `useCurriculum()` hook provides: modules, courseId, courseTitle, courseDescription, isLoading, error, getTopicContentFromDB
-   - `getTopicContentFromDB()`: for D5 Render checks hardcoded topic-content.ts first then falls back to DB; for other courses uses DB content field
-   - Supports structured JSON content and plain text content from DB
-   - Global cache prevents re-fetching on navigation
-   - Exported `TopicInfoWithContent` and `ModuleWithContent` extended interfaces
-
-3. **`/src/components/curriculum-provider.tsx`** - Wrapper component
-   - `CurriculumWrapper` component that wraps course pages with CurriculumProvider
-   - Re-exports useCurriculum for convenience
-
-## Files Modified
-
-4. **`/src/components/study-app.tsx`**
-   - Removed `import { modules } from "@/lib/curriculum"`
-   - Added `import { useCurriculum } from "@/hooks/use-curriculum"`
-   - Uses `const { modules, isLoading, courseTitle, courseDescription } = useCurriculum()`
-   - Added loading spinner state while curriculum is being fetched
-   - Dynamic courseName/courseDescription from API data
-   - Moved hooks (useCategoryTheme, useAchievementChecker) before early return to comply with React hooks rules
-
-5. **`/src/app/modulo/[moduleId]/tema/[topicId]/page.tsx`**
-   - Removed `import { modules } from "@/lib/curriculum"` and `import { getTopicContent } from "@/lib/topic-content"`
-   - Uses `const { modules, getTopicContentFromDB, isLoading } = useCurriculum()`
-   - Added loading spinner state while curriculum loads
-   - getTopicContentFromDB replaces direct getTopicContent call
-   - "Tema no encontrado" fallback still works when module/topic not found
-
-6. **`/src/hooks/use-course-data.ts`**
-   - Removed `import { modules } from "@/lib/curriculum"`
-   - Added `import { useCurriculum } from "@/hooks/use-curriculum"`
-   - `const { modules } = useCurriculum()` provides dynamic modules
-   - All computed helpers (getModuleProgress, getOverallProgress, getBookmarkedTopics, etc.) now use dynamic modules
-
-7. **`/src/app/curso/[slug]/page.tsx`**
-   - Added `import { CurriculumWrapper } from "@/components/curriculum-provider"`
-   - Wraps children with `<CurriculumWrapper courseSlug={slug}>` outside CourseDataProvider
-
-8. **`/src/app/layout.tsx`**
-   - Added `import { CurriculumProvider } from "@/hooks/use-curriculum"`
-   - Root layout wraps everything in `<CurriculumProvider courseSlug="d5-render">` as default
-   - Course pages override with their own CurriculumProvider via CurriculumWrapper
-
-9. **`/src/components/progress-overview.tsx`**
-   - Removed `import { modules } from "@/lib/curriculum"`
-   - Added `import { useCurriculum } from "@/hooks/use-curriculum"`
-   - Uses `const { modules } = useCurriculum()` for dynamic stats
-
-## Files NOT Modified (intentionally)
-
-- `src/lib/curriculum.ts` - Kept as-is, still used by D5 Render API route for quiz data
-- `src/lib/topic-content.ts` - Kept as-is, still used for D5 Render topic content
-- `src/app/buscar/page.tsx` - D5 Render specific search, keeps hardcoded modules
-- `src/app/marcadores/page.tsx` - D5 Render specific bookmarks, keeps hardcoded modules
-- `src/components/module-card.tsx` - Only imports types (Module, TopicInfo), not runtime data
-- `src/components/quiz-dialog.tsx` - Only imports types (Module, QuizQuestion), not runtime data
-
-## Key Design Decisions
-
-1. **Backward Compatibility**: D5 Render course works exactly as before - hardcoded quiz data and topic content are preserved
-2. **Module ID Convention**: All modules use `modulo-{number}` ID pattern to maintain compatibility with existing key system
-3. **Content Rendering**: DB content can be structured JSON or plain text - both are handled
-4. **Caching**: Global cache by slug prevents redundant API calls during navigation
-5. **Root Provider**: Default CurriculumProvider in root layout ensures topic pages always have access to curriculum data
+**Result:** The topic page now fully adapts to the category theme. All 37+ emerald color references have been replaced with dynamic theme classes. The page correctly shows emerald/green for arquitectura, blue for programación, red for ciberseguridad, and violet for IA courses.
 
 ## Build Verification
-
-- `bun run lint` passes (only pre-existing errors remain)
-- `next build` succeeds with no new errors
-- All existing functionality preserved for D5 Render
+- Ran `unset DATABASE_URL && npx next build` - **PASSED** with no errors
+- All routes compiled successfully
 
 ---
 
-Task ID: AT-012
-Agent: main
-Task: Fix "temas no encontrados" errors and improve non-D5 course experience
+## Task 3: Enrich Non-D5 Course Topic Content
 
-Work Log:
-- Investigated `/api/topic/0` 400 error - NO `/api/topic` route exists, errors come from topic page
-- Verified database: 164 topics, 34 modules, 5 courses, all published
-- Found duplicate category: `ia` and `inteligencia-artificial` both mapping to "Inteligencia Artificial"
-- Fixed StudyApp: added error state (instead of infinite loading) when curriculum fetch fails
-- Fixed StudyApp: added empty state when course has no modules
-- Fixed StudyApp: added course names/descriptions for all 5 courses (was only D5 Render)
-- Fixed Topic page: hide empty sections (keyPoints, steps, practice) instead of showing blank cards
-- Fixed Topic page: added error state when curriculum fails
-- Fixed Topic page: added gradient fallback for module hero images
-- Fixed Module card: added gradient fallback when module images don't exist
-- Fixed Curriculum API: require slug parameter (was defaulting to "d5-render" silently)
-- Fixed Curriculum API: safe JSON.parse for attachments field
-- Fixed Curriculum hook: auto-generate keyPoints from content sentences + auto-generate practice text
-- Fixed Category themes: added `inteligencia-artificial` as alias for `ia`
-- Fixed Category themes: added slug mapping for name lookup
-- Fixed Seed courses: changed categorySlug from `inteligencia-artificial` to `ia`
-- Deleted duplicate `inteligencia-artificial` category from database
-- Build passes successfully
-- Pushed to GitHub: commit a31a9ee
+**Date:** 2026-03-05
 
-Stage Summary:
-- 6 bugs fixed in 7 files
-- Non-D5 courses now show rich content with auto-generated keyPoints and practice exercises
-- Error states prevent infinite loading when API fails
-- Module images gracefully degrade to category-themed gradients
-- Duplicate category cleaned up in database
-- User still needs to configure DATABASE_URL in Vercel environment variables
+**Problem:** The 4 non-D5 courses had topic content fields with very short text (about 85-300 chars each), just brief summaries. The D5 Render course had rich, detailed JSON content with explanation, keyPoints, steps, practice, and extraResources sections. The non-D5 courses needed the same level of detail.
+
+**Courses affected:**
+1. "Diseño Arquitectónico con BIM" (slug: diseno-arquitectonico-bim, 6 modules, 26 topics)
+2. "Desarrollo Web Completo: HTML, CSS y JavaScript" (slug: desarrollo-web-completo, 6 modules, 27 topics)
+3. "Fundamentos de Ciberseguridad y Ethical Hacking" (slug: fundamentos-ciberseguridad, 6 modules, 26 topics)
+4. "Inteligencia Artificial: De los Fundamentos a la Práctica" (slug: introduccion-inteligencia-artificial, 6 modules, 25 topics)
+
+**Solution:** Created a Node.js script (`scripts/enrich-content.js`) that:
+1. Reads all topics from each non-D5 course via Prisma Client
+2. Parses the original seed TypeScript files to extract the long-form content that was written during seeding but got truncated in the database
+3. For topics with seed content available, builds structured JSON from the rich seed content
+4. For topics without seed content, generates comprehensive generic content based on the topic name, module context, and course context
+5. Updates the database with enriched JSON content following the required structure
+
+**Script details:**
+- Handles the DATABASE_URL env var issue (system has wrong SQLite URL, needs PostgreSQL from .env)
+- Loads DATABASE_URL manually from .env file
+- Uses Prisma Client for all database operations
+- Includes hand-crafted detailed content for 9 key BIM topics
+- Parses seed TS files using regex to extract topic name → content mapping
+- Generates course-specific content with appropriate resources, keyPoints, steps, and practice exercises
+- Validates minimum requirements (5+ keyPoints, 3+ steps, 2+ extraResources)
+
+**Content structure (JSON):**
+```json
+{
+  "explanation": "Detailed explanation (383-518 words per topic)",
+  "keyPoints": ["Point 1", "Point 2", "Point 3", "Point 4", "Point 5", "Point 6"],
+  "steps": [
+    {"title": "Step title", "description": "Step description", "tip": "Optional tip"},
+    ...
+  ],
+  "practice": "Actionable practice exercise",
+  "extraResources": [
+    {"label": "Resource name", "url": "https://example.com"},
+    ...
+  ]
+}
+```
+
+**Results:**
+- Total topics updated: 104
+- Errors: 0
+- All topics have valid JSON structure
+- Word count range: 383-518 words per explanation
+- All topics have 5-6 keyPoints, 3-5 steps, actionable practice, and 2-3 extraResources
+- Content is in Spanish as required
+- Resources are course-appropriate (BIM → Autodesk/buildingSMART, Web → MDN/W3Schools, Cyber → OWASP/NIST, IA → PapersWithCode/Kaggle)
+
+**Verification performed:**
+- Spot-checked topics from each course to verify JSON structure
+- Confirmed all 104 topics have good structure
+- Confirmed no topics below 300 words
+- Verified resource URLs are course-appropriate
+- Verified practice exercises are actionable and specific
