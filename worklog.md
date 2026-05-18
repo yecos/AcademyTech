@@ -114,3 +114,29 @@ export default function SomePage() {
 - Build passed successfully (`npx next build`)
 - No remaining hardcoded `/curso/d5-render` navigation links in the 9 specified files
 - Only remaining `d5-render` references are in the topic page as acceptable fallback defaults
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Create comprehensive improvement plan for Academy Tech platform production readiness
+
+Work Log:
+- Reviewed entire Prisma schema (14 models: Account, Session, VerificationToken, User, Category, Course, Module, Topic, Enrollment, UserProgress, QuizResult, UserNote, Bookmark, UserAchievement, UserStreak)
+- Reviewed all existing pages: Home, Login, Profile, Course/[slug], Category/[slug], Module/Topic, Admin, Professor, Certificado, Logros, Marcadores, Buscar, Glosario, Atajos, Comparar, Soluciones
+- Reviewed all components: Sidebar, TopBar, StudyApp, ModuleCard, QuizDialog, CategoryThemeProvider, CategoryBackground, AIAssistant, CodeSandbox, ProgressOverview
+- Reviewed category theme system (4 hardcoded themes: arquitectura=emerald, programacion=blue, ciberseguridad=red, ia=violet)
+- Identified critical gaps: no input validation, no rate limiting, no monetization, no reviews, no notifications, no verifiable certificates, hardcoded certificate text, no rich text editor, no image upload, no dynamic themes
+- Designed new database schema with 6 new models: CourseReview, Notification, Certificate, Payment, AuditLog, Coupon
+- Designed schema changes for 8 existing models (User, Category, Course, Topic, Module, Enrollment, QuizResult, UserStreak)
+- Identified 12 recommended composite indexes for query optimization
+- Created 6-phase improvement plan spanning 22 weeks
+- Generated professional PDF document with ReportLab (16 pages, 99KB)
+
+Stage Summary:
+- Produced: /home/z/my-project/download/Plan_Mejoramiento_Academy_Tech.pdf (16 pages)
+- Phase 1 (Weeks 1-3): Security & Quality - Zod validation, rate limiting, sanitization, audit logs
+- Phase 2 (Weeks 4-6): Student Experience - notifications, reviews, verifiable certificates, dynamic themes
+- Phase 3 (Weeks 7-9): Monetization - Stripe, pricing model, coupons, payment flow
+- Phase 4 (Weeks 10-13): Content Tools - rich text editor, image upload, dynamic quizzes, discussions
+- Phase 5 (Weeks 14-16): Scalability - Redis cache, ISR, query optimization, CI/CD, E2E tests
+- Phase 6 (Weeks 17-22): Advanced - learning paths, recommendations, gamification, i18n, emails
