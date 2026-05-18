@@ -162,7 +162,7 @@ export default function MarcadoresPage() {
                               <button
                                 onClick={() =>
                                   router.push(
-                                    `/modulo/${topic.moduleId}/tema/${topic.topicIndex}`
+                                    `/modulo/${topic.moduleId}/tema/${topic.topicIndex}?course=d5-render`
                                   )
                                 }
                                 className="flex-1 flex items-center gap-3 text-left min-w-0"

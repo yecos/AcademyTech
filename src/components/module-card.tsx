@@ -24,7 +24,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Module, TopicInfo } from "@/lib/curriculum";
-import { useCourse } from "@/hooks/use-course-context";
+import { useCourse, useCourseSlug } from "@/hooks/use-course-context";
 import { useCategoryTheme } from "@/components/CategoryThemeProvider";
 
 interface ModuleCardProps {
@@ -36,6 +36,7 @@ interface ModuleCardProps {
 export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
   const router = useRouter();
   const course = useCourse();
+  const courseSlug = useCourseSlug();
   const { theme } = useCategoryTheme();
   const tw = theme.tailwind;
 
@@ -173,7 +174,7 @@ export function ModuleCard({ module, index, onEvaluar }: ModuleCardProps) {
                     />
                     <button
                       onClick={() =>
-                        router.push(`/modulo/${module.id}/tema/${topicIndex}`)
+                        router.push(`/modulo/${module.id}/tema/${topicIndex}?course=${courseSlug}`)
                       }
                       className={`flex-1 flex items-center gap-1 text-left cursor-pointer transition-colors ${
                         checked

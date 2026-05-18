@@ -10,11 +10,12 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useCourse } from "@/hooks/use-course-context";
-import { modules } from "@/lib/curriculum";
+import { useCurriculum } from "@/hooks/use-curriculum";
 import { useCategoryTheme } from "@/components/CategoryThemeProvider";
 
 export function ProgressOverview() {
   const course = useCourse();
+  const { modules } = useCurriculum();
   const { theme } = useCategoryTheme();
   const tw = theme.tailwind;
 

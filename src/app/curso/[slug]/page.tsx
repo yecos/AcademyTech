@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { StudyApp } from "@/components/study-app";
 import { CourseDataProvider } from "@/hooks/use-course-context";
+import { CurriculumWrapper } from "@/components/curriculum-provider";
 import { CategoryThemeProvider } from "@/components/CategoryThemeProvider";
 import { getCategoryTheme, DEFAULT_THEME, CategoryTheme } from "@/lib/category-themes";
 
@@ -34,9 +35,11 @@ export default function CoursePage() {
 
   return (
     <CategoryThemeProvider slug={categorySlug} animated={true}>
-      <CourseDataProvider courseSlug={slug}>
-        <StudyApp />
-      </CourseDataProvider>
+      <CurriculumWrapper courseSlug={slug}>
+        <CourseDataProvider courseSlug={slug}>
+          <StudyApp />
+        </CourseDataProvider>
+      </CurriculumWrapper>
     </CategoryThemeProvider>
   );
 }

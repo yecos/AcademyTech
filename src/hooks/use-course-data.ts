@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useStudyStore } from "@/lib/store";
-import { modules } from "@/lib/curriculum";
+import { Module } from "@/lib/curriculum";
+import { useCurriculum } from "@/hooks/use-curriculum";
 import { achievements as achievementDefs } from "@/lib/achievements";
 
 // Types for course data
@@ -66,6 +67,7 @@ export function useCourseData(courseSlug: string = "d5-render"): CourseData {
   const { status } = useSession();
   const isAuthenticated = status === "authenticated";
   const store = useStudyStore();
+  const { modules } = useCurriculum();
 
   // State for DB-backed data
   const [dbData, setDbData] = useState<{

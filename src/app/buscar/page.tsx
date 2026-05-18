@@ -499,7 +499,7 @@ function BuscarContent() {
                           transition={{ duration: 0.3, delay: index * 0.03 }}
                           onClick={() =>
                             router.push(
-                              `/modulo/${topic.moduleId}/tema/${topic.topicIndex}`
+                              `/modulo/${topic.moduleId}/tema/${topic.topicIndex}?course=d5-render`
                             )
                           }
                           className="glass-card glass-card-hover rounded-xl p-4 cursor-pointer transition-all duration-300"

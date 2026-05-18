@@ -22,7 +22,8 @@ import {
   ArrowLeft,
   Download,
 } from "lucide-react";
-import { modules, Module } from "@/lib/curriculum";
+import { Module } from "@/lib/curriculum";
+import { useCurriculum } from "@/hooks/use-curriculum";
 import { useCourse, useCourseSlug } from "@/hooks/use-course-context";
 import { ProgressOverview } from "@/components/progress-overview";
 import { ModuleCard } from "@/components/module-card";
@@ -60,20 +61,33 @@ export function StudyApp() {
   const [quizOpen, setQuizOpen] = useState(false);
   const course = useCourse();
   const courseSlug = useCourseSlug();
+  const { modules, isLoading: curriculumLoading, courseTitle, courseDescription: curriculumDescription } = useCurriculum();
   const resetAll = course.resetAll;
   const overallProgress = course.getOverallProgress();
   const currentStreak = course.streak.current;
   const unlockedCount = course.getUnlockedCount();
 
-  const courseName = courseNames[courseSlug] || courseSlug;
-  const courseDescription = courseDescriptions[courseSlug] || "Sigue tu progreso y completa los temas del curso.";
-
-  // Get category theme
+  // Get category theme - must be called before any early return (hooks rules)
   const { theme } = useCategoryTheme();
   const tw = theme.tailwind;
 
   // Initialize achievement checker (runs streak check + achievement checks + toasts)
   useAchievementChecker();
+
+  const courseName = courseTitle || courseNames[courseSlug] || courseSlug;
+  const courseDescription = curriculumDescription || courseDescriptions[courseSlug] || "Sigue tu progreso y completa los temas del curso.";
+
+  // Show loading state while curriculum is being fetched
+  if (curriculumLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center transition-colors duration-300">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Cargando curso...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleEvaluar = (module: Module) => {
     setQuizModule(module);

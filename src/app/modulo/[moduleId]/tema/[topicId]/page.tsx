@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -25,9 +25,8 @@ import {
   ExternalLink,
   Code2,
 } from "lucide-react";
-import { modules } from "@/lib/curriculum";
-import { getTopicContent } from "@/lib/topic-content";
-import { useCourse, useCourseSlug } from "@/hooks/use-course-context";
+import { useCurriculum, CurriculumProvider } from "@/hooks/use-curriculum";
+import { useCourse, useCourseSlug, CourseDataProvider } from "@/hooks/use-course-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import {
@@ -213,23 +212,66 @@ function CodeSandboxSection() {
 }
 
 export default function TopicPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Cargando tema...</p>
+        </div>
+      </div>
+    }>
+      <TopicPageWithProvider />
+    </Suspense>
+  );
+}
+
+// Wrapper that provides the correct curriculum based on the course query param
+function TopicPageWithProvider() {
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course") || "d5-render";
+
+  return (
+    <CurriculumProvider courseSlug={courseSlug}>
+      <CourseDataProvider courseSlug={courseSlug}>
+        <TopicPageContent courseSlug={courseSlug} />
+      </CourseDataProvider>
+    </CurriculumProvider>
+  );
+}
+
+function TopicPageContent({ courseSlug }: { courseSlug: string }) {
   const params = useParams();
   const router = useRouter();
   const moduleId = params.moduleId as string;
   const topicIndex = parseInt(params.topicId as string, 10);
-  const courseSlug = useCourseSlug();
+
+  // Use the course slug from the query param to get the right curriculum
+  const { modules, getTopicContentFromDB, isLoading: curriculumLoading, courseTitle } = useCurriculum();
 
   // Build course URL prefix based on slug
   const courseUrl = `/curso/${courseSlug}`;
 
   const moduleData = modules.find((m) => m.id === moduleId);
-  const content = getTopicContent(moduleId, topicIndex);
+  const content = getTopicContentFromDB(moduleId, topicIndex);
 
   const course = useCourse();
   const toggleTopic = course.toggleProgress;
   const isCompleted = course.isTopicCompleted(moduleId, topicIndex);
   const toggleBookmark = course.toggleBookmark;
   const bookmarked = course.isBookmarked(moduleId, topicIndex);
+
+  // Show loading state while curriculum is being fetched
+  if (curriculumLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center transition-colors duration-300">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Cargando tema...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (
     !moduleData ||
@@ -264,10 +306,10 @@ export default function TopicPage() {
   const hasNext = topicIndex < totalTopics - 1;
 
   const prevPath = hasPrev
-    ? `/modulo/${moduleId}/tema/${topicIndex - 1}`
+    ? `/modulo/${moduleId}/tema/${topicIndex - 1}?course=${courseSlug}`
     : null;
   const nextPath = hasNext
-    ? `/modulo/${moduleId}/tema/${topicIndex + 1}`
+    ? `/modulo/${moduleId}/tema/${topicIndex + 1}?course=${courseSlug}`
     : null;
 
   const notesKey = `${moduleId}-${topicIndex}`;
@@ -301,7 +343,7 @@ export default function TopicPage() {
               onClick={() => router.push(courseUrl)}
               className="hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
             >
-              {courseSlug === "d5-render" ? "D5 Render" : courseSlug}
+              {courseTitle || (courseSlug === "d5-render" ? "D5 Render" : courseSlug)}
             </button>
             <ChevronRight className="w-3 h-3" />
             <span className="text-gray-400 dark:text-gray-500">
@@ -336,6 +378,10 @@ export default function TopicPage() {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 896px"
             priority
+            onError={(e) => {
+              // Fallback: hide image if not found, show gradient only
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/40 to-transparent dark:from-zinc-950 dark:via-zinc-950/40 dark:to-transparent" />
         </motion.div>
@@ -644,7 +690,7 @@ export default function TopicPage() {
               <button
                 key={i}
                 onClick={() =>
-                  router.push(`/modulo/${moduleId}/tema/${i}`)
+                  router.push(`/modulo/${moduleId}/tema/${i}?course=${courseSlug}`)
                 }
                 className={`w-2.5 h-2.5 rounded-full transition-all ${
                   i === topicIndex
