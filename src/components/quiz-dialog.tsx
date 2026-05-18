@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Module, QuizQuestion } from "@/lib/curriculum";
 import { useCourse } from "@/hooks/use-course-context";
+import { useCategoryTheme } from "@/components/CategoryThemeProvider";
 
 interface QuizDialogProps {
   module: Module;
@@ -43,6 +44,8 @@ export function QuizDialog({
   const [score, setScore] = useState(0);
 
   const course = useCourse();
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
 
   const questions = module.quiz;
   const totalQuestions = questions.length;
@@ -86,7 +89,7 @@ export function QuizDialog({
   const percentage = Math.round((score / totalQuestions) * 100);
 
   const getScoreColor = () => {
-    if (percentage >= 80) return "text-emerald-500 dark:text-emerald-400";
+    if (percentage >= 80) return `${tw.text} ${tw.textDark}`;
     if (percentage >= 60) return "text-amber-500 dark:text-amber-400";
     return "text-red-500 dark:text-red-400";
   };
@@ -103,7 +106,7 @@ export function QuizDialog({
       <DialogContent className="max-w-lg bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-gray-200 dark:border-white/10 text-gray-900 dark:text-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Award className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <Award className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
             Evaluación: {module.title}
           </DialogTitle>
           <DialogDescription className="text-gray-500 dark:text-gray-400">
@@ -130,9 +133,9 @@ export function QuizDialog({
                     key={i}
                     className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
                       i === currentQuestion
-                        ? "bg-emerald-500 dark:bg-emerald-400"
+                        ? tw.progress
                         : answers[questions[i].id]
-                          ? "bg-emerald-500/40 dark:bg-emerald-400/40"
+                          ? `${tw.bg} ${tw.bgDark}`
                           : "bg-gray-200 dark:bg-white/10"
                     }`}
                   />
@@ -162,14 +165,14 @@ export function QuizDialog({
                         htmlFor={`${currentQ.id}-${option.label}`}
                         className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border ${
                           answers[currentQ.id] === option.label
-                            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+                            ? `${tw.bg} ${tw.bgDark} ${tw.border} ${tw.borderDark} ${tw.text} ${tw.textDark}`
                             : "bg-gray-50 dark:bg-white/3 border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-white/10"
                         }`}
                       >
                         <RadioGroupItem
                           value={option.label}
                           id={`${currentQ.id}-${option.label}`}
-                          className="border-gray-300 dark:border-white/20 text-emerald-500 dark:text-emerald-400"
+                          className={`border-gray-300 dark:border-white/20 ${tw.text} ${tw.textDark}`}
                         />
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                           {option.label})
@@ -209,7 +212,7 @@ export function QuizDialog({
                       )
                     }
                     disabled={!answers[currentQ.id]}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white"
+                    className={`${tw.button} text-white`}
                   >
                     Siguiente
                     <ChevronRight className="w-4 h-4 ml-1" />
@@ -219,7 +222,7 @@ export function QuizDialog({
                     size="sm"
                     onClick={handleSubmit}
                     disabled={!isAllAnswered}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white"
+                    className={`${tw.button} text-white`}
                   >
                     <Trophy className="w-4 h-4 mr-1.5" />
                     Enviar Evaluación
@@ -246,9 +249,9 @@ export function QuizDialog({
                     damping: 15,
                     delay: 0.2,
                   }}
-                  className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/15 mb-3"
+                  className={`inline-flex items-center justify-center w-20 h-20 rounded-full ${tw.bg} ${tw.bgDark} mb-3`}
                 >
-                  <Trophy className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
+                  <Trophy className={`w-10 h-10 ${tw.text} ${tw.textDark}`} />
                 </motion.div>
                 <div className={`text-4xl font-bold ${getScoreColor()} mb-1`}>
                   {score}/{totalQuestions}
@@ -328,7 +331,7 @@ export function QuizDialog({
                 <Button
                   size="sm"
                   onClick={() => handleOpenChange(false)}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white"
+                  className={`flex-1 ${tw.button} text-white`}
                 >
                   Cerrar
                 </Button>

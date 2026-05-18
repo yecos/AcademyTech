@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useRef, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -21,8 +21,12 @@ import { useSession } from "next-auth/react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
-export default function CertificadoPage() {
+function CertificadoContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course");
+  const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+
   const certificateRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -70,7 +74,7 @@ export default function CertificadoPage() {
       });
 
       const link = document.createElement("a");
-      link.download = `certificado-d5-render-${displayName.replace(/\s+/g, "-").toLowerCase()}.png`;
+      link.download = `certificado-${courseSlug || "curso"}-${displayName.replace(/\s+/g, "-").toLowerCase()}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch {
@@ -79,7 +83,7 @@ export default function CertificadoPage() {
     } finally {
       setIsDownloading(false);
     }
-  }, [displayName]);
+  }, [displayName, courseSlug]);
 
   // Auto-set completion date if 100% but no date
   if (isComplete && !completionDate) {
@@ -101,7 +105,7 @@ export default function CertificadoPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/curso/d5-render")}
+            onClick={() => router.push(backUrl)}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -182,7 +186,7 @@ export default function CertificadoPage() {
               </div>
 
               <Button
-                onClick={() => router.push("/curso/d5-render")}
+                onClick={() => router.push(backUrl)}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
               >
                 <BookOpen className="w-4 h-4" />
@@ -340,5 +344,32 @@ export default function CertificadoPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function CertificadoFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
+      </div>
+      <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-pulse flex items-center gap-2 text-gray-400">
+            <Award className="w-5 h-5" />
+            <span className="text-sm">Cargando certificado...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function CertificadoPage() {
+  return (
+    <Suspense fallback={<CertificadoFallback />}>
+      <CertificadoContent />
+    </Suspense>
   );
 }

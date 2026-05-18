@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -302,8 +302,12 @@ function ScoreBar({
 
 type TabKey = "tabla" | "detalles" | "puntuacion";
 
-export default function CompararPage() {
+function CompararContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course");
+  const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+
   const [activeTab, setActiveTab] = useState<TabKey>("tabla");
 
   const tabs: { key: TabKey; label: string; icon: typeof BarChart3 }[] = [
@@ -344,7 +348,7 @@ export default function CompararPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/curso/d5-render")}
+            onClick={() => router.push(backUrl)}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -688,5 +692,32 @@ export default function CompararPage() {
         </motion.footer>
       </div>
     </div>
+  );
+}
+
+function CompararFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
+      </div>
+      <div className="relative max-w-6xl mx-auto px-4 py-8 sm:px-6">
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-pulse flex items-center gap-2 text-gray-400">
+            <GitCompare className="w-5 h-5" />
+            <span className="text-sm">Cargando comparación...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function CompararPage() {
+  return (
+    <Suspense fallback={<CompararFallback />}>
+      <CompararContent />
+    </Suspense>
   );
 }

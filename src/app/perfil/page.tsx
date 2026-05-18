@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,8 +24,12 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { useCourse } from "@/hooks/use-course-context";
 
-export default function PerfilPage() {
+function PerfilContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course");
+  const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+
   const { user, isAuthenticated, isLoading, isGuest, logout } = useAuth();
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState(user?.name || "");
@@ -116,7 +120,7 @@ export default function PerfilPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/curso/d5-render")}
+            onClick={() => router.push(backUrl)}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -421,5 +425,21 @@ export default function PerfilPage() {
         </motion.footer>
       </div>
     </div>
+  );
+}
+
+function PerfilFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full" />
+    </div>
+  );
+}
+
+export default function PerfilPage() {
+  return (
+    <Suspense fallback={<PerfilFallback />}>
+      <PerfilContent />
+    </Suspense>
   );
 }

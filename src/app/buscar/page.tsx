@@ -258,6 +258,8 @@ function performSearch(query: string): {
 function BuscarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course");
+  const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
   const initialQuery = searchParams.get("q") || "";
 
   const [query, setQuery] = useState(initialQuery);
@@ -307,7 +309,7 @@ function BuscarContent() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/curso/d5-render")}
+            onClick={() => router.push(backUrl)}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -499,7 +501,7 @@ function BuscarContent() {
                           transition={{ duration: 0.3, delay: index * 0.03 }}
                           onClick={() =>
                             router.push(
-                              `/modulo/${topic.moduleId}/tema/${topic.topicIndex}?course=d5-render`
+                              `/modulo/${topic.moduleId}/tema/${topic.topicIndex}${courseSlug ? `?course=${courseSlug}` : ""}`
                             )
                           }
                           className="glass-card glass-card-hover rounded-xl p-4 cursor-pointer transition-all duration-300"

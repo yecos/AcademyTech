@@ -1,149 +1,116 @@
-# Worklog: UI Improvements - Module Cards & Topic Page Theme
+# Worklog: Fix Hardcoded d5-render Navigation Links
 
-## Date: 2025-03-04
+**Date:** 2024-03-05
+**Issue:** 9 pages had hardcoded back links pointing to `/curso/d5-render`, meaning users in BIM, Web, Cybersecurity, or IA courses would be incorrectly navigated to the D5 Render course when clicking "back".
 
-## Task 1: Fix Module Card Images
+## Summary of Changes
 
-**File:** `/home/z/my-project/src/components/module-card.tsx`
+All 9 files were updated to:
+1. Read the `course` query parameter from the URL using `useSearchParams()`
+2. Compute a dynamic `backUrl` based on the course slug (or default to `/` home page)
+3. Replace all hardcoded `/curso/d5-render` references with the dynamic URL
+4. Replace all hardcoded `?course=d5-render` in module navigation links with dynamic course slugs
+5. Wrap components using `useSearchParams()` in a `<Suspense>` boundary (Next.js requirement)
 
-**Problem:** Module card tried to load images from `/images/modules/modulo-${module.number}.png` which only exist for D5 Render course (modulo-1 through modulo-10). For other courses, broken images would flash before the `onError` handler hid them.
+## Files Modified
 
-**Changes:**
-1. Removed `import Image from "next/image"` (no longer needed)
-2. Removed unused `import { useState } from "react"`
-3. Replaced the image banner section (lines 67-82) with a category-themed gradient approach:
-   - Uses `bg-gradient-to-br ${tw.gradient}` from the category theme for the background
-   - Decorative circular border pattern overlay with `opacity-20`
-   - Large module number overlay using `String(module.number).padStart(2, '0')` in `text-white/20`
-   - Bottom gradient fade from the page background color
-   - Category-colored bottom border line using the theme gradient
+### 1. `src/app/glosario/page.tsx`
+- Added `useSearchParams` import and `Suspense` import
+- Renamed main component to `GlosarioContent`, created `GlosarioFallback` loading component
+- New export: `GlosarioPage` wrapping `GlosarioContent` in `<Suspense>`
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)`
 
-**Result:** Module cards now always look good regardless of whether course images exist. The gradient, decorative elements, and module number adapt to the category theme (emerald for arquitectura, blue for programación, red for ciberseguridad, violet for IA).
+### 2. `src/app/marcadores/page.tsx`
+- Added `useSearchParams` import and `Suspense` import
+- Renamed main component to `MarcadoresContent`, created `MarcadoresFallback` loading component
+- New export: `MarcadoresPage` wrapping `MarcadoresContent` in `<Suspense>`
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)` (2 instances)
+- Replaced `/modulo/...?course=d5-render` → `/modulo/...${courseSlug ? ?course=${courseSlug} : ""}`
 
-## Task 2: Fix Topic Page Hardcoded Emerald Colors
+### 3. `src/app/logros/page.tsx`
+- Added `useSearchParams` import and `Suspense` import
+- Renamed main component to `LogrosContent`, created `LogrosFallback` loading component
+- New export: `LogrosPage` wrapping `LogrosContent` in `<Suspense>`
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)`
 
-**File:** `/home/z/my-project/src/app/modulo/[moduleId]/tema/[topicId]/page.tsx`
+### 4. `src/app/certificado/page.tsx`
+- Added `useSearchParams` import and `Suspense` import
+- Renamed main component to `CertificadoContent`, created `CertificadoFallback` loading component
+- New export: `CertificadoPage` wrapping `CertificadoContent` in `<Suspense>`
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)` (2 instances)
+- Replaced download filename `certificado-d5-render-` → `certificado-${courseSlug || "curso"}-`
 
-**Problem:** The topic page used hardcoded emerald colors throughout (37+ instances), making it only look correct for the arquitectura/emerald category. Other categories would show wrong colors.
+### 5. `src/app/buscar/page.tsx`
+- Already had `useSearchParams()` and `<Suspense>` boundary
+- Added `courseSlug` and `backUrl` computation from searchParams
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)`
+- Replaced `/modulo/...?course=d5-render` → `/modulo/...${courseSlug ? ?course=${courseSlug} : ""}`
 
-**Changes:**
+### 6. `src/app/soluciones/page.tsx`
+- Added `useSearchParams` import and `Suspense` import
+- Renamed main component to `SolucionesContent`, created `SolucionesFallback` loading component
+- New export: `SolucionesPage` wrapping `SolucionesContent` in `<Suspense>`
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)`
 
-### Imports
-1. Removed `import Image from "next/image"` (no longer needed)
-2. Removed `useRef` from React imports (unused)
-3. Added `import { useCategoryTheme, CategoryThemeProvider } from "@/components/CategoryThemeProvider"`
-4. Added `import { CategoryBackground } from "@/components/CategoryBackground"`
+### 7. `src/app/perfil/page.tsx`
+- Added `useSearchParams` import and `Suspense` import
+- Renamed main component to `PerfilContent`, created `PerfilFallback` loading component
+- New export: `PerfilPage` wrapping `PerfilContent` in `<Suspense>`
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)`
 
-### TopicPageWithProvider (wrapper)
-1. Added `useState` and `useEffect` to fetch the category slug from `/api/course?slug=${courseSlug}`
-2. Wrapped the entire content tree in `<CategoryThemeProvider slug={categorySlug} animated={true}>` so all child components can access the theme context
+### 8. `src/app/atajos/page.tsx`
+- Added `useSearchParams` import and `Suspense` import
+- Renamed main component to `AtajosContent`, created `AtajosFallback` loading component
+- New export: `AtajosPage` wrapping `AtajosContent` in `<Suspense>`
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)`
 
-### TopicNotes component
-1. Added `const { theme } = useCategoryTheme(); const tw = theme.tailwind;`
-2. Replaced `text-emerald-500 dark:text-emerald-400` on PenLine icon with `${tw.text} ${tw.textDark}`
-3. Replaced `text-emerald-500/70 dark:text-emerald-400/70` on saved indicator with `${tw.text} ${tw.textDark} opacity-70`
-4. Replaced `focus:border-emerald-500/30 focus:ring-1 focus:ring-emerald-500/15` on textarea with `${tw.border} ${tw.borderDark} focus:ring-1 ${tw.bg} ${tw.bgDark}`
+### 9. `src/app/comparar/page.tsx`
+- Added `useSearchParams` import and `Suspense` import
+- Renamed main component to `CompararContent`, created `CompararFallback` loading component
+- New export: `CompararPage` wrapping `CompararContent` in `<Suspense>`
+- Replaced `router.push("/curso/d5-render")` → `router.push(backUrl)`
 
-### CodeSandboxSection component
-1. Added `const { theme } = useCategoryTheme(); const tw = theme.tailwind;`
-2. Replaced `border-emerald-500/15` with `${tw.border} ${tw.borderDark}`
-3. Replaced `text-emerald-500 dark:text-emerald-400` on Code2 icon with `${tw.text} ${tw.textDark}`
-4. Replaced `bg-emerald-600 hover:bg-emerald-500` button with `${tw.button}`
+## Not Modified (Acceptable Defaults)
 
-### Suspense fallback
-1. Replaced `border-emerald-500` spinner with `border-gray-400` (neutral, since no theme context is available yet)
+### `src/app/modulo/[moduleId]/tema/[topicId]/page.tsx`
+- Line 238: `const courseSlug = searchParams.get("course") || "d5-render"` — This is a fallback default for backward compatibility when no course param is in the URL. The page already uses `courseSlug` dynamically for all navigation.
+- Line 412: `courseSlug === "d5-render" ? "D5 Render" : courseSlug` — Display name fallback. Not a navigation link.
 
-### TopicPageContent - All emerald replacements
-1. Added `const { theme } = useCategoryTheme(); const tw = theme.tailwind;`
-2. Added `<CategoryBackground />` component to the page layout
-3. Loading spinner: replaced `border-emerald-500` with `style={{ borderColor: theme.primaryColor, borderTopColor: 'transparent' }}`
-4. Error state button: replaced `bg-emerald-600 hover:bg-emerald-500` with `${tw.button}`
-5. Not-found state button: replaced `bg-emerald-600 hover:bg-emerald-500` with `${tw.button}`
-6. Replaced background decorative circles (`bg-emerald-500/5`, `bg-emerald-500/3`) with `<CategoryBackground />` component
-7. Breadcrumb nav: replaced `hover:text-emerald-500 dark:hover:text-emerald-400` with `${tw.text} ${tw.textDark} hover:opacity-80`
-8. Breadcrumb current item: replaced `text-emerald-500 dark:text-emerald-400` with `${tw.text} ${tw.textDark}`
-9. Hero banner: replaced Image component + emerald gradient with category-themed gradient approach (decorative circles, module number overlay, gradient fade, themed bottom border)
-10. Module badge: replaced `bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20` with `${tw.badge} ${tw.badgeDark} border`
-11. Difficulty badge (basico): replaced emerald with `${tw.badge} ${tw.badgeDark} border`
-12. Completed badge: replaced `bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/30` with `${tw.iconBg} ${tw.iconBgDark} ${tw.text} ${tw.textDark} border`
-13. Objective text: replaced `text-emerald-600/80 dark:text-emerald-400/80` with `${tw.text} ${tw.textDark} opacity-80`
-14. BookmarkCheck icon: replaced `text-emerald-500 dark:text-emerald-400` with `${tw.text} ${tw.textDark}`
-15. Checkbox: replaced `data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500` with conditional `style` prop using `theme.primaryColor`
-16. All section icons (BookOpen, Lightbulb, ListChecks, Eye, ExternalLink): replaced emerald colors with `${tw.text} ${tw.textDark}`
-17. Code badge: replaced emerald with `${tw.badge} ${tw.badgeDark} border`
-18. Key points numbering: replaced `bg-emerald-500/15 text-emerald-600 dark:text-emerald-400` with `${tw.bg} ${tw.bgDark} ${tw.text} ${tw.textDark}`
-19. Steps timeline line: replaced `bg-emerald-500/20` with `${tw.border} ${tw.borderDark}`
-20. Steps numbering: replaced `bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20` with `${tw.iconBg} ${tw.iconBgDark} ${tw.text} ${tw.textDark}`
-21. Practice section border: replaced `border-emerald-500/10` with `${tw.border} ${tw.borderDark}`
-22. Resources links: replaced `text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300` with `${tw.text} ${tw.textDark} hover:opacity-80`
-23. Navigation dots: replaced `bg-emerald-500 dark:bg-emerald-400` (current) with `${tw.button} text-white`, replaced `bg-emerald-500/50` (completed) with `${tw.bg} ${tw.bgDark}`
-24. Navigation buttons: replaced `bg-emerald-600 hover:bg-emerald-500` with `${tw.button}`
+## Pattern Applied
 
-**Result:** The topic page now fully adapts to the category theme. All 37+ emerald color references have been replaced with dynamic theme classes. The page correctly shows emerald/green for arquitectura, blue for programación, red for ciberseguridad, and violet for IA courses.
+```tsx
+// Before
+export default function SomePage() {
+  const router = useRouter();
+  // ...
+  onClick={() => router.push("/curso/d5-render")}
+}
 
-## Build Verification
-- Ran `unset DATABASE_URL && npx next build` - **PASSED** with no errors
-- All routes compiled successfully
+// After
+function SomeContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course");
+  const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+  // ...
+  onClick={() => router.push(backUrl)}
+}
 
----
+function SomeFallback() {
+  return <div>Loading...</div>;
+}
 
-## Task 3: Enrich Non-D5 Course Topic Content
-
-**Date:** 2026-03-05
-
-**Problem:** The 4 non-D5 courses had topic content fields with very short text (about 85-300 chars each), just brief summaries. The D5 Render course had rich, detailed JSON content with explanation, keyPoints, steps, practice, and extraResources sections. The non-D5 courses needed the same level of detail.
-
-**Courses affected:**
-1. "Diseño Arquitectónico con BIM" (slug: diseno-arquitectonico-bim, 6 modules, 26 topics)
-2. "Desarrollo Web Completo: HTML, CSS y JavaScript" (slug: desarrollo-web-completo, 6 modules, 27 topics)
-3. "Fundamentos de Ciberseguridad y Ethical Hacking" (slug: fundamentos-ciberseguridad, 6 modules, 26 topics)
-4. "Inteligencia Artificial: De los Fundamentos a la Práctica" (slug: introduccion-inteligencia-artificial, 6 modules, 25 topics)
-
-**Solution:** Created a Node.js script (`scripts/enrich-content.js`) that:
-1. Reads all topics from each non-D5 course via Prisma Client
-2. Parses the original seed TypeScript files to extract the long-form content that was written during seeding but got truncated in the database
-3. For topics with seed content available, builds structured JSON from the rich seed content
-4. For topics without seed content, generates comprehensive generic content based on the topic name, module context, and course context
-5. Updates the database with enriched JSON content following the required structure
-
-**Script details:**
-- Handles the DATABASE_URL env var issue (system has wrong SQLite URL, needs PostgreSQL from .env)
-- Loads DATABASE_URL manually from .env file
-- Uses Prisma Client for all database operations
-- Includes hand-crafted detailed content for 9 key BIM topics
-- Parses seed TS files using regex to extract topic name → content mapping
-- Generates course-specific content with appropriate resources, keyPoints, steps, and practice exercises
-- Validates minimum requirements (5+ keyPoints, 3+ steps, 2+ extraResources)
-
-**Content structure (JSON):**
-```json
-{
-  "explanation": "Detailed explanation (383-518 words per topic)",
-  "keyPoints": ["Point 1", "Point 2", "Point 3", "Point 4", "Point 5", "Point 6"],
-  "steps": [
-    {"title": "Step title", "description": "Step description", "tip": "Optional tip"},
-    ...
-  ],
-  "practice": "Actionable practice exercise",
-  "extraResources": [
-    {"label": "Resource name", "url": "https://example.com"},
-    ...
-  ]
+export default function SomePage() {
+  return (
+    <Suspense fallback={<SomeFallback />}>
+      <SomeContent />
+    </Suspense>
+  );
 }
 ```
 
-**Results:**
-- Total topics updated: 104
-- Errors: 0
-- All topics have valid JSON structure
-- Word count range: 383-518 words per explanation
-- All topics have 5-6 keyPoints, 3-5 steps, actionable practice, and 2-3 extraResources
-- Content is in Spanish as required
-- Resources are course-appropriate (BIM → Autodesk/buildingSMART, Web → MDN/W3Schools, Cyber → OWASP/NIST, IA → PapersWithCode/Kaggle)
+## Verification
 
-**Verification performed:**
-- Spot-checked topics from each course to verify JSON structure
-- Confirmed all 104 topics have good structure
-- Confirmed no topics below 300 words
-- Verified resource URLs are course-appropriate
-- Verified practice exercises are actionable and specific
+- Build passed successfully (`npx next build`)
+- No remaining hardcoded `/curso/d5-render` navigation links in the 9 specified files
+- Only remaining `d5-render` references are in the topic page as acceptable fallback defaults

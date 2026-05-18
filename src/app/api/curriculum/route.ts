@@ -1,6 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { modules as d5Modules } from "@/lib/curriculum";
+import { bimQuizzes } from "@/lib/quizzes/bim-quizzes";
+import { webDevQuizzes } from "@/lib/quizzes/web-dev-quizzes";
+import { cybersecurityQuizzes } from "@/lib/quizzes/cybersecurity-quizzes";
+import { iaQuizzes } from "@/lib/quizzes/ia-quizzes";
+import { QuizQuestion } from "@/lib/curriculum";
+
+// Map course slugs to their quiz data
+const courseQuizMap: Record<string, Record<number, QuizQuestion[]>> = {
+  "diseno-arquitectonico-bim": bimQuizzes,
+  "desarrollo-web-completo": webDevQuizzes,
+  "fundamentos-ciberseguridad": cybersecurityQuizzes,
+  "introduccion-inteligencia-artificial": iaQuizzes,
+};
 
 // GET /api/curriculum?slug=d5-render
 // Returns the full curriculum for a course, including modules, topics, and quiz data
@@ -106,7 +119,7 @@ export async function GET(request: Request) {
         videoUrl: dbTopic.videoUrl || null,
         attachments: dbTopic.attachments ? (() => { try { return JSON.parse(dbTopic.attachments); } catch { return null; } })() : null,
       })),
-      quiz: [], // No quiz data for non-D5 courses yet
+      quiz: courseQuizMap[slug]?.[dbModule.number] ?? []
     }));
 
     return NextResponse.json({
