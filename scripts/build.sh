@@ -16,5 +16,6 @@ else
   echo "⚠️ DATABASE_URL not set, skipping migrations"
 fi
 
-echo "🏗️ Building Next.js..."
-npx next build
+echo "🏗️ Building Next.js with webpack (stable for Vercel)..."
+# Use --webpack flag to avoid Turbopack ChunkLoadError in production
+npx next build --webpack
