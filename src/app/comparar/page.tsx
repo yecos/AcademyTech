@@ -18,259 +18,28 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
+import {
+  getCategoryToolsData,
+  courseSlugToCategorySlug,
+} from "@/lib/tools-data";
+import {
+  CategoryThemeProvider,
+  useCategoryTheme,
+} from "@/components/CategoryThemeProvider";
+import { CategoryBackground } from "@/components/CategoryBackground";
+import type { ComparisonEngine, ComparisonCriterion } from "@/lib/tools-data";
 
-interface EngineData {
-  name: string;
-  color: string;
-  bgColor: string;
-  borderColor: string;
-  textColor: string;
-  tipo: string;
-  tecnologia: string;
-  vistaPreviaReal: boolean;
-  calidadMaxima: string;
-  velocidadRender: string;
-  curvaAprendizaje: string;
-  precio: string;
-  plugins: string;
-  animacion: string;
-  render360: boolean;
-  postProduccion: string;
-  sistemaVegetacion: string;
-  pros: string[];
-  contras: string[];
-  mejorCaso: string;
-  scores: {
-    calidad: number;
-    velocidad: number;
-    facilidad: number;
-    vegetacion: number;
-    animacion: number;
-    precio: number;
-  };
-}
-
-const engines: EngineData[] = [
-  {
-    name: "D5 Render",
-    color: "emerald",
-    bgColor: "bg-emerald-500/15",
-    borderColor: "border-emerald-500/30",
-    textColor: "text-emerald-600 dark:text-emerald-400",
-    tipo: "Standalone",
-    tecnologia: "Ray Tracing (GPU RTX)",
-    vistaPreviaReal: true,
-    calidadMaxima: "Alta",
-    velocidadRender: "Rápida",
-    curvaAprendizaje: "Baja",
-    precio: "Gratis con límites / $348/año Pro",
-    plugins: "SketchUp, Rhino, Revit, Archicad, 3ds Max, Blender",
-    animacion: "Sí",
-    render360: true,
-    postProduccion: "Sí",
-    sistemaVegetacion: "Avanzado",
-    pros: [
-      "Ray tracing en tiempo real con calidad visual excepcional",
-      "Biblioteca de materiales y vegetación muy completa",
-      "Curva de aprendizaje baja, interfaz intuitiva",
-      "Versión gratuita funcional para uso personal",
-    ],
-    contras: [
-      "Requiere GPU NVIDIA RTX para rendimiento óptimo",
-      "Biblioteca de assets menor que Lumion",
-      "Algunas funciones avanzadas solo en versión Pro",
-    ],
-    mejorCaso:
-      "Visualización arquitectónica en tiempo real con énfasis en realismo y flujo de trabajo ágil",
-    scores: {
-      calidad: 90,
-      velocidad: 92,
-      facilidad: 88,
-      vegetacion: 85,
-      animacion: 80,
-      precio: 85,
-    },
-  },
-  {
-    name: "Lumion",
-    color: "blue",
-    bgColor: "bg-blue-500/15",
-    borderColor: "border-blue-500/30",
-    textColor: "text-blue-600 dark:text-blue-400",
-    tipo: "Standalone",
-    tecnologia: "Rasterización + Ray Tracing parcial",
-    vistaPreviaReal: true,
-    calidadMaxima: "Media-Alta",
-    velocidadRender: "Rápida",
-    curvaAprendizaje: "Baja",
-    precio: "$1,599/año o $3,599 perpetuo",
-    plugins: "SketchUp, Rhino, Revit, Archicad, 3ds Max",
-    animacion: "Sí",
-    render360: true,
-    postProduccion: "Sí",
-    sistemaVegetacion: "Avanzado",
-    pros: [
-      "Enorme biblioteca de assets, vegetación y efectos",
-      "Interfaz extremadamente amigable para principiantes",
-      "Excelente para renders rápidos de concepto",
-      "Efectos atmosféricos y climáticos muy completos",
-    ],
-    contras: [
-      "Precio elevado, sin versión gratuita",
-      "Calidad de ray tracing inferior a D5 Render",
-      "Requiere hardware potente para escenas grandes",
-    ],
-    mejorCaso:
-      "Presentaciones rápidas de concepto arquitectónico con gran variedad de contenido predefinido",
-    scores: {
-      calidad: 78,
-      velocidad: 85,
-      facilidad: 92,
-      vegetacion: 92,
-      animacion: 82,
-      precio: 55,
-    },
-  },
-  {
-    name: "Enscape",
-    color: "purple",
-    bgColor: "bg-purple-500/15",
-    borderColor: "border-purple-500/30",
-    textColor: "text-purple-600 dark:text-purple-400",
-    tipo: "Plugin",
-    tecnologia: "Rasterización + Ray Tracing parcial",
-    vistaPreviaReal: true,
-    calidadMaxima: "Media",
-    velocidadRender: "Rápida",
-    curvaAprendizaje: "Baja",
-    precio: "$599/año",
-    plugins: "SketchUp, Rhino, Revit, Archicad, Vectorworks",
-    animacion: "Básica",
-    render360: true,
-    postProduccion: "Básica",
-    sistemaVegetacion: "Básico",
-    pros: [
-      "Integración directa dentro del software de modelado",
-      "Curva de aprendizaje muy baja, sin cambio de contexto",
-      "Sincronización en tiempo real con el modelo 3D",
-      "Ideal para presentaciones de diseño iterativo",
-    ],
-    contras: [
-      "Calidad visual limitada comparado con standalone",
-      "Sistema de vegetación y biblioteca de assets limitados",
-      "Funciones de animación y post-producción básicas",
-    ],
-    mejorCaso:
-      "Iteración de diseño en tiempo real directamente desde el software BIM sin cambiar de aplicación",
-    scores: {
-      calidad: 65,
-      velocidad: 90,
-      facilidad: 95,
-      vegetacion: 55,
-      animacion: 50,
-      precio: 65,
-    },
-  },
-  {
-    name: "V-Ray",
-    color: "orange",
-    bgColor: "bg-orange-500/15",
-    borderColor: "border-orange-500/30",
-    textColor: "text-orange-600 dark:text-orange-400",
-    tipo: "Plugin",
-    tecnologia: "Ray Tracing CPU/GPU",
-    vistaPreviaReal: false,
-    calidadMaxima: "Alta",
-    velocidadRender: "Lenta",
-    curvaAprendizaje: "Alta",
-    precio: "$740/año o $1,540 perpetuo",
-    plugins: "SketchUp, Rhino, Revit, 3ds Max, Maya, Blender",
-    animacion: "Sí",
-    render360: true,
-    postProduccion: "Sí",
-    sistemaVegetacion: "No",
-    pros: [
-      "Calidad fotorrealista excepcional, estándar de la industria",
-      "Control total sobre cada parámetro de iluminación y materiales",
-      "Amplio ecosistema de plugins y soporte profesional",
-      "Compositor de canales y post-producción avanzados integrados",
-    ],
-    contras: [
-      "Tiempos de render largos, no es tiempo real",
-      "Curva de aprendizaje muy alta",
-      "No permite visualización interactiva fluida",
-    ],
-    mejorCaso:
-      "Renders fotorrealistas de máxima calidad para presentaciones finales de alto nivel",
-    scores: {
-      calidad: 98,
-      velocidad: 35,
-      facilidad: 40,
-      vegetacion: 30,
-      animacion: 75,
-      precio: 55,
-    },
-  },
-  {
-    name: "Twinmotion",
-    color: "cyan",
-    bgColor: "bg-cyan-500/15",
-    borderColor: "border-cyan-500/30",
-    textColor: "text-cyan-600 dark:text-cyan-400",
-    tipo: "Standalone",
-    tecnologia: "Rasterización + Unreal Engine",
-    vistaPreviaReal: true,
-    calidadMaxima: "Media-Alta",
-    velocidadRender: "Rápida",
-    curvaAprendizaje: "Baja",
-    precio: "Gratis para uso no comercial / $575/año",
-    plugins: "SketchUp, Rhino, Revit, Archicad",
-    animacion: "Sí",
-    render360: true,
-    postProduccion: "Básica",
-    sistemaVegetacion: "Avanzado",
-    pros: [
-      "Basado en Unreal Engine, tecnología probada",
-      "Gratis para uso no comercial y educación",
-      "Excelente sistema de vegetación y efectos climáticos",
-      "Integración con Datasmith para flujos BIM",
-    ],
-    contras: [
-      "Calidad de materiales PBR inferior a D5 Render",
-      "Interfaz menos intuitiva que D5 o Lumion",
-      "Actualizaciones lentas y ecosistema de plugins reducido",
-    ],
-    mejorCaso:
-      "Proyectos educativos y no comerciales que necesitan visualización en tiempo real con buen sistema de vegetación",
-    scores: {
-      calidad: 72,
-      velocidad: 80,
-      facilidad: 75,
-      vegetacion: 88,
-      animacion: 78,
-      precio: 80,
-    },
-  },
-];
-
-const comparisonCriteria = [
-  { key: "tipo", label: "Tipo" },
-  { key: "tecnologia", label: "Tecnología" },
-  { key: "vistaPreviaReal", label: "Vista previa en tiempo real", type: "boolean" as const },
-  { key: "calidadMaxima", label: "Calidad máxima" },
-  { key: "velocidadRender", label: "Velocidad de render" },
-  { key: "curvaAprendizaje", label: "Curva de aprendizaje" },
-  { key: "precio", label: "Precio" },
-  { key: "plugins", label: "Plugins de modelado" },
-  { key: "animacion", label: "Animación" },
-  { key: "render360", label: "Render 360°", type: "boolean" as const },
-  { key: "postProduccion", label: "Post-producción" },
-  { key: "sistemaVegetacion", label: "Sistema de vegetación" },
-];
-
-function BooleanValue({ value }: { value: boolean }) {
+function BooleanValue({
+  value,
+  theme,
+}: {
+  value: boolean;
+  theme: ReturnType<typeof useCategoryTheme>["theme"];
+}) {
   return value ? (
-    <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 mx-auto" />
+    <CheckCircle2
+      className={`w-4 h-4 ${theme.tailwind.text} ${theme.tailwind.textDark} mx-auto`}
+    />
   ) : (
     <XCircle className="w-4 h-4 text-red-400/60 mx-auto" />
   );
@@ -306,7 +75,12 @@ function CompararContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const courseSlug = searchParams.get("course");
+  const categorySlug = courseSlugToCategorySlug(courseSlug || "");
   const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+
+  const { theme } = useCategoryTheme();
+  const comparisonData = getCategoryToolsData(categorySlug).comparisons;
+  const { config, engines, criteria, scoreLabels } = comparisonData;
 
   const [activeTab, setActiveTab] = useState<TabKey>("tabla");
 
@@ -316,31 +90,46 @@ function CompararContent() {
     { key: "puntuacion", label: "Puntuaciones", icon: BarChart3 },
   ];
 
-  const scoreLabels: { key: keyof EngineData["scores"]; label: string }[] = [
-    { key: "calidad", label: "Calidad Visual" },
-    { key: "velocidad", label: "Velocidad" },
-    { key: "facilidad", label: "Facilidad de Uso" },
-    { key: "vegetacion", label: "Vegetación" },
-    { key: "animacion", label: "Animación" },
-    { key: "precio", label: "Relación Calidad/Precio" },
-  ];
-
-  const scoreColorMap: Record<string, string> = {
+  // Static color map for Tailwind JIT compatibility
+  // Covers all possible engine colors across categories
+  const staticScoreColorMap: Record<string, string> = {
     emerald: "bg-emerald-500",
     blue: "bg-blue-500",
     purple: "bg-purple-500",
     orange: "bg-orange-500",
     cyan: "bg-cyan-500",
+    red: "bg-red-500",
+    gray: "bg-gray-500",
+    violet: "bg-violet-500",
+    teal: "bg-teal-500",
+    amber: "bg-amber-500",
+    rose: "bg-rose-500",
+    indigo: "bg-indigo-500",
   };
+
+  // Build scoreColorMap from engine data using static lookup
+  const scoreColorMap: Record<string, string> = {};
+  for (const engine of engines) {
+    scoreColorMap[engine.color] =
+      staticScoreColorMap[engine.color] || "bg-gray-500";
+  }
+
+  // Helper to get a criterion value from an engine
+  function getCriterionValue(
+    engine: ComparisonEngine,
+    criterion: ComparisonCriterion
+  ): string | boolean {
+    // First check if it's a top-level field (tipo, tecnologia)
+    if (criterion.key === "tipo") return engine.tipo;
+    if (criterion.key === "tecnologia") return engine.tecnologia;
+    // Otherwise look in details
+    return engine.details[criterion.key];
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
-      {/* Background decorative elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-emerald-600/3 rounded-full blur-3xl" />
-      </div>
+      {/* Background */}
+      <CategoryBackground />
 
       <div className="relative max-w-6xl mx-auto px-4 py-8 sm:px-6">
         {/* Top bar */}
@@ -368,18 +157,22 @@ function CompararContent() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <GitCompare className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <div
+              className={`flex items-center justify-center w-10 h-10 rounded-lg ${theme.tailwind.iconBg} ${theme.tailwind.iconBgDark}`}
+            >
+              <span className="text-lg">{config.iconEmoji}</span>
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                Comparación de{" "}
-                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
-                  Motores de Render
+                {config.title.split(" ").slice(0, -1).join(" ") + " "}{" "}
+                <span
+                  className={`bg-gradient-to-r ${theme.tailwind.gradient} bg-clip-text text-transparent`}
+                >
+                  {config.title.split(" ").slice(-1)}
                 </span>
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                D5 Render vs Lumion vs Enscape vs V-Ray vs Twinmotion
+                {config.subtitle}
               </p>
             </div>
           </div>
@@ -421,7 +214,7 @@ function CompararContent() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border whitespace-nowrap ${
                   activeTab === tab.key
-                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    ? `${theme.tailwind.bg} ${theme.tailwind.text} ${theme.tailwind.textDark} ${theme.tailwind.border}`
                     : "bg-gray-100 dark:bg-white/3 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
@@ -459,34 +252,36 @@ function CompararContent() {
                     </tr>
                   </thead>
                   <tbody>
-                    {comparisonCriteria.map((criteria, idx) => (
+                    {criteria.map((criterion, idx) => (
                       <tr
-                        key={criteria.key}
+                        key={criterion.key}
                         className={`border-b border-gray-100 dark:border-white/3 ${
-                          idx % 2 === 0 ? "bg-gray-50/50 dark:bg-white/[0.01]" : ""
+                          idx % 2 === 0
+                            ? "bg-gray-50/50 dark:bg-white/[0.01]"
+                            : ""
                         }`}
                       >
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium sticky left-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur z-10">
-                          {criteria.label}
+                          {criterion.label}
                         </td>
-                        {engines.map((engine) => (
-                          <td
-                            key={engine.name}
-                            className="text-center px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            {criteria.type === "boolean" ? (
-                              <BooleanValue
-                                value={
-                                  engine[criteria.key as keyof EngineData] as boolean
-                                }
-                              />
-                            ) : (
-                              <span>
-                                {engine[criteria.key as keyof EngineData] as string}
-                              </span>
-                            )}
-                          </td>
-                        ))}
+                        {engines.map((engine) => {
+                          const value = getCriterionValue(engine, criterion);
+                          return (
+                            <td
+                              key={engine.name}
+                              className="text-center px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+                            >
+                              {criterion.type === "boolean" ? (
+                                <BooleanValue
+                                  value={value as boolean}
+                                  theme={theme}
+                                />
+                              ) : (
+                                <span>{value as string}</span>
+                              )}
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))}
                   </tbody>
@@ -530,8 +325,12 @@ function CompararContent() {
                   {/* Pros */}
                   <div>
                     <div className="flex items-center gap-1.5 mb-3">
-                      <ThumbsUp className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-                      <h4 className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                      <ThumbsUp
+                        className={`w-3.5 h-3.5 ${theme.tailwind.text} ${theme.tailwind.textDark}`}
+                      />
+                      <h4
+                        className={`text-xs font-semibold ${theme.tailwind.text} ${theme.tailwind.textDark} uppercase tracking-wider`}
+                      >
                         Ventajas
                       </h4>
                     </div>
@@ -541,7 +340,9 @@ function CompararContent() {
                           key={i}
                           className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500/70 mt-0.5 shrink-0" />
+                          <CheckCircle2
+                            className={`w-3.5 h-3.5 ${theme.tailwind.text} opacity-70 mt-0.5 shrink-0`}
+                          />
                           {pro}
                         </li>
                       ))}
@@ -597,7 +398,9 @@ function CompararContent() {
             {/* Overall scores */}
             <div className="glass-card rounded-xl p-6">
               <div className="flex items-center gap-2 mb-6">
-                <BarChart3 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                <BarChart3
+                  className={`w-5 h-5 ${theme.tailwind.text} ${theme.tailwind.textDark}`}
+                />
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   Puntuaciones Comparativas
                 </h3>
@@ -611,7 +414,10 @@ function CompararContent() {
                     </h4>
                     <div className="space-y-2.5">
                       {engines.map((engine) => (
-                        <div key={engine.name} className="flex items-center gap-3">
+                        <div
+                          key={engine.name}
+                          className="flex items-center gap-3"
+                        >
                           <span
                             className={`text-xs font-medium w-24 shrink-0 ${engine.textColor}`}
                           >
@@ -683,8 +489,10 @@ function CompararContent() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Comparación de motores de renderizado —{" "}
-              <span className="text-emerald-500/70 dark:text-emerald-400/70">
+              {config.title} —{" "}
+              <span
+                className={`${theme.tailwind.text} ${theme.tailwind.textDark} opacity-70`}
+              >
                 Academy Tech
               </span>
             </p>
@@ -714,10 +522,22 @@ function CompararFallback() {
   );
 }
 
+function CompararContentWithProvider() {
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course");
+  const categorySlug = courseSlugToCategorySlug(courseSlug || "");
+
+  return (
+    <CategoryThemeProvider slug={categorySlug}>
+      <CompararContent />
+    </CategoryThemeProvider>
+  );
+}
+
 export default function CompararPage() {
   return (
     <Suspense fallback={<CompararFallback />}>
-      <CompararContent />
+      <CompararContentWithProvider />
     </Suspense>
   );
 }

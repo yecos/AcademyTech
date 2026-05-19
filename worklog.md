@@ -140,3 +140,32 @@ Stage Summary:
 - Phase 4 (Weeks 10-13): Content Tools - rich text editor, image upload, dynamic quizzes, discussions
 - Phase 5 (Weeks 14-16): Scalability - Redis cache, ISR, query optimization, CI/CD, E2E tests
 - Phase 6 (Weeks 17-22): Advanced - learning paths, recommendations, gamification, i18n, emails
+
+---
+Task ID: tools-panel-review
+Agent: Main Agent
+Task: Review and improve the tools panel (Herramientas) for multi-category support
+
+Work Log:
+- Analyzed all 4 tool pages (Marcadores, Atajos, Comparar, Soluciones) + Glosario
+- Identified 9 critical issues: all pages D5 Render-specific, hardcoded emerald colors, code sandbox on all courses, no course context passing
+- Created /home/z/my-project/src/lib/tools-data.ts with comprehensive multi-category data for all 4 categories:
+  - Atajos: D5 Render, VS Code, Linux/Kali, Jupyter/Python shortcuts
+  - Comparar: Render engines, Frontend frameworks, Pentesting tools, ML frameworks
+  - Soluciones: Architecture, Web dev, Cybersecurity, AI troubleshooting items
+  - Glosario: Architecture 3D, Web dev, Cybersecurity, AI/ML glossary terms
+- Updated /src/app/atajos/page.tsx with CategoryThemeProvider and dynamic data
+- Updated /src/app/comparar/page.tsx with CategoryThemeProvider and dynamic data
+- Updated /src/app/soluciones/page.tsx with CategoryThemeProvider and dynamic data
+- Updated /src/app/glosario/page.tsx with CategoryThemeProvider and dynamic data
+- Updated /src/app/marcadores/page.tsx with CategoryThemeProvider and dynamic colors
+- Fixed CodeSandboxSection to only appear on programming courses
+- Updated study-app.tsx pill links to pass ?course= query parameter
+- Build passes successfully ✅
+
+Stage Summary:
+- All 5 tool pages now support all 4 categories dynamically
+- Each page uses CategoryThemeProvider for themed colors (emerald/blue/red/violet)
+- Code sandbox only appears on programacion category courses
+- Tool links pass course context via URL query parameters
+- Build compiles clean with no errors

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -12,75 +12,74 @@ import {
   X,
 } from "lucide-react";
 import {
-  glossaryTerms,
-  glossaryCategoryColors,
-  glossaryCategoryLabels,
-  type GlossaryCategoryKey,
-} from "@/lib/search-data";
+  getCategoryToolsData,
+  courseSlugToCategorySlug,
+} from "@/lib/tools-data";
+import { CategoryThemeProvider, useCategoryTheme } from "@/components/CategoryThemeProvider";
+import { CategoryBackground } from "@/components/CategoryBackground";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
-type CategoryKey = "todos" | GlossaryCategoryKey;
-
-const categories: { key: CategoryKey; label: string }[] = [
-  { key: "todos", label: "Todos" },
-  { key: "renderizado", label: "Renderizado" },
-  { key: "iluminacion", label: "Iluminación" },
-  { key: "materiales", label: "Materiales" },
-  { key: "camara", label: "Cámara" },
-  { key: "animacion", label: "Animación" },
-  { key: "exportacion", label: "Exportación" },
-];
-
-const categoryColorsAll: Record<CategoryKey, string> = {
-  todos: "bg-gray-200/60 text-gray-600 dark:bg-white/10 dark:text-gray-300 border-gray-300 dark:border-white/10",
-  ...glossaryCategoryColors,
-};
-
-const categoryLabelsAll: Record<CategoryKey, string> = {
-  todos: "Todos",
-  ...glossaryCategoryLabels,
-};
+type CategoryKey = "todos" | string;
 
 function GlosarioContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const courseSlug = searchParams.get("course");
+  const categorySlug = courseSlugToCategorySlug(courseSlug || "");
+  const glossaryData = getCategoryToolsData(categorySlug).glossary;
+  const { config, terms, categoryColors, categoryLabels } = glossaryData;
+
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
+
   const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+
+  // Derive categories from glossary data + "todos"
+  const categories: { key: CategoryKey; label: string }[] = [
+    { key: "todos", label: "Todos" },
+    ...Object.keys(categoryLabels).map((key) => ({
+      key: key as CategoryKey,
+      label: categoryLabels[key],
+    })),
+  ];
+
+  const categoryColorsAll: Record<string, string> = {
+    todos: "bg-gray-200/60 text-gray-600 dark:bg-white/10 dark:text-gray-300 border-gray-300 dark:border-white/10",
+    ...categoryColors,
+  };
+
+  const categoryLabelsAll: Record<string, string> = {
+    todos: "Todos",
+    ...categoryLabels,
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<CategoryKey>("todos");
 
-  const filteredTerms = useMemo(() => {
-    return glossaryTerms.filter((item) => {
-      const matchesCategory =
-        activeCategory === "todos" || item.category === activeCategory;
-      const matchesSearch =
-        searchQuery === "" ||
-        item.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.definition.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  }, [searchQuery, activeCategory]);
+  const filteredTerms = terms.filter((item) => {
+    const matchesCategory =
+      activeCategory === "todos" || item.category === activeCategory;
+    const matchesSearch =
+      searchQuery === "" ||
+      item.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.definition.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
-  const groupedTerms = useMemo(() => {
+  const groupedTerms = (() => {
     if (activeCategory !== "todos") return { [activeCategory]: filteredTerms };
-    const groups: Record<string, typeof glossaryTerms> = {};
+    const groups: Record<string, typeof terms> = {};
     for (const term of filteredTerms) {
       if (!groups[term.category]) groups[term.category] = [];
       groups[term.category].push(term);
     }
     return groups;
-  }, [filteredTerms, activeCategory]);
+  })();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
-      {/* Background decorative elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-emerald-600/3 rounded-full blur-3xl" />
-      </div>
+      <CategoryBackground />
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
         {/* Top bar */}
@@ -92,7 +91,7 @@ function GlosarioContent() {
             className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver al inicio
+            Volver al curso
           </Button>
           <div className="flex items-center gap-2">
             <UserMenu />
@@ -108,18 +107,18 @@ function GlosarioContent() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <BookOpen className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${tw.iconBg} ${tw.iconBgDark} border`}>
+              <BookOpen className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                Glosario{" "}
-                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
-                  D5 Render
+                {config.title.split(" ").slice(0, -1).join(" ")}{" "}
+                <span className={`bg-gradient-to-r ${tw.gradient} bg-clip-text text-transparent`}>
+                  {config.title.split(" ").slice(-1)}
                 </span>
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {glossaryTerms.length} términos de tecnología
+                {terms.length} términos — {config.subtitle}
               </p>
             </div>
           </div>
@@ -139,7 +138,7 @@ function GlosarioContent() {
               placeholder="Buscar término..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
+              className={`w-full pl-10 pr-10 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm focus:outline-none focus:${tw.border} focus:ring-1 focus:${tw.border} transition-colors`}
             />
             {searchQuery && (
               <button
@@ -166,14 +165,14 @@ function GlosarioContent() {
                 onClick={() => setActiveCategory(cat.key)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border ${
                   activeCategory === cat.key
-                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    ? `${tw.badge} ${tw.badgeDark}`
                     : "bg-gray-100 dark:bg-white/3 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
                 {cat.label}
                 {cat.key !== "todos" && (
                   <span className="ml-1.5 text-[10px] opacity-60">
-                    {glossaryTerms.filter((t) => t.category === cat.key).length}
+                    {terms.filter((t) => t.category === cat.key).length}
                   </span>
                 )}
               </button>
@@ -202,7 +201,7 @@ function GlosarioContent() {
               </div>
             ) : (
               <div className="space-y-8">
-                {Object.entries(groupedTerms).map(([category, terms]) => (
+                {Object.entries(groupedTerms).map(([category, categoryTerms]) => (
                   <div key={category}>
                     <div className="flex items-center gap-2 mb-4">
                       <Badge
@@ -212,11 +211,11 @@ function GlosarioContent() {
                       </Badge>
                       <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
                       <span className="text-xs text-gray-400 dark:text-gray-500">
-                        {terms.length} términos
+                        {categoryTerms.length} términos
                       </span>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {terms.map((item, index) => (
+                      {categoryTerms.map((item, index) => (
                         <motion.div
                           key={item.term}
                           initial={{ opacity: 0, y: 15 }}
@@ -260,8 +259,8 @@ function GlosarioContent() {
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Glosario — Academy Tech{" "}
-              <span className="text-emerald-500/70 dark:text-emerald-400/70">
-                {glossaryTerms.length} términos definidos
+              <span className={`${tw.text} ${tw.textDark} opacity-70`}>
+                {terms.length} términos definidos
               </span>
             </p>
           </div>
@@ -275,8 +274,8 @@ function GlosarioFallback() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gray-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-gray-500/3 rounded-full blur-3xl" />
       </div>
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
         <div className="flex items-center justify-center py-20">
@@ -293,7 +292,19 @@ function GlosarioFallback() {
 export default function GlosarioPage() {
   return (
     <Suspense fallback={<GlosarioFallback />}>
-      <GlosarioContent />
+      <GlosarioContentInner />
     </Suspense>
+  );
+}
+
+function GlosarioContentInner() {
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course");
+  const categorySlug = courseSlugToCategorySlug(courseSlug || "");
+
+  return (
+    <CategoryThemeProvider slug={categorySlug}>
+      <GlosarioContent />
+    </CategoryThemeProvider>
   );
 }

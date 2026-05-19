@@ -12,16 +12,21 @@ import {
   Home,
   X,
 } from "lucide-react";
-import { modules } from "@/lib/curriculum";
 import { useCourse } from "@/hooks/use-course-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
+import { CategoryThemeProvider, useCategoryTheme } from "@/components/CategoryThemeProvider";
+import { CategoryBackground } from "@/components/CategoryBackground";
+import { courseSlugToCategorySlug } from "@/lib/tools-data";
 
-function MarcadoresContent() {
+function MarcadoresThemedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const courseSlug = searchParams.get("course");
   const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
 
   const course = useCourse();
   const bookmarkedTopics = course.getBookmarkedTopics();
@@ -37,7 +42,7 @@ function MarcadoresContent() {
   }, {});
 
   const diffColors: Record<string, string> = {
-    basico: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    basico: `${tw.badge} ${tw.badgeDark} border`,
     intermedio: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20",
     avanzado: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20",
   };
@@ -50,12 +55,7 @@ function MarcadoresContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
-      {/* Background decorative elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-emerald-600/3 rounded-full blur-3xl" />
-      </div>
+      <CategoryBackground />
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
         {/* Top bar */}
@@ -83,13 +83,13 @@ function MarcadoresContent() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <Bookmark className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${tw.iconBg} ${tw.iconBgDark} border ${tw.border} ${tw.borderDark}`}>
+              <Bookmark className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
                 Mis{" "}
-                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
+                <span className={`bg-gradient-to-r ${tw.gradient} bg-clip-text text-transparent`}>
                   Marcadores
                 </span>
               </h1>
@@ -117,7 +117,7 @@ function MarcadoresContent() {
               </p>
               <Button
                 onClick={() => router.push(backUrl)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+                className={`${tw.button} text-white gap-2`}
               >
                 <Home className="w-4 h-4" />
                 Ir al inicio
@@ -128,8 +128,6 @@ function MarcadoresContent() {
           <div className="space-y-8">
             {Object.entries(groupedBookmarks).map(
               ([moduleId, topics], groupIndex) => {
-                const mod = modules.find((m) => m.id === moduleId);
-                if (!mod) return null;
                 return (
                   <motion.div
                     key={moduleId}
@@ -138,11 +136,11 @@ function MarcadoresContent() {
                     transition={{ duration: 0.4, delay: groupIndex * 0.1 }}
                   >
                     <div className="flex items-center gap-2 mb-4">
-                      <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs">
-                        Módulo {mod.number}
+                      <Badge className={`${tw.badge} ${tw.badgeDark} text-xs border`}>
+                        Módulo
                       </Badge>
                       <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {mod.title}
+                        {moduleId}
                       </h2>
                       <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
                       <span className="text-xs text-gray-400 dark:text-gray-500">
@@ -151,7 +149,6 @@ function MarcadoresContent() {
                     </div>
                     <div className="space-y-2">
                       {topics.map((topic, index) => {
-                        const topicInfo = mod.topics[topic.topicIndex];
                         return (
                           <motion.div
                             key={`${topic.moduleId}-${topic.topicIndex}`}
@@ -178,19 +175,9 @@ function MarcadoresContent() {
                                 <span className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors truncate">
                                   {topic.topicName}
                                 </span>
-                                {topicInfo && (
-                                  <>
-                                    <Badge
-                                      className={`text-[9px] px-1.5 py-0 ${diffColors[topicInfo.difficulty]} shrink-0`}
-                                    >
-                                      {diffLabels[topicInfo.difficulty]}
-                                    </Badge>
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 shrink-0 flex items-center gap-0.5">
-                                      <Clock className="w-2.5 h-2.5" />
-                                      {topicInfo.estimatedTime}
-                                    </span>
-                                  </>
-                                )}
+                                <span className="text-[10px] text-gray-400 dark:text-gray-500 shrink-0 flex items-center gap-0.5">
+                                  <Clock className="w-2.5 h-2.5" />
+                                </span>
                               </button>
                               <button
                                 onClick={() =>
@@ -223,7 +210,7 @@ function MarcadoresContent() {
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Marcadores — Academy Tech —{" "}
-              <span className="text-emerald-500/70 dark:text-emerald-400/70">
+              <span className={`${tw.text} ${tw.textDark} opacity-70`}>
                 {bookmarkedTopics.length} tema{bookmarkedTopics.length !== 1 ? "s" : ""} guardado{bookmarkedTopics.length !== 1 ? "s" : ""}
               </span>
             </p>
@@ -234,13 +221,21 @@ function MarcadoresContent() {
   );
 }
 
+function MarcadoresContent() {
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course") || "d5-render";
+  const categorySlug = courseSlugToCategorySlug(courseSlug);
+
+  return (
+    <CategoryThemeProvider slug={categorySlug} animated>
+      <MarcadoresThemedContent />
+    </CategoryThemeProvider>
+  );
+}
+
 function MarcadoresFallback() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-      </div>
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
         <div className="flex items-center justify-center py-20">
           <div className="animate-pulse flex items-center gap-2 text-gray-400">

@@ -284,7 +284,7 @@ export function StudyApp() {
               </span>
             </div>
             <Link
-              href="/glosario"
+              href={`/glosario?course=${courseSlug}`}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
             >
               <BookOpen className="w-3 h-3 text-gray-500 dark:text-gray-400" />
@@ -293,7 +293,7 @@ export function StudyApp() {
               </span>
             </Link>
             <Link
-              href="/atajos"
+              href={`/atajos?course=${courseSlug}`}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
             >
               <Keyboard className="w-3 h-3 text-gray-500 dark:text-gray-400" />
@@ -302,7 +302,7 @@ export function StudyApp() {
               </span>
             </Link>
             <Link
-              href="/marcadores"
+              href={`/marcadores?course=${courseSlug}`}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
             >
               <Bookmark className="w-3 h-3 text-gray-500 dark:text-gray-400" />
@@ -311,7 +311,7 @@ export function StudyApp() {
               </span>
             </Link>
             <Link
-              href="/soluciones"
+              href={`/soluciones?course=${courseSlug}`}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
             >
               <AlertTriangle className="w-3 h-3 text-gray-500 dark:text-gray-400" />
@@ -320,7 +320,7 @@ export function StudyApp() {
               </span>
             </Link>
             <Link
-              href="/buscar"
+              href={`/buscar?course=${courseSlug}`}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ${tw.bg} ${tw.bgDark} border ${tw.border} ${tw.borderDark} hover:opacity-90 transition-all duration-200`}
             >
               <Search className={`w-3 h-3 ${tw.text} ${tw.textDark}`} />
@@ -329,7 +329,7 @@ export function StudyApp() {
               </span>
             </Link>
             <Link
-              href="/comparar"
+              href={`/comparar?course=${courseSlug}`}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
             >
               <GitCompare className="w-3 h-3 text-gray-500 dark:text-gray-400" />

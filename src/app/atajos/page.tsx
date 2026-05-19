@@ -12,78 +12,15 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
-
-interface Shortcut {
-  keys: string[];
-  description: string;
-}
-
-interface ShortcutCategory {
-  title: string;
-  icon: string;
-  shortcuts: Shortcut[];
-}
-
-const shortcutCategories: ShortcutCategory[] = [
-  {
-    title: "Navegación",
-    icon: "🧭",
-    shortcuts: [
-      { keys: ["W", "A", "S", "D"], description: "Navegación en primera persona" },
-      { keys: ["Q", "E"], description: "Subir/Bajar en modo primera persona" },
-      { keys: ["Rueda del ratón"], description: "Zoom" },
-      { keys: ["Botón central", "Arrastrar"], description: "Orbitar" },
-      { keys: ["Shift", "Botón central"], description: "Pan" },
-      { keys: ["F"], description: "Enfocar objeto seleccionado" },
-      { keys: ["Home"], description: "Vista inicial de la escena" },
-    ],
-  },
-  {
-    title: "Transformación",
-    icon: "🔄",
-    shortcuts: [
-      { keys: ["W"], description: "Herramienta mover" },
-      { keys: ["E"], description: "Herramienta rotar" },
-      { keys: ["R"], description: "Herramienta escalar" },
-      { keys: ["Ctrl", "Z"], description: "Deshacer" },
-      { keys: ["Ctrl", "Y"], description: "Rehacer" },
-      { keys: ["Ctrl", "D"], description: "Duplicar objeto" },
-      { keys: ["Delete"], description: "Eliminar objeto" },
-      { keys: ["Ctrl", "A"], description: "Seleccionar todo" },
-      { keys: ["Ctrl", "Shift", "A"], description: "Deseleccionar todo" },
-    ],
-  },
-  {
-    title: "Archivo",
-    icon: "📁",
-    shortcuts: [
-      { keys: ["Ctrl", "S"], description: "Guardar escena" },
-      { keys: ["Ctrl", "O"], description: "Abrir escena" },
-      { keys: ["Ctrl", "N"], description: "Nueva escena" },
-      { keys: ["Ctrl", "Shift", "S"], description: "Guardar como" },
-    ],
-  },
-  {
-    title: "Vista",
-    icon: "👁️",
-    shortcuts: [
-      { keys: ["1"], description: "Vista perspectiva" },
-      { keys: ["2"], description: "Vista superior" },
-      { keys: ["3"], description: "Vista frontal" },
-      { keys: ["4"], description: "Vista lateral" },
-      { keys: ["G"], description: "Mostrar/ocultar grid" },
-      { keys: ["Ctrl", "H"], description: "Ocultar objeto seleccionado" },
-    ],
-  },
-  {
-    title: "Render",
-    icon: "🎬",
-    shortcuts: [
-      { keys: ["Ctrl", "R"], description: "Iniciar render" },
-      { keys: ["PrintScreen"], description: "Captura de pantalla" },
-    ],
-  },
-];
+import {
+  getCategoryToolsData,
+  courseSlugToCategorySlug,
+} from "@/lib/tools-data";
+import {
+  CategoryThemeProvider,
+  useCategoryTheme,
+} from "@/components/CategoryThemeProvider";
+import { CategoryBackground } from "@/components/CategoryBackground";
 
 function KeyCap({ children }: { children: React.ReactNode }) {
   return (
@@ -108,20 +45,22 @@ function KeyCombo({ keys }: { keys: string[] }) {
   );
 }
 
-function AtajosContent() {
+function AtajosThemedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const courseSlug = searchParams.get("course");
+  const categorySlug = courseSlugToCategorySlug(courseSlug || "arquitectura");
+  const toolsData = getCategoryToolsData(categorySlug);
+  const { config, categories: shortcutCategories } = toolsData.shortcuts;
   const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
+
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Background decorative elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-emerald-600/3 rounded-full blur-3xl" />
-      </div>
+      <CategoryBackground />
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
         {/* Top bar */}
@@ -149,18 +88,22 @@ function AtajosContent() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <Keyboard className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <div
+              className={`flex items-center justify-center w-10 h-10 rounded-lg ${tw.iconBg} ${tw.iconBgDark}`}
+            >
+              <Keyboard className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                Atajos de{" "}
-                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
-                  Teclado
+                {config.title.split(" ").slice(0, -1).join(" ")}{" "}
+                <span
+                  className={`bg-gradient-to-r ${tw.gradient} bg-clip-text text-transparent`}
+                >
+                  {config.title.split(" ").slice(-1)[0]}
                 </span>
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Referencia rápida de los atajos de D5 Render
+                {config.subtitle}
               </p>
             </div>
           </div>
@@ -181,7 +124,9 @@ function AtajosContent() {
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
                   {category.title}
                 </h2>
-                <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] px-1.5">
+                <Badge
+                  className={`${tw.badge} ${tw.badgeDark} text-[10px] px-1.5`}
+                >
                   {category.shortcuts.length}
                 </Badge>
                 <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
@@ -198,7 +143,7 @@ function AtajosContent() {
                       duration: 0.3,
                       delay: catIndex * 0.08 + sIndex * 0.03,
                     }}
-                    className="glass-card glass-card-hover rounded-lg px-4 py-3 flex items-center justify-between gap-3 transition-all duration-200"
+                    className={`glass-card glass-card-hover rounded-lg px-4 py-3 flex items-center justify-between gap-3 transition-all duration-200 ${tw.hoverBorder} ${tw.hoverBorderDark}`}
                   >
                     <span className="text-sm text-gray-600 dark:text-gray-300 min-w-0">
                       {shortcut.description}
@@ -216,22 +161,18 @@ function AtajosContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.6 }}
-          className="mt-10 glass-card rounded-xl p-5 border-emerald-500/10"
+          className={`mt-10 glass-card rounded-xl p-5 ${tw.border}`}
         >
           <div className="flex items-start gap-3">
-            <Command className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <Command
+              className={`w-5 h-5 ${tw.text} ${tw.textDark} shrink-0 mt-0.5`}
+            />
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
                 Consejo
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                Los atajos de teclado pueden variar según la versión de D5 Render y tu
-                configuración regional. Algunos atajos solo están disponibles cuando la
-                ventana del viewport está activa. Personaliza tus atajos en{" "}
-                <span className="text-emerald-600 dark:text-emerald-400/80">
-                  Configuración → Atajos de teclado
-                </span>{" "}
-                para adaptarlos a tu flujo de trabajo.
+                {config.tipText}
               </p>
             </div>
           </div>
@@ -247,7 +188,7 @@ function AtajosContent() {
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Atajos — Academy Tech —{" "}
-              <span className="text-emerald-500/70 dark:text-emerald-400/70">
+              <span className={`${tw.text} opacity-70`}>
                 {shortcutCategories.reduce(
                   (acc, cat) => acc + cat.shortcuts.length,
                   0
@@ -262,13 +203,21 @@ function AtajosContent() {
   );
 }
 
+function AtajosContent() {
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course");
+  const categorySlug = courseSlugToCategorySlug(courseSlug || "arquitectura");
+
+  return (
+    <CategoryThemeProvider slug={categorySlug} animated>
+      <AtajosThemedContent />
+    </CategoryThemeProvider>
+  );
+}
+
 function AtajosFallback() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-      </div>
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
         <div className="flex items-center justify-center py-20">
           <div className="animate-pulse flex items-center gap-2 text-gray-400">

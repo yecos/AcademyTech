@@ -41,6 +41,7 @@ import {
 } from "@/lib/code-block-parser";
 import { useCategoryTheme, CategoryThemeProvider } from "@/components/CategoryThemeProvider";
 import { CategoryBackground } from "@/components/CategoryBackground";
+import { courseSlugToCategorySlug } from "@/lib/tools-data";
 
 // Component to render parsed content segments (text + code blocks)
 function ContentWithCodeBlocks({ content }: { content: string }) {
@@ -675,6 +676,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
 
             {/* Interactive Code Sandbox Section - only for programming courses */}
             <CodeSandboxSection courseSlug={courseSlug} />
+            {courseSlugToCategorySlug(courseSlug) === "programacion" && <CodeSandboxSection />}
 
             {/* Personal Notes */}
             <TopicNotes
@@ -734,6 +736,8 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
 
             {/* Still show sandbox even when content is not available - only for programming courses */}
             <CodeSandboxSection courseSlug={courseSlug} />
+            {/* Sandbox only for programming courses */}
+            {courseSlugToCategorySlug(courseSlug) === "programacion" && <CodeSandboxSection />}
 
             {/* Personal Notes (shown even when content is not available) */}
             <TopicNotes

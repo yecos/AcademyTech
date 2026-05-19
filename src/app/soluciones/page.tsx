@@ -25,53 +25,63 @@ import {
   CircleAlert,
   CircleCheck,
   Wrench,
+  Code2,
+  Shield,
+  Brain,
+  Building2,
 } from "lucide-react";
 import {
-  troubleshootingItems,
-  troubleshootingCategoryColors,
-  troubleshootingCategoryLabels,
+  getCategoryToolsData,
+  courseSlugToCategorySlug,
   severityColors,
   severityLabels,
-  type TroubleshootingCategoryKey,
   type Severity,
-} from "@/lib/search-data";
+  type TroubleshootingItem,
+} from "@/lib/tools-data";
+import { CategoryThemeProvider, useCategoryTheme } from "@/components/CategoryThemeProvider";
+import { CategoryBackground } from "@/components/CategoryBackground";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
-type CategoryKey = "todos" | TroubleshootingCategoryKey;
-
-const categories: { key: CategoryKey; label: string; icon: React.ReactNode }[] = [
-  { key: "todos", label: "Todos", icon: <CircleCheck className="w-3.5 h-3.5" /> },
-  { key: "instalacion", label: "Instalación", icon: <Download className="w-3.5 h-3.5" /> },
-  { key: "importacion", label: "Importación", icon: <Upload className="w-3.5 h-3.5" /> },
-  { key: "iluminacion", label: "Iluminación", icon: <Lightbulb className="w-3.5 h-3.5" /> },
-  { key: "materiales", label: "Materiales", icon: <Palette className="w-3.5 h-3.5" /> },
-  { key: "exportacion", label: "Exportación", icon: <Zap className="w-3.5 h-3.5" /> },
-];
-
-const categoryColorsAll: Record<CategoryKey, string> = {
-  todos: "bg-gray-200/60 text-gray-600 dark:bg-white/10 dark:text-gray-300 border-gray-300 dark:border-white/10",
-  ...troubleshootingCategoryColors,
+// Icon map for troubleshooting categories (generic icons per category key)
+const categoryIconMap: Record<string, React.ReactNode> = {
+  instalacion: <Download className="w-3.5 h-3.5" />,
+  importacion: <Upload className="w-3.5 h-3.5" />,
+  iluminacion: <Lightbulb className="w-3.5 h-3.5" />,
+  materiales: <Palette className="w-3.5 h-3.5" />,
+  exportacion: <Zap className="w-3.5 h-3.5" />,
+  codigo: <Code2 className="w-3.5 h-3.5" />,
+  estilos: <Palette className="w-3.5 h-3.5" />,
+  responsive: <CircleCheck className="w-3.5 h-3.5" />,
+  entorno: <Wrench className="w-3.5 h-3.5" />,
+  api: <Zap className="w-3.5 h-3.5" />,
+  herramientas: <Wrench className="w-3.5 h-3.5" />,
+  red: <CircleAlert className="w-3.5 h-3.5" />,
+  entrenamiento: <Brain className="w-3.5 h-3.5" />,
 };
 
-const categoryLabelsAll: Record<CategoryKey, string> = {
-  todos: "Todos",
-  ...troubleshootingCategoryLabels,
+const categoryThemeIconMap: Record<string, React.ReactNode> = {
+  arquitectura: <Building2 className="w-5 h-5" />,
+  programacion: <Code2 className="w-5 h-5" />,
+  ciberseguridad: <Shield className="w-5 h-5" />,
+  ia: <Brain className="w-5 h-5" />,
 };
+
+type CategoryKey = "todos" | string;
 
 const severityConfig: Record<Severity, { label: string; color: string; icon: React.ReactNode }> = {
   critico: {
-    label: "Crítico",
+    label: severityLabels.critico,
     color: severityColors.critico,
     icon: <CircleAlert className="w-3 h-3" />,
   },
   moderado: {
-    label: "Moderado",
+    label: severityLabels.moderado,
     color: severityColors.moderado,
     icon: <AlertTriangle className="w-3 h-3" />,
   },
   leve: {
-    label: "Leve",
+    label: severityLabels.leve,
     color: severityColors.leve,
     icon: <CircleCheck className="w-3 h-3" />,
   },
@@ -80,11 +90,46 @@ const severityConfig: Record<Severity, { label: string; color: string; icon: Rea
 function SolucionesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const courseSlug = searchParams.get("course");
+  const courseSlug = searchParams.get("course") || "";
+  const categorySlug = courseSlugToCategorySlug(courseSlug);
+  const toolsData = getCategoryToolsData(categorySlug);
+  const troubleshooting = toolsData.troubleshooting;
+
+  const { theme } = useCategoryTheme();
+  const tw = theme.tailwind;
+
   const backUrl = courseSlug ? `/curso/${courseSlug}` : "/";
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<CategoryKey>("todos");
+
+  // Build categories from troubleshooting data
+  const { categories, categoryColorsAll, categoryLabelsAll } = useMemo(() => {
+    const cats: { key: CategoryKey; label: string; icon: React.ReactNode }[] = [
+      { key: "todos", label: "Todos", icon: <CircleCheck className="w-3.5 h-3.5" /> },
+    ];
+    for (const [key, label] of Object.entries(troubleshooting.categoryLabels)) {
+      cats.push({
+        key,
+        label,
+        icon: categoryIconMap[key] || <Wrench className="w-3.5 h-3.5" />,
+      });
+    }
+
+    const colorsAll: Record<CategoryKey, string> = {
+      todos: "bg-gray-200/60 text-gray-600 dark:bg-white/10 dark:text-gray-300 border-gray-300 dark:border-white/10",
+      ...troubleshooting.categoryColors,
+    };
+
+    const labelsAll: Record<CategoryKey, string> = {
+      todos: "Todos",
+      ...troubleshooting.categoryLabels,
+    };
+
+    return { categories: cats, categoryColorsAll: colorsAll, categoryLabelsAll: labelsAll };
+  }, [troubleshooting]);
+
+  const troubleshootingItems = troubleshooting.items;
 
   const filteredIssues = useMemo(() => {
     return troubleshootingItems.filter((issue) => {
@@ -102,12 +147,12 @@ function SolucionesContent() {
         );
       return matchesCategory && matchesSearch;
     });
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery, activeCategory, troubleshootingItems]);
 
   const groupedIssues = useMemo(() => {
     if (activeCategory !== "todos")
       return { [activeCategory]: filteredIssues };
-    const groups: Record<string, typeof troubleshootingItems> = {};
+    const groups: Record<string, TroubleshootingItem[]> = {};
     for (const issue of filteredIssues) {
       if (!groups[issue.category]) groups[issue.category] = [];
       groups[issue.category].push(issue);
@@ -123,14 +168,13 @@ function SolucionesContent() {
     };
   }, [filteredIssues]);
 
+  // Theme icon for the header
+  const headerIcon = categoryThemeIconMap[categorySlug] || <AlertTriangle className="w-5 h-5" />;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
-      {/* Background decorative elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-60 h-60 bg-emerald-500/3 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 w-96 h-96 bg-emerald-600/3 rounded-full blur-3xl" />
-      </div>
+      {/* Category-themed background */}
+      <CategoryBackground />
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6">
         {/* Top bar */}
@@ -158,18 +202,28 @@ function SolucionesContent() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
-              <AlertTriangle className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${tw.iconBg} ${tw.iconBgDark}`}>
+              <span className={`${tw.text} ${tw.textDark}`}>
+                {headerIcon}
+              </span>
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                Soluciones{" "}
-                <span className="bg-gradient-to-r from-emerald-500 to-emerald-400 dark:from-emerald-400 dark:to-emerald-300 bg-clip-text text-transparent">
-                  D5 Render
-                </span>
+                {troubleshooting.config.title.includes(" ") ? (
+                  <>
+                    {troubleshooting.config.title.split(" ").slice(0, -1).join(" ")}{" "}
+                    <span className={`bg-gradient-to-r ${tw.gradient} bg-clip-text text-transparent`}>
+                      {troubleshooting.config.title.split(" ").slice(-1)}
+                    </span>
+                  </>
+                ) : (
+                  <span className={`bg-gradient-to-r ${tw.gradient} bg-clip-text text-transparent`}>
+                    {troubleshooting.config.title}
+                  </span>
+                )}
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {troubleshootingItems.length} problemas comunes y sus soluciones
+                {troubleshootingItems.length} {troubleshooting.config.subtitle.toLowerCase()}
               </p>
             </div>
           </div>
@@ -200,7 +254,7 @@ function SolucionesContent() {
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span className={`w-2 h-2 rounded-full ${tw.bg} dark:bg-current`} style={{ color: theme.primaryColor }} />
                 <span className="text-xs text-gray-500 dark:text-gray-400">
                   {severityCounts.leve} Leves
                 </span>
@@ -223,7 +277,7 @@ function SolucionesContent() {
               placeholder="Buscar problema, causa o solución..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-colors"
+              className="w-full pl-10 pr-10 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 text-sm focus:outline-none focus:border-[var(--category-border-accent)] focus:ring-1 focus:ring-[var(--category-border-accent)] transition-colors"
             />
             {searchQuery && (
               <button
@@ -250,7 +304,7 @@ function SolucionesContent() {
                 onClick={() => setActiveCategory(cat.key)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border ${
                   activeCategory === cat.key
-                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    ? `${tw.bg} ${tw.text} ${tw.textDark} ${tw.border}`
                     : "bg-gray-100 dark:bg-white/3 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
@@ -320,7 +374,7 @@ function SolucionesContent() {
                           >
                             <AccordionItem
                               value={`issue-${issue.id}`}
-                              className="glass-card rounded-xl border-0 overflow-hidden data-[state=open]:border-emerald-500/15 transition-colors duration-300"
+                              className="glass-card rounded-xl border-0 overflow-hidden [&[data-state=open]]:border-[var(--category-border-accent)] transition-colors duration-300"
                             >
                               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-100 dark:hover:bg-white/3 transition-colors duration-200 [&[data-state=open]]:border-b [&[data-state=open]]:border-gray-200 dark:[&[data-state=open]]:border-white/5">
                                 <div className="flex items-center gap-3 text-left flex-1 min-w-0">
@@ -379,8 +433,8 @@ function SolucionesContent() {
                                   {/* Solutions */}
                                   <div>
                                     <div className="flex items-center gap-1.5 mb-2">
-                                      <Wrench className="w-3.5 h-3.5 text-emerald-500/70 dark:text-emerald-400/70" />
-                                      <h4 className="text-xs font-semibold text-emerald-600/90 dark:text-emerald-400/90 uppercase tracking-wider">
+                                      <Wrench className={`w-3.5 h-3.5 ${tw.text} ${tw.textDark} opacity-70`} />
+                                      <h4 className={`text-xs font-semibold ${tw.text} ${tw.textDark} opacity-90 uppercase tracking-wider`}>
                                         Soluciones
                                       </h4>
                                     </div>
@@ -390,7 +444,7 @@ function SolucionesContent() {
                                           key={i}
                                           className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300"
                                         >
-                                          <span className="shrink-0 w-4 h-4 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[9px] font-bold mt-0.5">
+                                          <span className={`shrink-0 w-4 h-4 rounded-full ${tw.badge} ${tw.badgeDark} flex items-center justify-center text-[9px] font-bold mt-0.5`}>
                                             {i + 1}
                                           </span>
                                           <span>{solution}</span>
@@ -417,23 +471,16 @@ function SolucionesContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.5 }}
-          className="mt-10 glass-card rounded-xl p-5 border-emerald-500/10"
+          className={`mt-10 glass-card rounded-xl p-5 ${tw.border}`}
         >
           <div className="flex items-start gap-3">
-            <Wrench className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <Wrench className={`w-5 h-5 ${tw.text} ${tw.textDark} shrink-0 mt-0.5`} />
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
                 Consejo
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                Si tu problema no aparece en esta lista, asegúrate de tener la
-                última versión de D5 Render instalada. Muchos errores se
-                corrigen en cada actualización. También puedes consultar la{" "}
-                <span className="text-emerald-600 dark:text-emerald-400/80">
-                  comunidad oficial de D5 Render
-                </span>{" "}
-                o contactar al soporte técnico con tu archivo de registro
-                (log) para obtener ayuda personalizada.
+                {troubleshooting.config.tipText}
               </p>
             </div>
           </div>
@@ -448,8 +495,8 @@ function SolucionesContent() {
         >
           <div className="glass-card rounded-xl p-4">
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              Soluciones — Academy Tech —{" "}
-              <span className="text-emerald-500/70 dark:text-emerald-400/70">
+              {troubleshooting.config.title} — Academy Tech —{" "}
+              <span className={`${tw.text} ${tw.textDark} opacity-70`}>
                 {troubleshootingItems.length} problemas documentados
               </span>
             </p>
@@ -457,6 +504,18 @@ function SolucionesContent() {
         </motion.footer>
       </div>
     </div>
+  );
+}
+
+function SolucionesContentWithTheme() {
+  const searchParams = useSearchParams();
+  const courseSlug = searchParams.get("course") || "";
+  const categorySlug = courseSlugToCategorySlug(courseSlug);
+
+  return (
+    <CategoryThemeProvider slug={categorySlug}>
+      <SolucionesContent />
+    </CategoryThemeProvider>
   );
 }
 
@@ -482,7 +541,7 @@ function SolucionesFallback() {
 export default function SolucionesPage() {
   return (
     <Suspense fallback={<SolucionesFallback />}>
-      <SolucionesContent />
+      <SolucionesContentWithTheme />
     </Suspense>
   );
 }
