@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useId } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useId, useRef, useEffect, useState } from "react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useCategoryTheme } from "@/components/CategoryThemeProvider";
 import { CategoryTheme, PatternType } from "@/lib/category-themes";
 
@@ -27,7 +27,6 @@ function GeometricPattern({ color, uid }: { color: string; uid: string }) {
           height="60"
           patternUnits="userSpaceOnUse"
         >
-          {/* Grid lines */}
           <path
             d="M 60 0 L 0 0 0 60"
             fill="none"
@@ -35,7 +34,6 @@ function GeometricPattern({ color, uid }: { color: string; uid: string }) {
             strokeWidth="0.5"
             opacity="0.4"
           />
-          {/* Diagonal accent */}
           <path
             d="M 0 0 L 60 60"
             fill="none"
@@ -43,9 +41,7 @@ function GeometricPattern({ color, uid }: { color: string; uid: string }) {
             strokeWidth="0.3"
             opacity="0.2"
           />
-          {/* Corner dot */}
           <circle cx="0" cy="0" r="1.5" fill={color} opacity="0.3" />
-          {/* Center square */}
           <rect
             x="22"
             y="22"
@@ -81,7 +77,6 @@ function CodePattern({ color, uid }: { color: string; uid: string }) {
           height="60"
           patternUnits="userSpaceOnUse"
         >
-          {/* Angle brackets < > */}
           <path
             d="M 20 15 L 10 30 L 20 45"
             fill="none"
@@ -98,7 +93,6 @@ function CodePattern({ color, uid }: { color: string; uid: string }) {
             opacity="0.3"
             strokeLinecap="round"
           />
-          {/* Slash */}
           <path
             d="M 55 15 L 65 45"
             fill="none"
@@ -107,10 +101,8 @@ function CodePattern({ color, uid }: { color: string; uid: string }) {
             opacity="0.2"
             strokeLinecap="round"
           />
-          {/* Dot separators */}
           <circle cx="28" cy="30" r="1" fill={color} opacity="0.3" />
           <circle cx="72" cy="30" r="1" fill={color} opacity="0.2" />
-          {/* Curly brace hint */}
           <path
             d="M 5 25 Q 10 25 10 30 Q 10 35 5 35"
             fill="none"
@@ -143,7 +135,6 @@ function HexagonalPattern({ color, uid }: { color: string; uid: string }) {
           height="100"
           patternUnits="userSpaceOnUse"
         >
-          {/* Hexagons - first row */}
           <path
             d="M 28 2 L 52 16 L 52 44 L 28 58 L 4 44 L 4 16 Z"
             fill="none"
@@ -151,7 +142,6 @@ function HexagonalPattern({ color, uid }: { color: string; uid: string }) {
             strokeWidth="0.5"
             opacity="0.3"
           />
-          {/* Inner hexagon */}
           <path
             d="M 28 14 L 42 22 L 42 38 L 28 46 L 14 38 L 14 22 Z"
             fill="none"
@@ -159,35 +149,15 @@ function HexagonalPattern({ color, uid }: { color: string; uid: string }) {
             strokeWidth="0.3"
             opacity="0.2"
           />
-          {/* Circuit connection lines */}
-          <line
-            x1="28"
-            y1="2"
-            x2="28"
-            y2="-8"
-            stroke={color}
-            strokeWidth="0.4"
-            opacity="0.2"
-          />
-          <line
-            x1="52"
-            y1="30"
-            x2="62"
-            y2="30"
-            stroke={color}
-            strokeWidth="0.4"
-            opacity="0.2"
-          />
-          {/* Node dots at hex vertices */}
+          <line x1="28" y1="2" x2="28" y2="-8" stroke={color} strokeWidth="0.4" opacity="0.2" />
+          <line x1="52" y1="30" x2="62" y2="30" stroke={color} strokeWidth="0.4" opacity="0.2" />
           <circle cx="28" cy="2" r="1.2" fill={color} opacity="0.3" />
           <circle cx="52" cy="16" r="1" fill={color} opacity="0.25" />
           <circle cx="52" cy="44" r="1" fill={color} opacity="0.25" />
           <circle cx="28" cy="58" r="1.2" fill={color} opacity="0.3" />
           <circle cx="4" cy="44" r="1" fill={color} opacity="0.25" />
           <circle cx="4" cy="16" r="1" fill={color} opacity="0.25" />
-          {/* Center node */}
           <circle cx="28" cy="30" r="2" fill={color} opacity="0.15" />
-          {/* Second row offset hex */}
           <path
             d="M 0 58 L -14 72 L 0 86 L 14 72 Z"
             fill="none"
@@ -220,37 +190,26 @@ function NeuralPattern({ color, uid }: { color: string; uid: string }) {
           height="80"
           patternUnits="userSpaceOnUse"
         >
-          {/* Layer 1 - Input nodes */}
           <circle cx="15" cy="20" r="3" fill={color} opacity="0.12" />
           <circle cx="15" cy="40" r="3.5" fill={color} opacity="0.15" />
           <circle cx="15" cy="60" r="3" fill={color} opacity="0.12" />
-
-          {/* Layer 2 - Hidden nodes */}
           <circle cx="45" cy="15" r="2.5" fill={color} opacity="0.1" />
           <circle cx="45" cy="30" r="3" fill={color} opacity="0.13" />
           <circle cx="45" cy="50" r="3" fill={color} opacity="0.13" />
           <circle cx="45" cy="65" r="2.5" fill={color} opacity="0.1" />
-
-          {/* Layer 3 - Output nodes */}
           <circle cx="75" cy="25" r="3" fill={color} opacity="0.12" />
           <circle cx="75" cy="55" r="3" fill={color} opacity="0.12" />
-
-          {/* Connections Layer 1 → Layer 2 */}
           <line x1="18" y1="20" x2="42" y2="15" stroke={color} strokeWidth="0.3" opacity="0.15" />
           <line x1="18" y1="20" x2="42" y2="30" stroke={color} strokeWidth="0.3" opacity="0.12" />
           <line x1="18" y1="40" x2="42" y2="30" stroke={color} strokeWidth="0.4" opacity="0.15" />
           <line x1="18" y1="40" x2="42" y2="50" stroke={color} strokeWidth="0.4" opacity="0.15" />
           <line x1="18" y1="60" x2="42" y2="50" stroke={color} strokeWidth="0.3" opacity="0.12" />
           <line x1="18" y1="60" x2="42" y2="65" stroke={color} strokeWidth="0.3" opacity="0.15" />
-
-          {/* Connections Layer 2 → Layer 3 */}
           <line x1="48" y1="15" x2="72" y2="25" stroke={color} strokeWidth="0.3" opacity="0.12" />
           <line x1="48" y1="30" x2="72" y2="25" stroke={color} strokeWidth="0.3" opacity="0.15" />
           <line x1="48" y1="30" x2="72" y2="55" stroke={color} strokeWidth="0.3" opacity="0.12" />
           <line x1="48" y1="50" x2="72" y2="55" stroke={color} strokeWidth="0.3" opacity="0.15" />
           <line x1="48" y1="65" x2="72" y2="55" stroke={color} strokeWidth="0.3" opacity="0.12" />
-
-          {/* Pulse rings on some nodes */}
           <circle cx="15" cy="40" r="6" fill="none" stroke={color} strokeWidth="0.3" opacity="0.08" />
           <circle cx="45" cy="30" r="5.5" fill="none" stroke={color} strokeWidth="0.3" opacity="0.08" />
           <circle cx="75" cy="25" r="5" fill="none" stroke={color} strokeWidth="0.3" opacity="0.06" />
@@ -281,120 +240,238 @@ function CategoryPattern({ pattern, color, uid }: { pattern: PatternType; color:
 }
 
 // ============================================================
-// Main Background Component
+// Floating Particle
+// ============================================================
+
+function FloatingParticle({
+  color,
+  size,
+  initialX,
+  initialY,
+  duration,
+  delay,
+}: {
+  color: string;
+  size: number;
+  initialX: string;
+  initialY: string;
+  duration: number;
+  delay: number;
+}) {
+  return (
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: color,
+        left: initialX,
+        top: initialY,
+      }}
+      animate={{
+        y: [0, -30, 10, -20, 0],
+        x: [0, 10, -5, 8, 0],
+        opacity: [0.15, 0.4, 0.25, 0.35, 0.15],
+        scale: [1, 1.2, 0.9, 1.1, 1],
+      }}
+      transition={{
+        duration,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay,
+      }}
+    />
+  );
+}
+
+// ============================================================
+// Main Background Component — with Mouse Parallax
 // ============================================================
 
 interface CategoryBackgroundProps {
-  /** Override the theme - if not provided, uses useCategoryTheme() */
   theme?: CategoryTheme;
-  /** Opacity of the pattern overlay (0-1), default 0.07 */
   patternOpacity?: number;
-  /** Show/hide pattern overlay, default true */
   showPattern?: boolean;
-  /** Show/hide gradient orbs, default true */
   showOrbs?: boolean;
-  /** Additional class names */
+  showParticles?: boolean;
   className?: string;
 }
 
 export function CategoryBackground({
   theme: themeProp,
-  patternOpacity = 0.07,
+  patternOpacity = 0.10,
   showPattern = true,
   showOrbs = true,
+  showParticles = true,
   className = "",
 }: CategoryBackgroundProps) {
-  // Get theme from context (always available with default) or override with prop
   const { theme: contextTheme } = useCategoryTheme();
   const theme = themeProp || contextTheme;
   const uid = useId();
 
+  // Mouse parallax tracking
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springX = useSpring(mouseX, { stiffness: 30, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 30, damping: 20 });
+
+  useEffect(() => {
+    function handleMouseMove(e: MouseEvent) {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      // Normalize to -1..1 range
+      mouseX.set((e.clientX - rect.left - centerX) / centerX * 20);
+      mouseY.set((e.clientY - rect.top - centerY) / centerY * 20);
+    }
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  // Generate random particles
+  const particles = useMemo(() =>
+    Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      size: 3 + Math.random() * 5,
+      initialX: `${10 + Math.random() * 80}%`,
+      initialY: `${10 + Math.random() * 80}%`,
+      duration: 6 + Math.random() * 8,
+      delay: Math.random() * 4,
+    })),
+    []
+  );
+
   return (
-    <div className={`fixed inset-0 pointer-events-none overflow-hidden z-0 ${className}`}>
-      {/* Gradient Orbs */}
+    <div ref={containerRef} className={`fixed inset-0 pointer-events-none overflow-hidden z-0 ${className}`}>
+      {/* Gradient Orbs — with mouse parallax */}
       {showOrbs && (
         <>
-          {/* Primary orb - top right */}
+          {/* Primary orb — top right */}
           <motion.div
             key={`orb1-${theme.slug}`}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{
               opacity: 1,
               scale: 1,
-              x: [0, 10, -5, 0],
-              y: [0, -8, 5, 0],
             }}
             transition={{
               opacity: { duration: 0.8 },
               scale: { duration: 0.8 },
-              x: { duration: 20, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 25, repeat: Infinity, ease: "easeInOut" },
             }}
-            className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl"
-            style={{ backgroundColor: `${theme.primaryColor}08` }}
-          />
+            className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl"
+            style={{ x: springX, y: springY, backgroundColor: `${theme.primaryColor}12` }}
+          >
+            <motion.div
+              className="w-full h-full rounded-full"
+              animate={{
+                x: [0, 10, -5, 0],
+                y: [0, -8, 5, 0],
+              }}
+              transition={{
+                x: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 25, repeat: Infinity, ease: "easeInOut" },
+              }}
+            />
+          </motion.div>
 
-          {/* Secondary orb - middle left */}
+          {/* Secondary orb — middle left */}
           <motion.div
             key={`orb2-${theme.slug}`}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{
               opacity: 1,
               scale: 1,
-              x: [0, -8, 5, 0],
-              y: [0, 10, -5, 0],
             }}
             transition={{
               opacity: { duration: 0.8, delay: 0.2 },
               scale: { duration: 0.8, delay: 0.2 },
-              x: { duration: 18, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 22, repeat: Infinity, ease: "easeInOut" },
             }}
-            className="absolute top-1/3 -left-20 w-60 h-60 rounded-full blur-3xl"
-            style={{ backgroundColor: `${theme.gradientVia}06` }}
-          />
+            className="absolute top-1/3 -left-16 w-72 h-72 rounded-full blur-3xl"
+            style={{ x: springX, y: springY, backgroundColor: `${theme.gradientVia}10` }}
+          >
+            <motion.div
+              className="w-full h-full rounded-full"
+              animate={{
+                x: [0, -8, 5, 0],
+                y: [0, 10, -5, 0],
+              }}
+              transition={{
+                x: { duration: 18, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 22, repeat: Infinity, ease: "easeInOut" },
+              }}
+            />
+          </motion.div>
 
-          {/* Tertiary orb - bottom center */}
+          {/* Tertiary orb — bottom center */}
           <motion.div
             key={`orb3-${theme.slug}`}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{
               opacity: 1,
               scale: 1,
-              x: [0, 5, -10, 0],
-              y: [0, -5, 8, 0],
             }}
             transition={{
               opacity: { duration: 0.8, delay: 0.4 },
               scale: { duration: 0.8, delay: 0.4 },
-              x: { duration: 24, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 20, repeat: Infinity, ease: "easeInOut" },
             }}
-            className="absolute -bottom-20 right-1/4 w-96 h-96 rounded-full blur-3xl"
-            style={{ backgroundColor: `${theme.gradientTo}05` }}
-          />
+            className="absolute -bottom-16 right-1/4 w-[28rem] h-[28rem] rounded-full blur-3xl"
+            style={{ x: springX, y: springY, backgroundColor: `${theme.gradientTo}0c` }}
+          >
+            <motion.div
+              className="w-full h-full rounded-full"
+              animate={{
+                x: [0, 5, -10, 0],
+                y: [0, -5, 8, 0],
+              }}
+              transition={{
+                x: { duration: 24, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+              }}
+            />
+          </motion.div>
 
-          {/* Accent glow - top left (smaller) */}
+          {/* Accent glow — top left */}
           <motion.div
             key={`orb4-${theme.slug}`}
             initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              x: [0, 8, -3, 0],
-              y: [0, 5, -8, 0],
-            }}
-            transition={{
-              opacity: { duration: 0.8, delay: 0.3 },
-              x: { duration: 30, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 26, repeat: Infinity, ease: "easeInOut" },
-            }}
-            className="absolute top-20 left-1/3 w-48 h-48 rounded-full blur-3xl"
-            style={{ backgroundColor: `${theme.primaryColor}04` }}
-          />
+            animate={{ opacity: 1 }}
+            transition={{ opacity: { duration: 0.8, delay: 0.3 } }}
+            className="absolute top-20 left-1/3 w-56 h-56 rounded-full blur-3xl"
+            style={{ x: springX, y: springY, backgroundColor: `${theme.primaryColor}08` }}
+          >
+            <motion.div
+              className="w-full h-full rounded-full"
+              animate={{
+                x: [0, 8, -3, 0],
+                y: [0, 5, -8, 0],
+              }}
+              transition={{
+                x: { duration: 30, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 26, repeat: Infinity, ease: "easeInOut" },
+              }}
+            />
+          </motion.div>
         </>
       )}
 
-      {/* Pattern Overlay */}
+      {/* Floating Particles */}
+      {showParticles && particles.map((p) => (
+        <FloatingParticle
+          key={p.id}
+          color={theme.primaryColor}
+          size={p.size}
+          initialX={p.initialX}
+          initialY={p.initialY}
+          duration={p.duration}
+          delay={p.delay}
+        />
+      ))}
+
+      {/* Pattern Overlay — more visible */}
       {showPattern && (
         <motion.div
           key={`pattern-${theme.slug}`}
@@ -416,12 +493,9 @@ export function CategoryBackground({
 
 interface CategoryCardBackgroundProps {
   theme: CategoryTheme;
-  /** Show pattern on hover, default true */
   showPatternOnHover?: boolean;
   className?: string;
 }
-
-let cardBgCounter = 0;
 
 export function CategoryCardBackground({
   theme,
@@ -432,17 +506,17 @@ export function CategoryCardBackground({
 
   return (
     <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
-      {/* Gradient tint */}
+      {/* Gradient tint — more visible */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.05]"
         style={{
           background: `linear-gradient(135deg, ${theme.gradientFrom} 0%, ${theme.gradientTo} 100%)`,
         }}
       />
 
-      {/* Pattern (visible on hover via group-hover) */}
+      {/* Pattern — visible on hover */}
       {showPatternOnHover && (
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500">
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500">
           <CategoryPattern pattern={theme.pattern} color={theme.primaryColor} uid={uid} />
         </div>
       )}
