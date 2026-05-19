@@ -17,7 +17,9 @@ import {
   ChevronRight,
   Clock,
   Eye,
+  HelpCircle,
   Home,
+  Layers,
   Lightbulb,
   ListChecks,
   PenLine,
@@ -42,6 +44,16 @@ import {
 import { useCategoryTheme, CategoryThemeProvider } from "@/components/CategoryThemeProvider";
 import { CategoryBackground } from "@/components/CategoryBackground";
 import { courseSlugToCategorySlug } from "@/lib/tools-data";
+import {
+  InteractiveFlashcard,
+  KnowledgeCheck,
+  ReadingProgressBar,
+  ConceptCards,
+  InteractiveSteps,
+  SectionNavigator,
+  type FlashcardItem,
+  type CheckQuestion,
+} from "@/components/topic";
 
 // Component to render parsed content segments (text + code blocks)
 function ContentWithCodeBlocks({ content }: { content: string }) {
@@ -226,6 +238,48 @@ function CodeSandboxSection({ courseSlug }: { courseSlug: string }) {
   );
 }
 
+// Generate flashcards from topic content keyPoints
+function generateFlashcards(content: { keyPoints: string[]; explanation: string }): FlashcardItem[] {
+  return content.keyPoints.map((point) => ({
+    front: `¿Qué es o qué significa: ${point.length > 60 ? point.slice(0, 60) + "..." : point}?`,
+    back: point,
+  }));
+}
+
+// Generate knowledge check questions from topic content
+function generateKnowledgeCheck(
+  content: { keyPoints: string[]; explanation: string; objective: string }
+): CheckQuestion[] {
+  if (content.keyPoints.length < 2) return [];
+
+  return content.keyPoints.slice(0, 5).map((point, i) => {
+    const otherPoints = content.keyPoints.filter((_, j) => j !== i);
+    const distractors = otherPoints.slice(0, 3).map((p) =>
+      p.length > 50 ? p.slice(0, 50) + "..." : p
+    );
+
+    while (distractors.length < 3) {
+      distractors.push("Ninguna de las anteriores");
+    }
+
+    const correctAnswer = point.length > 60 ? point.slice(0, 60) + "..." : point;
+    const allOptions = [correctAnswer, ...distractors.slice(0, 3)];
+
+    // Shuffle options
+    const correctIndex = Math.floor(Math.random() * allOptions.length);
+    const temp = allOptions[0];
+    allOptions[0] = allOptions[correctIndex];
+    allOptions[correctIndex] = temp;
+
+    return {
+      question: `¿Cuál de los siguientes es un punto clave de este tema?`,
+      options: allOptions,
+      correctIndex,
+      explanation: point,
+    };
+  });
+}
+
 export default function TopicPage() {
   return (
     <Suspense fallback={
@@ -397,10 +451,27 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
     ? hasCodeBlocks(content.explanation)
     : false;
 
+  // Section navigator items
+  const sectionItems = content ? [
+    { id: "section-explanation", label: "Explicación", icon: <BookOpen className="w-3.5 h-3.5" /> },
+    ...(content.keyPoints.length > 0 ? [{ id: "section-concepts", label: "Conceptos", icon: <Lightbulb className="w-3.5 h-3.5" /> }] : []),
+    ...(content.keyPoints.length >= 2 ? [{ id: "section-flashcards", label: "Flashcards", icon: <Layers className="w-3.5 h-3.5" /> }] : []),
+    ...(content.steps.length > 0 ? [{ id: "section-steps", label: "Pasos", icon: <ListChecks className="w-3.5 h-3.5" /> }] : []),
+    ...(content.keyPoints.length >= 2 ? [{ id: "section-knowledge", label: "Quiz", icon: <HelpCircle className="w-3.5 h-3.5" /> }] : []),
+    ...(content.practice?.trim() ? [{ id: "section-practice", label: "Práctica", icon: <Eye className="w-3.5 h-3.5" /> }] : []),
+    ...(content.extraResources.length > 0 ? [{ id: "section-resources", label: "Recursos", icon: <ExternalLink className="w-3.5 h-3.5" /> }] : []),
+  ] : [];
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       {/* Category-themed background */}
       <CategoryBackground />
+
+      {/* Reading progress bar */}
+      <ReadingProgressBar />
+
+      {/* Section navigator sidebar (desktop only) */}
+      <SectionNavigator sections={sectionItems} />
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:px-6 z-10">
         {/* Top bar */}
@@ -558,6 +629,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
           <div className="space-y-8">
             {/* Explanation - with code block support */}
             <motion.section
+              id="section-explanation"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
@@ -578,85 +650,44 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
               <ContentWithCodeBlocks content={content.explanation} />
             </motion.section>
 
-            {/* Key Points - only show if there are key points */}
+            {/* Concept Cards - visual interactive key concepts */}
             {content.keyPoints.length > 0 && (
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.15 }}
-                className="glass-card rounded-xl p-6"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <Lightbulb className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Puntos Clave
-                  </h2>
-                </div>
-                <ul className="space-y-3">
-                  {content.keyPoints.map((point, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <span className={`flex items-center justify-center w-6 h-6 rounded-full ${tw.bg} ${tw.bgDark} ${tw.text} ${tw.textDark} text-xs font-bold shrink-0 mt-0.5`}>
-                        {i + 1}
-                      </span>
-                      <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
-                        {point}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.section>
+              <div id="section-concepts">
+                <ConceptCards concepts={content.keyPoints} />
+              </div>
             )}
 
-            {/* Steps / Tutorial - only show if there are steps */}
+            {/* Interactive Flashcards - study cards from keyPoints */}
+            {content.keyPoints.length >= 2 && (
+              <div id="section-flashcards">
+                <InteractiveFlashcard
+                  cards={generateFlashcards(content)}
+                  title="Tarjetas de Estudio"
+                />
+              </div>
+            )}
+
+            {/* Interactive Steps - enhanced tutorial with step completion */}
             {content.steps.length > 0 && (
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="glass-card rounded-xl p-6"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <ListChecks className={`w-5 h-5 ${tw.text} ${tw.textDark}`} />
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Tutorial Paso a Paso
-                  </h2>
-                </div>
-                <div className="space-y-6">
-                  {content.steps.map((step, i) => (
-                    <div key={i} className="relative">
-                      {i < content.steps.length - 1 && (
-                        <div className={`absolute left-5 top-12 bottom-0 w-px ${tw.border} ${tw.borderDark}`} />
-                      )}
-                      <div className="flex items-start gap-4">
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${tw.iconBg} ${tw.iconBgDark} ${tw.text} ${tw.textDark} font-bold shrink-0 text-sm`}>
-                          {i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                            {step.title}
-                          </h3>
-                          <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                            {step.description}
-                          </p>
-                          {step.tip && (
-                            <div className="mt-2 flex items-start gap-2 bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
-                              <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-                              <span className="text-amber-600/80 dark:text-amber-300/80 text-xs">
-                                {step.tip}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.section>
+              <div id="section-steps">
+                <InteractiveSteps steps={content.steps} />
+              </div>
+            )}
+
+            {/* Knowledge Check - inline quiz */}
+            {content.keyPoints.length >= 2 && (
+              <div id="section-knowledge">
+                <KnowledgeCheck
+                  questions={generateKnowledgeCheck(content)}
+                  title="Verifica tu Conocimiento"
+                />
+              </div>
             )}
 
             {/* Practice - only show if there is practice content */}
             {content.practice && content.practice.trim() && (
               <motion.section
+                id="section-practice"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.25 }}
@@ -687,6 +718,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
             {/* Extra Resources */}
             {content.extraResources.length > 0 && (
               <motion.section
+                id="section-resources"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.35 }}
