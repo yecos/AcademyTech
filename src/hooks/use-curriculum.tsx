@@ -16,6 +16,7 @@ import {
   QuizQuestion,
 } from "@/lib/curriculum";
 import { getTopicContent, TopicContent } from "@/lib/topic-content";
+import { DEFAULT_COURSE_SLUG } from "@/lib/constants";
 
 // Extended topic info that includes DB content
 export interface TopicInfoWithContent extends TopicInfo {
@@ -129,7 +130,7 @@ export function CurriculumProvider({
   const getTopicContentFromDB = useCallback(
     (moduleId: string, topicIndex: number): TopicContent | null => {
       // For D5 Render, always check hardcoded content first
-      if (courseSlug === "d5-render") {
+      if (courseSlug === DEFAULT_COURSE_SLUG) {
         const hardcoded = getTopicContent(moduleId, topicIndex);
         if (hardcoded) return hardcoded;
       }
@@ -216,7 +217,7 @@ export function useCurriculum(): CurriculumContextType {
       courseDescription: null,
       isLoading: false,
       error: null,
-      courseSlug: "d5-render",
+      courseSlug: DEFAULT_COURSE_SLUG,
       getTopicContentFromDB: () => null,
     };
   }

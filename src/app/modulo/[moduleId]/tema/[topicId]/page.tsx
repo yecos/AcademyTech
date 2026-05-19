@@ -675,8 +675,7 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
             )}
 
             {/* Interactive Code Sandbox Section - only for programming courses */}
-            <CodeSandboxSection courseSlug={courseSlug} />
-            {courseSlugToCategorySlug(courseSlug) === "programacion" && <CodeSandboxSection />}
+            {courseSlugToCategorySlug(courseSlug) === "programacion" && <CodeSandboxSection courseSlug={courseSlug} />}
 
             {/* Personal Notes */}
             <TopicNotes
@@ -734,10 +733,8 @@ function TopicPageContent({ courseSlug }: { courseSlug: string }) {
               </p>
             </div>
 
-            {/* Still show sandbox even when content is not available - only for programming courses */}
-            <CodeSandboxSection courseSlug={courseSlug} />
             {/* Sandbox only for programming courses */}
-            {courseSlugToCategorySlug(courseSlug) === "programacion" && <CodeSandboxSection />}
+            {courseSlugToCategorySlug(courseSlug) === "programacion" && <CodeSandboxSection courseSlug={courseSlug} />}
 
             {/* Personal Notes (shown even when content is not available) */}
             <TopicNotes

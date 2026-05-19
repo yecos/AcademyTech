@@ -35,6 +35,8 @@ export async function POST(request: Request) {
     const moduleIdList = moduleIds.map((m) => m.id);
 
     // Delete all user data for this course in a transaction
+    // Note: Only delete course-specific data, NOT global data like achievements and streaks
+    // that may belong to other courses
     await prisma.$transaction([
       prisma.userProgress.deleteMany({
         where: { userId, topicId: { in: topicIdList } },
@@ -47,12 +49,6 @@ export async function POST(request: Request) {
       }),
       prisma.bookmark.deleteMany({
         where: { userId, topicId: { in: topicIdList } },
-      }),
-      prisma.userAchievement.deleteMany({
-        where: { userId },
-      }),
-      prisma.userStreak.deleteMany({
-        where: { userId },
       }),
     ]);
 

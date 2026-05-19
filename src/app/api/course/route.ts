@@ -7,7 +7,11 @@ import { prisma } from "@/lib/prisma";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const slug = searchParams.get("slug") || "d5-render";
+    const slug = searchParams.get("slug");
+
+    if (!slug) {
+      return NextResponse.json({ error: "El parámetro 'slug' es requerido" }, { status: 400 });
+    }
 
     const course = await prisma.course.findUnique({
       where: { slug },

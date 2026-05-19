@@ -6,6 +6,7 @@ import { useStudyStore } from "@/lib/store";
 import { Module } from "@/lib/curriculum";
 import { useCurriculum } from "@/hooks/use-curriculum";
 import { achievements as achievementDefs } from "@/lib/achievements";
+import { DEFAULT_COURSE_SLUG } from "@/lib/constants";
 
 // Types for course data
 export interface CourseData {
@@ -63,7 +64,7 @@ async function getCourseId(slug: string): Promise<string | null> {
   return null;
 }
 
-export function useCourseData(courseSlug: string = "d5-render"): CourseData {
+export function useCourseData(courseSlug: string = DEFAULT_COURSE_SLUG): CourseData {
   const { status } = useSession();
   const isAuthenticated = status === "authenticated";
   const store = useStudyStore();

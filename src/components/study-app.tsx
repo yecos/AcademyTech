@@ -37,6 +37,7 @@ import { AuthBanner } from "@/components/auth-banner";
 import { useCategoryTheme } from "@/components/CategoryThemeProvider";
 import { CategoryBackground } from "@/components/CategoryBackground";
 import { CourseReviews } from "@/components/course-reviews";
+import { COURSE_NAMES, COURSE_DESCRIPTIONS } from "@/lib/constants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,23 +50,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Map slugs to display names
-const courseNames: Record<string, string> = {
-  "d5-render": "D5 Render",
-  "diseno-arquitectonico-bim": "Diseño Arquitectónico BIM",
-  "desarrollo-web-completo": "Desarrollo Web Completo",
-  "fundamentos-ciberseguridad": "Ciberseguridad y Ethical Hacking",
-  "introduccion-inteligencia-artificial": "Inteligencia Artificial",
-};
+// Map slugs to display names — shared from constants
+const courseNames = COURSE_NAMES;
 
-// Map slugs to descriptions
-const courseDescriptions: Record<string, string> = {
-  "d5-render": "Sigue tu progreso a través del curso completo de D5 Render. Completa los temas y evalúa tus conocimientos con las evaluaciones de cada módulo.",
-  "diseno-arquitectonico-bim": "Domina la metodología BIM desde los fundamentos hasta la práctica profesional con Revit.",
-  "desarrollo-web-completo": "Aprende a crear sitios web profesionales con HTML5, CSS3 y JavaScript ES6+.",
-  "fundamentos-ciberseguridad": "Aprende cómo proteger sistemas y realizar auditorías de seguridad éticas.",
-  "introduccion-inteligencia-artificial": "Desde machine learning hasta deep learning y modelos generativos.",
-};
+// Map slugs to descriptions — shared from constants
+const courseDescriptions = COURSE_DESCRIPTIONS;
 
 export function StudyApp() {
   const [quizModule, setQuizModule] = useState<Module | null>(null);
@@ -264,7 +253,7 @@ export function StudyApp() {
                     // ignore
                   }
                 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 hover:border-emerald-500/20 transition-all duration-200"
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/3 border border-gray-200 dark:border-white/8 hover:bg-gray-200 dark:hover:bg-white/6 ${tw.hoverBorder} transition-all duration-200`}
               >
                 <Download className="w-3 h-3 text-gray-500 dark:text-gray-400" />
                 <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300">
@@ -338,7 +327,7 @@ export function StudyApp() {
               </span>
             </Link>
             <Link
-              href="/certificado"
+              href={`/certificado?course=${courseSlug}`}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-200 ${
                 overallProgress === 100
                   ? `${tw.bg} ${tw.bgDark} ${tw.border} ${tw.borderDark}`
@@ -351,7 +340,7 @@ export function StudyApp() {
               </span>
             </Link>
             <Link
-              href="/logros"
+              href={`/logros?course=${courseSlug}`}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 hover:border-amber-500/30 transition-all duration-200"
             >
               <Trophy className="w-3 h-3 text-amber-500 dark:text-amber-400" />
@@ -485,7 +474,7 @@ export function StudyApp() {
                   Has completado todos los temas del curso de {courseName}.
                   ¡Ahora eres un experto!
                 </p>
-                <Link href="/certificado">
+                <Link href={`/certificado?course=${courseSlug}`}>
                   <Button className={`${tw.button} text-white gap-2 mt-2`}>
                     <Award className="w-4 h-4" />
                     Obtener Certificado

@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/debug - Debug endpoint to check DB connectivity
+// GET /api/debug - Debug endpoint to check DB connectivity (admin only)
 export async function GET() {
   try {
+    // Require admin authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+    if (session.user.role !== "admin") {
+      return NextResponse.json({ error: "Prohibido — solo administradores" }, { status: 403 });
+    }
+
     // Check if Category model exists
     const categoryCount = await prisma.category.count().catch(() => -1);
 
@@ -18,7 +29,7 @@ export async function GET() {
         teacherId: true,
         level: true,
       },
-    }).catch((e: any) => ({ error: e.message }));
+    }).catch((e: unknown) => ({ error: e instanceof Error ? e.message : "Error desconocido" }));
 
     // Check database URL (masked)
     const dbUrl = process.env.DATABASE_URL;
@@ -31,10 +42,10 @@ export async function GET() {
       dbUrlPrefix: maskedUrl,
       nodeEnv: process.env.NODE_ENV,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
     return NextResponse.json({
-      error: error.message,
-      stack: error.stack?.split("\n").slice(0, 5),
+      error: message,
     });
   }
 }

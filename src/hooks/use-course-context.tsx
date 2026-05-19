@@ -2,11 +2,12 @@
 
 import { createContext, useContext, ReactNode } from "react";
 import { useCourseData, CourseData } from "@/hooks/use-course-data";
+import { DEFAULT_COURSE_SLUG } from "@/lib/constants";
 
 const CourseDataContext = createContext<CourseData | null>(null);
 
 // Separate context for the course slug so it can be set from child components
-const CourseSlugContext = createContext<string>("d5-render");
+const CourseSlugContext = createContext<string>(DEFAULT_COURSE_SLUG);
 
 export function CourseDataProvider({
   children,
@@ -15,7 +16,7 @@ export function CourseDataProvider({
   children: ReactNode;
   courseSlug?: string;
 }) {
-  const effectiveSlug = courseSlug || "d5-render";
+  const effectiveSlug = courseSlug || DEFAULT_COURSE_SLUG;
   const courseData = useCourseData(effectiveSlug);
 
   return (

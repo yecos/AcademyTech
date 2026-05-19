@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 /**
  * POST /api/sandbox
  * Accepts { code: string, language: string } and returns the code
  * wrapped in a proper HTML document for iframe srcdoc, with security sanitization.
+ * Requires authentication.
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { code, language } = body as { code: string; language: string };
 
